@@ -130,12 +130,24 @@
   display: block;
   font-family: var(--font-display);
   font-variant-numeric: lining-nums tabular-nums;
-  font-size: 19.6vw;
+  /* cqw, not vw. `rail` narrows the reading column by up to 320px, and a string
+     set against the WINDOW cannot fit a column that is not the window — it
+     overran by 160px, and by 431px once its bleed was switched off, which is
+     what finally identified the size rather than the margin as the cause. */
+  /* Every dimension here is in cqw — the width of `main`, the reading column.
+     The string is `white-space: nowrap`, so its size and the box it spans have
+     to be derived from the SAME measure or it overruns. Sizing by `cqw` while
+     the box still bled to `100vw` was the near miss: under rail the type was
+     scaled to a 1120px column and then dropped into a 985px shell, overflowing
+     by the 135px difference. The box now spans the column too. 19.4 rather
+     than 19.6 leaves a pixel of slack for the substitute face's metrics. */
+  font-size: 19.4cqw;
   line-height: 0.86;
-  letter-spacing: -0.78vw;
+  letter-spacing: -0.77cqw;
   margin-top: 0.06em;
-  margin-inline: calc(50% - 50vw);
-  padding-inline: 2vw;
+  width: 100cqw;
+  margin-inline: calc(50% - 50cqw);
+  padding-inline: 2cqw;
   text-align: center;
   white-space: nowrap;
   color: transparent;
@@ -723,24 +735,39 @@ html:not([data-theme='marry-monday']) .dresscode-head {
   color: var(--ink);
 }
 
+/* Darkened from the harvested #a27a65 / #96705c.
+   Cream on that pairing measures 3.56:1 for the ink and 3.11:1 for the muted
+   tone — both under the 4.5 AA floor, on a band that carries whole sections of
+   body text. The 126-combination sweep found it the moment `classic` started
+   naming its banded sections; before that this band only ever landed on
+   whichever section happened to be fourth in the DOM.
+   #7d5947 keeps the same rust-taupe hue and takes the ink to 5.78:1 and the
+   muted tone to 5.05:1. A deliberate deviation from the source, recorded
+   because everything else in this file is faithful to one. */
 [data-theme='kelsey'] main > section.section[data-band='b'] {
-  --bg: #a27a65;
-  --surface: #96705c;
+  --bg: #7d5947;
+  --surface: #6f4f3f;
   --ink: #fdf6ee;
   --muted: #f3e6da;
   --accent: #fdf6ee;
   --accent-text: #fdf6ee;
-  --border: #b89380;
+  --border: #9b7864;
   --btn-ink: #fdf6ee;
   --btn-border: #d8bdab;
   --btn-bg-hover: #fdf6ee;
-  --btn-ink-hover: #a27a65;
+  --btn-ink-hover: #7d5947;
   --btn-border-hover: #fdf6ee;
   background: var(--bg);
   color: var(--ink);
 }
 
 [data-theme='kelsey'] main > section.section[data-band='c'] {
+  /* This band's text measures 4.42:1 on its own --surface — under the AA floor,
+     while clearing it on --bg. So the band opts out of panel fills the same way
+     the four low-headroom themes do: a template's tiles and panels are outlined
+     here rather than filled. Declared on the band, not the theme, because
+     kelsey's other two bands have the headroom and keep their fills. */
+  --panel: var(--bg);
   --bg: #c5ad9f;
   --surface: #bba394;
   --ink: #5c3520;
@@ -1052,6 +1079,18 @@ html:not([data-theme='marry-monday']) .dresscode-head {
 [data-theme='marry-monday'] .hero {
   position: relative;
   isolation: isolate;
+  /* The outlined date is centred with `calc(50% - 50cqw)`, and 50% resolves
+     against the CONTAINING BLOCK, not the column — so any template whose hero
+     has asymmetric padding shifts it off centre. timeline's spine indents the
+     left side only, which pushed the string 5px past the right edge of a phone.
+
+     Clipped rather than resized: the source sets this string to run flush to
+     the edges and be cropped there, so cropping is the intended behaviour and a
+     few pixels of a decorative, aria-hidden numeral is exactly what should go.
+     `clip` rather than `hidden` — `hidden` creates a scroll container, and a
+     clipped ancestor pulls `position: sticky` day headers off the viewport in
+     WebKit, which this file has been bitten by before. */
+  overflow-x: clip;
 }
 
 [data-theme='marry-monday'] .hero::before {
@@ -1158,8 +1197,8 @@ html:not([data-theme='marry-monday']) .dresscode-head {
 [data-theme='morrison'] .hero::before {
   content: '';
   display: block;
-  width: 100vw;
-  margin-inline: calc(50% - 50vw);
+  width: var(--bleed-width, 100vw);
+  margin-inline: var(--bleed, calc(50% - 50vw));
   margin-bottom: clamp(2rem, 5vw, 3.5rem);
   background-color: var(--surface);
   background-repeat: no-repeat;
@@ -1513,8 +1552,8 @@ html:not([data-theme='marry-monday']) .dresscode-head {
 
 @media (min-width: 900px) {
   [data-theme='morrison'] .hero::before {
-    width: 100vw;
-    margin-inline: calc(50% - 50vw);
+    width: var(--bleed-width, 100vw);
+    margin-inline: var(--bleed, calc(50% - 50vw));
   }
 }
 
@@ -1545,8 +1584,8 @@ html:not([data-theme='marry-monday']) .dresscode-head {
 [data-theme='marrakesh'] .hero::before {
   content: '';
   display: block;
-  width: 100vw;
-  margin-inline: calc(50% - 50vw);
+  width: var(--bleed-width, 100vw);
+  margin-inline: var(--bleed, calc(50% - 50vw));
   margin-bottom: clamp(1.75rem, 4vw, 3rem);
   height: clamp(64px, 7vw, 92px);
   background: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 92' fill='none' stroke='%232d808b' stroke-width='1.5'%3E%3Cpath d='M0 68 h120' stroke-width='2'/%3E%3Cpath d='M0 76 q10 16 20 0 q10 16 20 0 q10 16 20 0 q10 16 20 0 q10 16 20 0 q10 16 20 0' /%3E%3Ccircle cx='30' cy='34' r='17'/%3E%3Ccircle cx='90' cy='34' r='17'/%3E%3Ccircle cx='0' cy='34' r='17'/%3E%3Ccircle cx='60' cy='34' r='17'/%3E%3Ccircle cx='120' cy='34' r='17'/%3E%3Cpath d='M30 17 v34 M13 34 h34 M18 22 l24 24 M42 22 l-24 24'/%3E%3Cpath d='M90 17 v34 M73 34 h34 M78 22 l24 24 M102 22 l-24 24'/%3E%3Cpath d='M60 17 v34 M43 34 h34 M48 22 l24 24 M72 22 l-24 24'/%3E%3Cpath d='M0 8 h120'/%3E%3C/svg%3E") repeat-x center top / 120px 92px;
@@ -1637,8 +1676,8 @@ html:not([data-theme='marry-monday']) .dresscode-head {
 [data-theme='industrial'] .site-footer::before {
   content: '';
   display: block;
-  width: 100vw;
-  margin-inline: calc(50% - 50vw);
+  width: var(--bleed-width, 100vw);
+  margin-inline: var(--bleed, calc(50% - 50vw));
   height: clamp(26px, 3.2vw, 44px);
   background: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none' viewBox='0 0 400 40'%3E%3Cpath d='M0 12 C60 4 110 20 168 11 C228 2 286 19 344 10 C368 6 386 12 400 9 L400 30 C384 33 366 27 344 31 C286 40 228 23 168 32 C110 41 60 25 0 33 Z' fill='%239b5a44'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
 }
@@ -1965,7 +2004,7 @@ html:not([data-theme='marry-monday']) .dresscode-head {
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 100vw;
+  width: var(--bleed-width, 100vw);
   margin-inline: 0;
   height: clamp(26px, 3.2vw, 44px);
   background: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none' viewBox='0 0 400 40'%3E%3Cpath d='M0 9 C58 17 116 1 174 10 C232 19 290 3 348 11 C370 14 386 9 400 12 L400 31 C384 28 368 33 348 30 C290 21 232 38 174 29 C116 20 58 36 0 28 Z' fill='%239b5a44'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
@@ -2057,9 +2096,39 @@ html:not([data-theme='marry-monday']) .dresscode-head {
 
 /* --- avril: the whole screen in the blue, names reversed out in white ----- */
 
+/* Paint a new ground, re-bind the tokens that sit on it.
+   This cover is the deep blue with the names reversed out — and until the cover
+   carried anything BUT the names, that was all it needed. It now holds the date
+   and, on gate, both doors, and those were still using the tokens tuned for the
+   cream page: the date measured 1.36:1 and gate's two buttons came out the same
+   blue as the ground behind them, which axe scores as a pass because identical
+   colours are not a contrast failure to it.
+
+   The values are avril's own reversed set, the same one its banded sections
+   use. Written as literals because `background: var(--ink)` would otherwise
+   resolve against the --ink being redefined in the same block. */
 [data-theme='avril'] .splash {
   justify-content: center;
-  background: var(--ink);
+  background: #013ab2;
+
+  /* NOT --bg. `[data-theme='avril'] .splash-names { color: var(--bg) }` reads it
+     to reverse the names out of the blue, so redefining it here painted the
+     couple's names in the same blue as the ground they sit on — the exact
+     failure this block was written to fix, moved one element along. Only the
+     tokens the cover's OTHER contents read are rebound. */
+  --ink: #fffaf1;
+  --muted: #dfe6f5;
+  --accent: #fffaf1;
+  --accent-text: #fffaf1;
+  --accent-soft: #4f7ccb;
+  --border: #4f7ccb;
+  --btn-bg: transparent;
+  --btn-ink: #fffaf1;
+  --btn-border: #fffaf1;
+  --btn-bg-hover: #fffaf1;
+  --btn-ink-hover: #013ab2;
+  --btn-border-hover: #fffaf1;
+  color: var(--ink);
 }
 
 [data-theme='avril'] .splash-names {

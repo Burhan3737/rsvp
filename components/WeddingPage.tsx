@@ -197,7 +197,12 @@ export function WeddingPage({
               the main first-screen difference between these templates — survives onto the device
               most guests use. */}
           {tpl.cover && settings.script_line ? (
-            <span className="splash-indic" aria-hidden="true">
+            // Both classes: `hero-indic` is what every theme paints, `splash-indic` only places it.
+            // Added with a class of its own and no colour rule, it inherited whatever was nearest —
+            // invisible on avril, where it came out the same colour as the ground behind it, and
+            // 3.89:1 on surround. axe scores identical foreground and background as a PASS, so the
+            // invisible case was found by a check written specifically to look for it.
+            <span className="hero-indic splash-indic" aria-hidden="true">
               {settings.script_line}
             </span>
           ) : null}

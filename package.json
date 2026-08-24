@@ -16,6 +16,8 @@
     "test:all": "vitest run && playwright test",
     "capture": "node scripts/capture.mjs",
     "capture:templates": "node scripts/capture-templates.mjs",
+    "sweep": "node scripts/sweep-matrix.mjs",
+    "headroom": "node scripts/theme-headroom.mjs",
     "db:reset": "node -e \"require('node:fs').rmSync('.data/pglite',{recursive:true,force:true})\" && node scripts/seed.mjs --reset"
   },
   "dependencies": {

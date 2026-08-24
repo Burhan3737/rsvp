@@ -27,6 +27,33 @@
   --section-gap: clamp(4.5rem, 12vw, 11rem);
   --rule: 1px;
 
+  /* --panel: the ground a TEMPLATE is allowed to paint behind text.
+     Distinct from --surface, and the difference is load-bearing.
+
+     Templates fill panels — boxed's tiles, card's plate, the story and FAQ
+     blocks — and they used --surface for it. But a theme tunes --ink and
+     --muted against --bg, and only against --bg. A 126-combination sweep found
+     the consequence: exactly four themes carry less than 4.5:1 once text sits
+     on --surface instead, and all four failed. surround is the clearest — its
+     ink is 4.52:1 on its own page, which is The Knot's own pairing and only
+     just AA, so ANY second ground breaks it. A colour-mix compromise does not
+     rescue it either; at a 30% mix it still measures 4.33.
+
+     So the fill is a per-theme decision rather than a template one. It defaults
+     to --surface, and the four themes with no headroom set it back to --bg —
+     their panels are drawn with a border and padding, which is what carries
+     the structure anyway.
+
+     NOT declared here as `--panel: var(--surface)`. A var() inside a custom
+     property is substituted where it is DECLARED, so a root-level alias freezes
+     root's surface and carries that one value into every descendant — including
+     the banded sections, where the theme redefines --surface to a deep ground.
+     The panels there came out in the page's cream while the text inside them
+     had already flipped to cream too: 1.05:1, the same colour on the same
+     colour. Only the themes that need to opt OUT declare it, and the templates
+     read `var(--panel, var(--surface))`, whose fallback resolves at the element
+     and therefore follows the band. */
+
   /* Motion. Slow, and applied to headings only — never to body copy, never to every element.
      The design must still read well with all of this stripped out. */
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -67,6 +94,7 @@
 [data-theme='marry-monday'] {
   --bg: #f3f2f1;
   --surface: #fdfdfb;
+
   --ink: #284135;
   /* The source's secondary text is #999790 — a WARM NEUTRAL grey, not a green. It fails AA at
      body size, so this is the same hue darkened to 4.68:1 rather than a tint of the ink, which is
@@ -759,6 +787,9 @@
     these have two: Bellefair for the names, Montserrat for sub-headings, EB
     Garamond for running text. */
 [data-theme='surround'] {
+  /* Text measures 3.90:1 on --surface, under the 4.5 AA floor, so this theme's
+     panels are outlined rather than filled. */
+  --panel: var(--bg);
   --bg: #dcba6a;
   --surface: #d0ac59;
   --ink: #67471e;        /* 4.52:1 — The Knot's own pairing, and only just AA */
@@ -812,6 +843,9 @@
     White with #2D808B teal as the ink, names in a fine handwriting face at 65px,
     and sub-headings set LOWERCASE — the only template of the eighteen that does. */
 [data-theme='marrakesh'] {
+  /* Text measures 4.24:1 on --surface, under the 4.5 AA floor, so this theme's
+     panels are outlined rather than filled. */
+  --panel: var(--bg);
   --bg: #ffffff;
   --surface: #f0f7f8;
   --ink: #2d808b;        /* 4.59:1 */
@@ -865,6 +899,9 @@
     #FAE2C3 apricot with #C42412 red, names in Oswald at 58px with EIGHT pixels of
     tracking over a MONOSPACE body. The only mono in the set, from any source. */
 [data-theme='official'] {
+  /* Text measures 4.13:1 on --surface, under the 4.5 AA floor, so this theme's
+     panels are outlined rather than filled. */
+  --panel: var(--bg);
   --bg: #fae2c3;
   --surface: #f2d5ae;
   --ink: #c42412;        /* 4.64:1 */
@@ -918,6 +955,9 @@
     templates across all three sources whose accent is not its ink. Names in Saira
     Extra Condensed, the only condensed face in the set. */
 [data-theme='industrial'] {
+  /* Text measures 4.26:1 on --surface, under the 4.5 AA floor, so this theme's
+     panels are outlined rather than filled. */
+  --panel: var(--bg);
   --bg: #f7f6f4;
   --surface: #edece8;
   --ink: #595c58;        /* 6.28:1 */
@@ -1642,6 +1682,14 @@ textarea.field {
 
 .unlock {
   margin-top: clamp(2rem, 5vw, 3rem);
+}
+
+/* The reading column is a container, so decorative type can size against IT
+   rather than against the window. `rail` pushes `main` right by up to 320px;
+   anything set in `vw` inside that column overruns the page by exactly the
+   offset, whatever its margins do. */
+main {
+  container-type: inline-size;
 }
 
 /* --- Content blocks ------------------------------------------------------- */

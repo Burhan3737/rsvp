@@ -105,7 +105,7 @@ html[data-template='boxed'] .schedule-day-header {
     width: 25%;
     max-width: 320px;
     z-index: 20;
-    background: var(--surface);
+    background: var(--panel, var(--surface));
     border-right: 1px solid var(--border);
     padding: clamp(2rem, 4vw, 3.5rem) 0;
     overflow-y: auto;
@@ -272,7 +272,7 @@ html[data-template='boxed'] .schedule-day-header {
     content: '';
     display: block;
     align-self: stretch;
-    background: var(--surface);
+    background: var(--panel, var(--surface));
     border-inline: 1px solid var(--border);
     grid-row: 1;
   }
@@ -308,7 +308,7 @@ html[data-template='boxed'] .schedule-day-header {
   html[data-template='card'] main {
     width: min(670px, 92vw);
     margin: clamp(2rem, 5vw, 4rem) auto;
-    background: var(--surface);
+    background: var(--panel, var(--surface));
     border: 1px solid var(--border);
     padding-block: clamp(2rem, 5vw, 3.5rem);
   }
@@ -355,7 +355,7 @@ html[data-template='boxed'] .schedule-day-header {
   }
 
   html[data-template='boxed'] body {
-    background: var(--surface);
+    background: var(--panel, var(--surface));
   }
 
   html[data-template='boxed'] main > section.section {
@@ -513,7 +513,7 @@ html[data-template='card'] .schedule-agenda .swatches {
 html[data-template='boxed'] .schedule-cards .schedule-item {
   padding: clamp(1.25rem, 3vw, 2rem);
   border: 1px solid var(--border);
-  background: var(--surface);
+  background: var(--panel, var(--surface));
   margin-bottom: clamp(1rem, 2.5vw, 1.5rem);
 }
 
@@ -688,7 +688,7 @@ html[data-template='boxed'] .schedule-cards .schedule-item {
   html[data-template='card'] main {
     margin: 1rem 0.75rem 2rem;
     border: 1px solid var(--border);
-    background: var(--surface);
+    background: var(--panel, var(--surface));
     padding-block: 1.5rem;
   }
 
@@ -706,7 +706,7 @@ html[data-template='boxed'] .schedule-cards .schedule-item {
   }
 
   html[data-template='boxed'] body {
-    background: var(--surface);
+    background: var(--panel, var(--surface));
   }
 }
 
@@ -720,7 +720,7 @@ html[data-template='boxed'] .schedule-cards .schedule-item {
     position: sticky;
     top: var(--stick-top, 0px);
     z-index: 20;
-    background: var(--surface);
+    background: var(--panel, var(--surface));
     border-bottom: 1px solid var(--border);
   }
 
@@ -755,7 +755,7 @@ html[data-template='boxed'] .schedule-cards .schedule-item {
     align-items: center;
     padding-inline: 0.6rem 0.75rem;
     pointer-events: none;
-    background: var(--surface);
+    background: var(--panel, var(--surface));
     border-left: var(--rule) solid var(--border);
     color: var(--muted);
     font-size: 13px;
@@ -785,9 +785,9 @@ html[data-template='boxed'] .schedule-cards .schedule-item {
      heading sits on a tinted band, the body on the ground below it. */
   html[data-template='split'] .section-title,
   html[data-template='split'] .section-num {
-    background: var(--surface);
-    width: 100vw;
-    margin-inline: calc(50% - 50vw);
+    background: var(--panel, var(--surface));
+    width: var(--bleed-width, 100vw);
+    margin-inline: var(--bleed, calc(50% - 50vw));
     padding: 0.75rem var(--gutter);
   }
 
@@ -874,7 +874,7 @@ html[data-template='boxed'] .splash-names {
   html[data-template='split'] .splash::before {
     content: '';
     align-self: stretch;
-    background: var(--surface);
+    background: var(--panel, var(--surface));
     border-right: 1px solid var(--border);
   }
 
@@ -1246,7 +1246,7 @@ html[data-template='boxed'] .story-panels {
 html[data-template='boxed'] .story-panels .story-beat {
   padding: clamp(1rem, 2.4vw, 1.5rem);
   border: var(--rule) solid var(--border);
-  background: var(--surface);
+  background: var(--panel, var(--surface));
 }
 
 html[data-template='boxed'] main > section.section:nth-of-type(n) .story-panels .story-beat {
@@ -1717,7 +1717,7 @@ html[data-template='rail'] .schedule-banded .schedule-item {
    The theme paints `.schedule-item` at (0,4,2) and rail's own reset above wins
    at (0,4,3), so this has to clear both. */
 html[data-template='rail'] main > section.section:nth-of-type(n) .schedule-banded .schedule-day:nth-of-type(odd) .schedule-item {
-  background: var(--surface);
+  background: var(--panel, var(--surface));
 }
 
 html[data-template='rail'] .schedule-banded .schedule-node,
@@ -1782,7 +1782,7 @@ html[data-template='timeline'] main > section.section:nth-of-type(n) .schedule-i
 html[data-template='boxed'] main > section.section:nth-of-type(n) .schedule-item,
 html[data-template='card'] main > section.section:nth-of-type(n) .schedule-item,
 html[data-template='split'] main > section.section:nth-of-type(n) .schedule-item {
-  background: var(--surface);
+  background: var(--panel, var(--surface));
 }
 
 /* --- classic advertised sticky day headers and did not have them -----------
@@ -1894,8 +1894,8 @@ html[data-template='card'] .schedule-day-header .day-date {
 
 @media (max-width: 1023px) {
   html[data-template='rail'] .schedule-banded .schedule-item {
-    width: 100vw;
-    margin-inline: calc(50% - 50vw);
+    width: var(--bleed-width, 100vw);
+    margin-inline: var(--bleed, calc(50% - 50vw));
     padding-inline: var(--gutter);
   }
 }
@@ -2071,7 +2071,7 @@ html[data-template='timeline'] .hero-eyebrow::before {
 
 /* The ground is genuinely pinned now, rather than being a second body colour. */
 html[data-template='boxed'] body::before {
-  background: var(--surface);
+  background: var(--panel, var(--surface));
 }
 
 /* ===========================================================================
@@ -2254,7 +2254,7 @@ html[data-template='boxed'] .blocks-tiles {
 html[data-template='boxed'] .blocks-tiles .block {
   padding: clamp(1rem, 2.4vw, 1.5rem);
   border: var(--rule) solid var(--border);
-  background: var(--surface);
+  background: var(--panel, var(--surface));
 }
 
 html[data-template='boxed'] main > section.section:nth-of-type(n) .blocks-tiles .block {
@@ -2472,7 +2472,7 @@ html[data-template='boxed'] .faq-panels .faq-item {
   max-width: none;
   padding: clamp(0.9rem, 2.2vw, 1.35rem);
   border: var(--rule) solid var(--border);
-  background: var(--surface);
+  background: var(--panel, var(--surface));
 }
 
 html[data-template='boxed'] .faq-panels .faq-item + .faq-item {
@@ -2665,7 +2665,7 @@ html[data-template='boxed'] .footer-set-panel .shell {
 html[data-template='boxed'] .footer-set-panel .footer-inner {
   padding: clamp(1rem, 2.4vw, 1.5rem);
   border: var(--rule) solid var(--border);
-  background: var(--surface);
+  background: var(--panel, var(--surface));
 }
 
 /* Below the two-column gates, rail, split and gate all resolved to one 350px
@@ -2793,7 +2793,7 @@ html[data-template='card'] main > section.section:nth-of-type(n) .gifts-framed .
 html[data-template='boxed'] .gifts-tiles .gifts-body {
   padding: clamp(1rem, 2.4vw, 1.5rem);
   border: var(--rule) solid var(--border);
-  background: var(--surface);
+  background: var(--panel, var(--surface));
 }
 
 html[data-template='boxed'] main > section.section:nth-of-type(n) .gifts-tiles .gifts-body {
@@ -2847,7 +2847,7 @@ html[data-template='timeline'] .welcome-spine .welcome-note {
 html[data-template='boxed'] .welcome-tiles .welcome-note {
   padding: clamp(1rem, 2.4vw, 1.5rem);
   border: var(--rule) solid var(--border);
-  background: var(--surface);
+  background: var(--panel, var(--surface));
 }
 
 html[data-template='split'] .welcome-twoUp .welcome-note {
@@ -3027,5 +3027,64 @@ html[data-template='gate'] .welcome-gutter .welcome-note {
 @media (min-width: 900px) {
   html[data-template='gate'] .faq-ledger .faq-item {
     grid-template-columns: minmax(0, 0.32fr) minmax(0, 0.68fr);
+  }
+}
+
+/* ===========================================================================
+   FULL BLEED, WHEN THE CONTENT COLUMN IS NOT THE VIEWPORT
+
+   abbey, goundry, galata and morrison open on a full-width band drawn as
+   `.hero::before` with the standard trick:
+
+       width: var(--bleed-width, 100vw);
+       margin-inline: var(--bleed, calc(50% - 50vw));
+
+   That is correct only while the element's container spans the window. Under
+   `rail` it does not: `main` is pushed right by min(25%, 320px) to clear the
+   fixed rail, so at 1440 the band starts 160px to the LEFT of the content and
+   runs 160px past the right edge of the document. The 126-combination sweep
+   measured exactly 160px of sideways scroll on all four of those themes with
+   `rail`, and on nothing else.
+
+   Inside an offset column the band bleeds to the COLUMN, which is what
+   "full width" means once the reading area is not the window.
+   =========================================================================== */
+
+@media (min-width: 1024px) {
+  /* One switch, not a list of elements.
+     The first version of this fix named `.hero::before`, because that was the
+     selector the sweep pointed at. It then found the same 160px on
+     marry-monday, whose band is `.hero-numeric`, and on industrial, whose is
+     `.site-footer::before`. Enumerating the elements that happen to bleed today
+     is how a fix gets re-applied once per element for as long as the project
+     lasts, so the trick now reads its values from `--bleed` / `--bleed-width`
+     and rail switches them off for everything inside the offset column. */
+  html[data-template='rail'] main,
+  html[data-template='rail'] .site-footer {
+    --bleed: 0px;
+    --bleed-width: 100%;
+  }
+}
+
+/* The day header splits into two spans so the break is deterministic, and
+   `.day-date` is `white-space: nowrap` to stop "24" being stranded from
+   "February". In split's three-column schedule the column is ~209px, so a
+   theme with a large display face overflows the page rather than wrapping —
+   measured at 82px sideways on aspen. In a column, wrapping wins over the
+   orphan rule it was protecting against. */
+html[data-template='split'] .schedule-columns .day-date,
+html[data-template='split'] .schedule-columns .day-weekday {
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+
+/* --- Two decorative strings that outrun a narrow column -------------------- */
+
+@media (max-width: 480px) {
+  /* card holds the cover names inside a 364px plate; the source's inline
+     padding then leaves under 300px for the names and the ampersand tips over
+     the edge. */
+  html[data-template='card'] .splash-names {
+    padding-inline: clamp(0.75rem, 4vw, 2rem);
   }
 }
