@@ -1,0 +1,1743 @@
+/* ===========================================================================
+   TEMPLATES — structure, not paint
+
+   A theme sets palette and type. A template sets STRUCTURE: which sections
+   appear, in what order, and how each is laid out. The two are independent
+   axes, so every one of the eighteen themes can wear every one of these.
+
+   Nothing in this file touches a colour token. If a rule here names a hex, it
+   is in the wrong file.
+
+   SELECTORS ARE PREFIXED `html` ON PURPOSE. The theme layer writes
+   `html:not([data-theme='marry-monday']) .section-title`, which is specificity
+   (0,2,1); a bare `[data-template='split'] .section-title` is (0,2,0) and loses
+   silently. Every alignment a template asked for was being overridden by the
+   paint layer until these were raised to match. templates.css is imported last,
+   so equal specificity resolves in structure's favour.
+   =========================================================================== */
+
+/* --- Section navigation ---------------------------------------------------- */
+
+.anchor-nav {
+  display: none;
+}
+
+/* A bar across the top, for the templates whose source has one. */
+html[data-template='timeline'] .anchor-nav-anchors,
+html[data-template='boxed'] .anchor-nav-anchors {
+  display: block;
+  position: sticky;
+  top: var(--stick-top, 0px);
+  z-index: 20;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.anchor-nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(1rem, 3vw, 2.5rem);
+  list-style: none;
+  margin: 0 auto;
+  padding: 0.85rem var(--gutter);
+  max-width: 1320px;
+}
+
+.anchor-nav a {
+  font-family: var(--font-body);
+  font-size: var(--label-size, 12px);
+  font-weight: var(--label-weight, 500);
+  text-transform: var(--label-case, uppercase);
+  letter-spacing: var(--label-tracking);
+  color: var(--muted);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  padding-bottom: 2px;
+}
+
+.anchor-nav a:hover,
+.anchor-nav a:focus-visible {
+  color: var(--ink);
+  border-bottom-color: var(--ink);
+}
+
+html[data-template='timeline'] .schedule-day-header,
+html[data-template='boxed'] .schedule-day-header {
+  top: calc(var(--stick-top, 0px) + 3.25rem);
+}
+
+/* ===========================================================================
+   1. CLASSIC SCROLL  <-  Zola's default order
+   The base layout. Nothing to add.
+   =========================================================================== */
+
+/* ===========================================================================
+   2. SIDE RAIL  <-  Eternity (ThemeForest 4.92 from 38 reviews, 851 sales)
+
+   aside.large-3 beside #main.large-9 — a Foundation 3/12 split, so the rail is
+   25% and the content 75%. The rail carries a monogram over a vertical list and
+   never scrolls away; below the large breakpoint it is hidden entirely and a
+   normal bar takes over. Alternate sections are tinted, and headings sit on a
+   6em/2em rhythm over a double rule.
+   =========================================================================== */
+
+@media (min-width: 1024px) {
+  html[data-template='rail'] .anchor-nav-rail {
+    display: block;
+    position: fixed;
+    top: var(--stick-top, 0px);
+    bottom: 0;
+    left: 0;
+    width: 25%;
+    max-width: 320px;
+    z-index: 20;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: clamp(2rem, 4vw, 3.5rem) 0;
+    overflow-y: auto;
+  }
+
+  html[data-template='rail'] .rail-monogram {
+    text-align: center;
+    margin: 0 0 clamp(1.5rem, 3vw, 2.5rem);
+  }
+
+  html[data-template='rail'] .anchor-nav-rail ul {
+    display: block;
+    /* The source sets its nav list to 59% of the rail and centres it. */
+    width: 59%;
+    margin-inline: auto;
+    padding: 0;
+  }
+
+  html[data-template='rail'] .anchor-nav-rail li + li {
+    border-top: 1px solid var(--border);
+  }
+
+  html[data-template='rail'] .anchor-nav-rail a {
+    display: block;
+    padding: 1.25em 0;
+    text-align: center;
+    border-bottom: 0;
+  }
+
+  html[data-template='rail'] main,
+  html[data-template='rail'] .site-footer,
+  html[data-template='rail'] .viewing-bar {
+    margin-left: min(25%, 320px);
+  }
+
+  /* The content row is 62.5em — 1000px — inside the remaining three quarters. */
+  html[data-template='rail'] .shell {
+    max-width: min(1000px, 88%);
+  }
+
+  /* Zebra bands are the only separator between sections in the source. */
+  html[data-template='rail'] main > section.section:nth-of-type(odd) {
+    background: var(--surface);
+  }
+
+  html[data-template='rail'] .section-title {
+    margin-block: 1.5em 0.5em;
+    padding-bottom: 0.25em;
+    border-bottom: 4px double var(--border);
+    display: inline-block;
+  }
+
+  html[data-template='rail'] .rule {
+    display: none;
+  }
+}
+
+/* ===========================================================================
+   3. TIMELINE  <-  Lovebirds, The Aisle and Forever
+
+   Three independent top sellers converged on this, with measurements close
+   enough to treat as one archetype: a 1-2px rule at left 50%, items at 46-48%
+   floated alternately, a circular node on the rule, and — the detail that makes
+   it interleave rather than pair up — a vertical offset on the inverted items.
+   Lovebirds sets that offset to 110px.
+   =========================================================================== */
+
+@media (min-width: 900px) {
+  .schedule-timeline .schedule-list {
+    position: relative;
+  }
+
+  .schedule-timeline .schedule-list::before {
+    content: '';
+    display: block;
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    margin-left: -1px;
+    background: var(--border);
+  }
+
+  .schedule-timeline .schedule-item {
+    width: 46%;
+    padding-left: 0;
+    text-align: right;
+  }
+
+  .schedule-timeline .schedule-item:nth-child(even) {
+    margin-left: 54%;
+    text-align: left;
+    /* The stagger. Without it the two columns pair up and it reads as a table. */
+    margin-top: -110px;
+  }
+
+  .schedule-timeline .schedule-item:nth-child(even):first-child {
+    margin-top: 0;
+  }
+
+  .schedule-timeline .schedule-node {
+    display: block;
+    width: 30px;
+    height: 30px;
+    left: auto;
+    right: -8.7%;
+    top: 1.4rem;
+  }
+
+  .schedule-timeline .schedule-item:nth-child(even) .schedule-node {
+    right: auto;
+    left: -8.7%;
+  }
+
+  .schedule-timeline .swatches,
+  .schedule-timeline .schedule-actions,
+  .schedule-timeline .dresscode-head {
+    justify-content: flex-end;
+  }
+
+  .schedule-timeline .schedule-item:nth-child(even) .swatches,
+  .schedule-timeline .schedule-item:nth-child(even) .schedule-actions,
+  .schedule-timeline .schedule-item:nth-child(even) .dresscode-head {
+    justify-content: flex-start;
+  }
+
+  .schedule-timeline .dresscode {
+    margin-inline: 0;
+  }
+}
+
+/* ===========================================================================
+   4. SPLIT SCREEN  <-  The Aisle, invitation-split (2.8K sales)
+
+   Two 50% columns with a deep inset frame. The source scrolls the two halves
+   past each other in OPPOSITE directions under JavaScript. This reproduces the
+   division, the pairing and the 7.5rem inset but NOT the counter-scroll — that
+   is a real departure, stated here rather than implied.
+   =========================================================================== */
+
+@media (min-width: 940px) {
+  html[data-template='split'] main > section.section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    padding-block: 0;
+  }
+
+  html[data-template='split'] main > section.section > .shell {
+    max-width: none;
+    /* The scrolled state insets the cells 7.5rem. */
+    padding: 7.5rem;
+  }
+
+  html[data-template='split'] main > section.section:nth-of-type(2n) > .shell {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  html[data-template='split'] main > section.section::after {
+    content: '';
+    display: block;
+    align-self: stretch;
+    background: var(--surface);
+    border-inline: 1px solid var(--border);
+    grid-row: 1;
+  }
+
+  html[data-template='split'] main > section.section:nth-of-type(2n)::after {
+    grid-column: 1;
+  }
+
+  html[data-template='split'] .section-title,
+  html[data-template='split'] .section-num,
+  html[data-template='split'] .prose,
+  html[data-template='split'] .schedule-body,
+  html[data-template='split'] .faq,
+  html[data-template='split'] .blocks {
+    text-align: left;
+  }
+
+  html[data-template='split'] .rule {
+    display: none;
+  }
+}
+
+/* ===========================================================================
+   5. INVITATION CARD  <-  Batik (54 reviews, the most-reviewed in the category)
+
+   A card centred on the page, the way printed stationery is set. The source is
+   960px outer holding a 670 x 551px card. The HEIGHT is not fixed here: Batik
+   swaps panes inside a card that never grows, and this is one document, so a
+   fixed height would clip it. That departure is deliberate.
+   =========================================================================== */
+
+@media (min-width: 720px) {
+  html[data-template='card'] main {
+    width: min(670px, 92vw);
+    margin: clamp(2rem, 5vw, 4rem) auto;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding-block: clamp(2rem, 5vw, 3.5rem);
+  }
+
+  html[data-template='card'] .shell {
+    max-width: none;
+    padding-inline: clamp(1.75rem, 4vw, 3rem);
+  }
+
+  /* Nothing escapes a card, so every full-bleed device in the theme layer is
+     pulled back inside it. */
+  html[data-template='card'] .hero::before,
+  html[data-template='card'] .dresscode::before,
+  html[data-template='card'] .site-footer::before,
+  html[data-template='card'] .hero-numeric,
+  html[data-template='card'] .edge-rail,
+  html[data-template='card'] .corner-mark,
+  html[data-template='card'] .footer-rail {
+    display: none;
+  }
+
+  html[data-template='card'] main > section.section {
+    background: transparent;
+    padding-block: clamp(1.75rem, 4vw, 2.75rem);
+  }
+}
+
+/* ===========================================================================
+   6. BOXED PANEL  <-  Aimer (4.53 from 17 reviews, 543 sales)
+
+   A bordered panel that scrolls over a backdrop that does not move. The source
+   fixes a full-viewport photograph behind a 1170px card at margin-top 30px.
+   This project ships no photographs, so the backdrop is the theme's own surface
+   tone — one swappable slot, which is exactly how the source treats it.
+   =========================================================================== */
+
+@media (min-width: 900px) {
+  html[data-template='boxed'] main {
+    width: min(1170px, 94vw);
+    margin: 30px auto 0;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    box-shadow: none;
+  }
+
+  html[data-template='boxed'] body {
+    background: var(--surface);
+  }
+
+  html[data-template='boxed'] main > section.section {
+    min-height: calc(100vh - var(--stick-top, 0px) - 3.25rem);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    scroll-margin-top: calc(var(--stick-top, 0px) + 3.25rem);
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* The schedule legitimately runs past a screen. */
+  html[data-template='boxed'] main > section.section#schedule {
+    min-height: 0;
+    display: block;
+  }
+}
+
+/* ===========================================================================
+   7. COVER GATE  <-  Neela invite build (5.0, 706 sales) and veleyross.wedding
+
+   The first screen is the names, the date and two links; everything else waits
+   below it. The source's nav is literally marked no-menu and carries exactly
+   two items — the details, and the reply. veleyross, an Awwwards Site of the
+   Day at 8.00, does the same thing with three images in the whole document.
+   =========================================================================== */
+
+/* --- Covers, for the templates whose source opens on one -------------------- */
+
+html[data-template='card'] .splash,
+html[data-template='split'] .splash,
+html[data-template='boxed'] .splash,
+html[data-template='gate'] .splash {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - var(--stick-top, 0px));
+  padding-inline: var(--gutter);
+  border-bottom: 1px solid var(--border);
+}
+
+/* --- Wedding party -------------------------------------------------------- */
+
+.party {
+  list-style: none;
+  margin: clamp(2rem, 5vw, 3rem) 0 0;
+  padding: 0;
+}
+
+.party-role {
+  margin: 0 0 0.35rem;
+}
+
+.party-name {
+  margin: 0 0 0.5rem;
+}
+
+.party-bio {
+  margin: 0;
+  line-height: 1.65;
+}
+
+
+
+/* ===========================================================================
+   THE SCHEDULE, ACTUALLY DIFFERENT PER TEMPLATE
+
+   The first distinctness audit scored the set 34 and named this as the weakest
+   axis: `schedule-columns` had no CSS at all, so it silently rendered the base
+   list; `schedule-cards` added a border the base already carried, so three
+   templates measured byte-identical; and `schedule-agenda` was a two-column
+   wrapper around the same full item body rather than a condensed agenda.
+
+   The schedule is the densest section on any wedding site and it is where the
+   real templates differ most, so it carries the most weight here.
+   =========================================================================== */
+
+/* --- AGENDA (card) — a condensed row, the way stationery sets a running order.
+   Time and name lead; the long-form detail is present but visibly secondary. */
+
+.schedule-agenda .schedule-item {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: clamp(1rem, 2.5vw, 1.5rem);
+  margin-bottom: clamp(1rem, 2.5vw, 1.5rem);
+}
+
+.schedule-agenda .schedule-item:last-child {
+  border-bottom: 0;
+}
+
+.schedule-agenda .schedule-name {
+  margin-bottom: 0.15rem;
+}
+
+.schedule-agenda .schedule-blurb {
+  margin-top: 0;
+}
+
+/* The detail below the venue is set smaller and quieter — an agenda lists, it
+   does not explain. */
+.schedule-agenda .schedule-desc,
+.schedule-agenda .dresscode,
+.schedule-agenda .schedule-unplugged {
+  font-size: 0.92em;
+  opacity: 0.86;
+}
+
+.schedule-agenda .swatches {
+  gap: 0.4rem;
+}
+
+@media (min-width: 640px) {
+  .schedule-agenda .schedule-item {
+    display: grid;
+    grid-template-columns: 8.5rem 1fr;
+    column-gap: clamp(1rem, 2.5vw, 2rem);
+    align-items: baseline;
+  }
+
+  .schedule-agenda .schedule-time {
+    grid-column: 1;
+    text-align: right;
+    margin: 0;
+  }
+
+  .schedule-agenda .schedule-body {
+    grid-column: 2;
+    text-align: left;
+  }
+}
+
+/* --- CARDS (boxed, gate) — a real tile grid, two up where there is room.
+   The base item already has a border, so a border alone was a no-op. What makes
+   a card a card is that it is a TILE in a grid, not a row in a stack. */
+
+@media (min-width: 800px) {
+  .schedule-cards .schedule-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(1rem, 2.5vw, 1.75rem);
+    align-items: start;
+  }
+
+  .schedule-cards .schedule-list::before {
+    display: none;
+  }
+}
+
+.schedule-cards .schedule-item {
+  padding: clamp(1.25rem, 3vw, 2rem);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  margin-bottom: clamp(1rem, 2.5vw, 1.5rem);
+}
+
+.schedule-cards .schedule-node {
+  display: none;
+}
+
+.schedule-cards .schedule-item {
+  padding-left: clamp(1.25rem, 3vw, 2rem);
+}
+
+/* --- COLUMNS (split) — days side by side across the page.
+   This had no CSS whatsoever, which is why split silently rendered the base list
+   and measured identical to classic. */
+
+@media (min-width: 900px) {
+  .schedule-columns {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: clamp(1rem, 2.5vw, 2rem);
+    align-items: start;
+  }
+
+  .schedule-columns .schedule-day {
+    display: block;
+    margin: 0;
+  }
+
+  .schedule-columns .schedule-day-header {
+    position: static;
+    margin: 0 0 0.75rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+  }
+
+  .schedule-columns .schedule-list::before,
+  .schedule-columns .schedule-node {
+    display: none;
+  }
+
+  .schedule-columns .schedule-item {
+    padding-left: 0;
+    padding-bottom: 0;
+  }
+
+  .schedule-columns .schedule-body {
+    text-align: left;
+  }
+
+  /* A column is narrow, so the long-form detail is dropped rather than squeezed
+     to three words a line. The event, its time and its place are what a column
+     is for. */
+  .schedule-columns .schedule-desc,
+  .schedule-columns .schedule-blurb,
+  .schedule-columns .dresscode {
+    display: none;
+  }
+
+  .schedule-columns .schedule-actions {
+    justify-content: flex-start;
+  }
+}
+
+/* --- TIMELINE — the day carried on the event, since the list is now flat. */
+
+.schedule-daymark {
+  margin: 0 0 0.4rem;
+  color: var(--accent-text, var(--muted));
+}
+
+/* ===========================================================================
+   SPLIT — put something in the other half
+
+   The audit measured `.shell` at x=720 in all six sections: the left 720px was
+   an empty tinted rectangle every time, so nothing was ever paired and half the
+   page carried nothing. The section's heading block now occupies one side and
+   its body the other, which is what "paired panels" was supposed to mean.
+   =========================================================================== */
+
+@media (min-width: 940px) {
+  html[data-template='split'] main > section.section::after {
+    display: none;
+  }
+
+  html[data-template='split'] main > section.section > .shell {
+    display: grid;
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    column-gap: clamp(2rem, 5vw, 4.5rem);
+    align-items: start;
+    padding: clamp(3rem, 7.5vw, 7.5rem);
+    grid-column: 1 / -1;
+  }
+
+  html[data-template='split'] main > section.section > .shell > .rule {
+    display: none;
+  }
+
+  /* The heading side. */
+  html[data-template='split'] .section-num,
+  html[data-template='split'] .section-title {
+    grid-column: 1;
+    text-align: left;
+    margin-inline: 0;
+  }
+
+  html[data-template='split'] .section-title {
+    position: sticky;
+    top: calc(var(--stick-top, 0px) + 2rem);
+  }
+
+  /* Everything else goes on the other side of the fold. */
+  html[data-template='split'] .schedule,
+  html[data-template='split'] .story,
+  html[data-template='split'] .party,
+  html[data-template='split'] .faq,
+  html[data-template='split'] .blocks,
+  html[data-template='split'] .prose,
+  html[data-template='split'] .welcome-note,
+  html[data-template='split'] .section-lede,
+  html[data-template='split'] .unlock {
+    grid-column: 2;
+    text-align: left;
+    margin-inline: 0;
+  }
+
+  /* The rule between the halves is the frame the source draws. */
+  html[data-template='split'] main > section.section {
+    display: block;
+    border-bottom: 1px solid var(--border);
+  }
+
+  html[data-template='split'] main > section.section > .shell {
+    max-width: none;
+    position: relative;
+  }
+
+  html[data-template='split'] main > section.section > .shell::before {
+    content: '';
+    position: absolute;
+    top: clamp(3rem, 7.5vw, 7.5rem);
+    bottom: clamp(3rem, 7.5vw, 7.5rem);
+    left: calc(0.85 / 2 * 100%);
+    width: 1px;
+    background: var(--border);
+  }
+}
+
+/* ===========================================================================
+   MOBILE — every template keeps its own identity at 390px
+
+   The audit's clearest finding: every structural rule was behind a min-width
+   gate, so at 390px all seven rendered one identical 350px column. Two pairs of
+   screenshots were byte-identical files. On the device most guests will actually
+   open the link on, the axis did not exist.
+   =========================================================================== */
+
+@media (max-width: 719px) {
+  /* The card stays a card. It only needs to be a smaller one. */
+  html[data-template='card'] main {
+    margin: 1rem 0.75rem 2rem;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    padding-block: 1.5rem;
+  }
+
+  html[data-template='card'] main > section.section {
+    padding-block: 1.25rem;
+  }
+}
+
+@media (max-width: 899px) {
+  /* The panel stays a panel. */
+  html[data-template='boxed'] main {
+    margin: 0.75rem;
+    border: 1px solid var(--border);
+    background: var(--bg);
+  }
+
+  html[data-template='boxed'] body {
+    background: var(--surface);
+  }
+}
+
+@media (max-width: 1023px) {
+  /* The rail loses its rail, so it needs a bar — the code used to claim one
+     existed and none did, which left a seven-section page with no navigation at
+     all on a phone. */
+  html[data-template='rail'] .anchor-nav-rail {
+    display: block;
+    position: sticky;
+    top: var(--stick-top, 0px);
+    z-index: 20;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+
+  html[data-template='rail'] .anchor-nav-rail .rail-monogram {
+    display: none;
+  }
+
+  html[data-template='rail'] .anchor-nav-rail ul {
+    justify-content: flex-start;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    gap: 1.25rem;
+    padding: 0.7rem var(--gutter);
+  }
+
+  html[data-template='rail'] .anchor-nav-rail li + li {
+    border-top: 0;
+  }
+
+  html[data-template='rail'] .anchor-nav-rail a {
+    white-space: nowrap;
+    padding: 0;
+  }
+}
+
+@media (max-width: 939px) {
+  /* Split stacks into a two-band rhythm rather than losing its identity: the
+     heading sits on a tinted band, the body on the ground below it. */
+  html[data-template='split'] .section-title,
+  html[data-template='split'] .section-num {
+    background: var(--surface);
+    width: 100vw;
+    margin-inline: calc(50% - 50vw);
+    padding: 0.75rem var(--gutter);
+  }
+
+  html[data-template='split'] .section-num {
+    padding-bottom: 0;
+  }
+
+  html[data-template='split'] .section-title {
+    padding-top: 0;
+    margin-bottom: clamp(1.25rem, 4vw, 2rem);
+  }
+}
+
+/* ===========================================================================
+   THE TWO ANCHOR BARS, told apart
+
+   timeline and boxed shared one grouped rule, so two of the seven navigation
+   models were literally the same object.
+   =========================================================================== */
+
+/* timeline: centred, underlined, no rules between. */
+html[data-template='timeline'] .anchor-nav-anchors ul {
+  justify-content: center;
+}
+
+/* boxed: left-set inside the panel, numbered, separated by hairlines — it reads
+   as a table of contents for a set of pages, which is what boxed is. */
+html[data-template='boxed'] .anchor-nav-anchors ul {
+  justify-content: flex-start;
+  gap: 0;
+  counter-reset: navitem;
+  max-width: min(1170px, 94vw);
+}
+
+html[data-template='boxed'] .anchor-nav-anchors li {
+  counter-increment: navitem;
+  padding-inline: clamp(0.6rem, 1.6vw, 1.1rem);
+}
+
+html[data-template='boxed'] .anchor-nav-anchors li + li {
+  border-left: 1px solid var(--border);
+}
+
+html[data-template='boxed'] .anchor-nav-anchors a::before {
+  content: counter(navitem, decimal-leading-zero) '  ';
+  opacity: 0.55;
+}
+
+/* ===========================================================================
+   THE COVER, varied
+
+   split, card, boxed and gate shared one `.splash` rule and produced
+   byte-identical folds — a guest's entire first impression of four of the seven
+   was the same image.
+   =========================================================================== */
+
+/* card: the names inside a ruled box, as a printed card sets them. */
+html[data-template='card'] .splash-names {
+  border-block: 1px solid var(--border);
+  padding-block: clamp(1.5rem, 4vw, 2.5rem);
+  padding-inline: clamp(2rem, 6vw, 4rem);
+}
+
+/* boxed: names left-set against the panel edge rather than centred. */
+html[data-template='boxed'] .splash {
+  justify-content: flex-start;
+}
+
+html[data-template='boxed'] .splash-names {
+  text-align: left;
+  max-width: min(1170px, 94vw);
+  margin-inline: auto 0;
+}
+
+/* split: the cover is divided like the page it introduces. */
+@media (min-width: 940px) {
+  html[data-template='split'] .splash {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    padding: 0;
+  }
+
+  html[data-template='split'] .splash::before {
+    content: '';
+    align-self: stretch;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+  }
+
+  html[data-template='split'] .splash-names {
+    padding-inline: clamp(2rem, 6vw, 5rem);
+    text-align: left;
+  }
+}
+
+/* gate shows the DATE and both doors on the first screen — that is the whole
+   claim, and the cover used to carry names only, aria-hidden, with a single CTA
+   on a second full-height screen below it. */
+html[data-template='gate'] .splash {
+  flex-direction: column;
+  gap: clamp(1.25rem, 3vw, 2rem);
+}
+
+html[data-template='gate'] .gate-date {
+  margin: 0;
+}
+
+html[data-template='gate'] .gate-doors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(0.75rem, 2vw, 1.25rem);
+  justify-content: center;
+  margin: 0;
+}
+
+/* With the cover carrying everything, the hero below it stops being a second
+   full screen of the same names. */
+html[data-template='gate'] .hero {
+  min-height: 0;
+  display: block;
+}
+
+/* The plain stack — no offset, no spine. The default, and what `classic` and `gate` would use if
+   they carried a story at all. Named so the class is not a no-op that only looks configured. */
+.story-stack .story-beat + .story-beat {
+  border-top: 1px solid var(--border);
+  padding-top: clamp(1.75rem, 4vw, 2.75rem);
+}
+
+/* ===========================================================================
+   ROUND 2 CORRECTIONS
+
+   The second distinctness audit scored 52 and found that several fixes reported
+   as landed had not. Each item below is one of those.
+   =========================================================================== */
+
+/* --- The agenda's time column was 136px of nothing --------------------------
+   `.schedule-agenda .schedule-time { grid-column: 1 }` targeted a GRANDCHILD:
+   the time lives inside `.schedule-body`, which is the actual grid item. So the
+   time rendered inside column 2 and column 1 stayed permanently empty. The grid
+   belongs on the body. */
+
+@media (min-width: 640px) {
+  html[data-template='card'] .schedule-agenda .schedule-item {
+    display: block;
+  }
+
+  html[data-template='card'] .schedule-agenda .schedule-body {
+    display: grid;
+    grid-template-columns: 8.5rem minmax(0, 1fr);
+    column-gap: clamp(1rem, 2.5vw, 2rem);
+    align-items: baseline;
+  }
+
+  html[data-template='card'] .schedule-agenda .schedule-body > * {
+    grid-column: 2;
+  }
+
+  html[data-template='card'] .schedule-agenda .schedule-time {
+    grid-column: 1;
+    grid-row: 1;
+    text-align: right;
+    margin: 0;
+  }
+}
+
+/* --- The timeline had no spine and no nodes ---------------------------------
+   `html:not([data-theme='marry-monday']) .schedule-list::before, .schedule-node
+   { display: none }` in the theme layer outranked the template rules, so the
+   rule down the centre — the thing the template is named for — and every node on
+   it computed to display:none. Restored at matching specificity. */
+
+@media (min-width: 900px) {
+  html[data-template='timeline'] .schedule-timeline .schedule-list::before {
+    display: block;
+  }
+
+  html[data-template='timeline'] .schedule-timeline .schedule-node {
+    display: block;
+  }
+
+  /* 248px inside a 620px shell gave six-word lines and cards up to 1787px tall.
+     The timeline needs the width its sources give it. */
+  html[data-template='timeline'] .shell {
+    max-width: min(1080px, 92%);
+  }
+}
+
+/* --- `.shell` was one shared 620px in four templates ------------------------
+   classic, timeline, boxed and gate all computed 620px at x=410, which is why
+   their bodies measured the same. Measure is a structural decision. */
+
+html[data-template='card'] .shell {
+  max-width: none;
+}
+
+@media (min-width: 900px) {
+  html[data-template='boxed'] .shell {
+    max-width: min(880px, 84%);
+  }
+
+  html[data-template='gate'] .shell {
+    max-width: min(520px, 78%);
+  }
+}
+
+/* --- LEDGER (gate) ----------------------------------------------------------
+   gate shared `cards` with boxed and the two rendered pixel-identically. A gate
+   withholds: its schedule is a ruled ledger of time, name and place, with the
+   long-form detail left for the reply page. It matches what the template is for. */
+
+.schedule-ledger .schedule-item {
+  padding-left: 0;
+  padding-bottom: 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.schedule-ledger .schedule-body {
+  padding-block: clamp(0.85rem, 2vw, 1.25rem);
+}
+
+.schedule-ledger .schedule-node,
+.schedule-ledger .schedule-list::before {
+  display: none;
+}
+
+.schedule-ledger .schedule-desc,
+.schedule-ledger .schedule-blurb,
+.schedule-ledger .dresscode,
+.schedule-ledger .schedule-unplugged,
+.schedule-ledger .schedule-arrive {
+  display: none;
+}
+
+.schedule-ledger .schedule-name {
+  margin-bottom: 0.15rem;
+}
+
+.schedule-ledger .schedule-time {
+  margin-bottom: 0.1rem;
+}
+
+/* --- boxed's cover was right-set, not left ---------------------------------
+   `margin-inline: auto 0` sets margin-LEFT to auto. The names measured x=1169 in
+   a panel ending at 1304 — tucked into the corner. */
+
+html[data-template='boxed'] .splash-names {
+  margin-inline: 0 auto;
+}
+
+/* --- gate repeated itself one screen down ----------------------------------
+   Its `min-height: 0; display: block` was a no-op, because classic's hero is
+   already both. With the cover carrying the names, the date and both doors, the
+   hero below it was showing all three again at full size. */
+
+html[data-template='gate'] .hero-names,
+html[data-template='gate'] .hero-eyebrow,
+html[data-template='gate'] .hero-cta,
+html[data-template='gate'] .hero-indic,
+html[data-template='gate'] .hero-numeric {
+  display: none;
+}
+
+html[data-template='gate'] .hero {
+  padding-block: clamp(2rem, 5vw, 3.5rem) 0;
+}
+
+/* --- The wedding party, per template ---------------------------------------
+   Two treatments genuinely exist in the wild: a grid of portraits (Zola,
+   WithJoy, Minted, Appy Couple) and one member per full alternating band
+   (Bliss & Bone's `lara`, where H2 is the role and H3 the name). Sections.tsx
+   previously took the template and used it only to print an eyebrow number, so
+   every section but the schedule was identical across all seven. */
+
+.party-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: clamp(1.5rem, 4vw, 2.75rem);
+}
+
+.party-list {
+  display: block;
+}
+
+.party-list .party-member + .party-member {
+  border-top: 1px solid var(--border);
+  padding-top: clamp(1rem, 2.5vw, 1.5rem);
+  margin-top: clamp(1rem, 2.5vw, 1.5rem);
+}
+
+/* One member per band, alternating. */
+.party-bands {
+  display: block;
+}
+
+.party-bands .party-member {
+  padding-block: clamp(1.5rem, 4vw, 2.5rem);
+  border-bottom: 1px solid var(--border);
+}
+
+@media (min-width: 820px) {
+  .party-bands .party-member {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+    column-gap: clamp(2rem, 5vw, 4rem);
+    align-items: baseline;
+  }
+
+  .party-bands .party-member:nth-child(even) {
+    direction: rtl;
+  }
+
+  .party-bands .party-member:nth-child(even) > * {
+    direction: ltr;
+  }
+
+  .party-bands .party-role,
+  .party-bands .party-name {
+    grid-column: 1;
+    text-align: left;
+  }
+
+  .party-bands .party-name {
+    grid-row: 2;
+  }
+
+  .party-bands .party-bio {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    text-align: left;
+  }
+}
+
+/* --- The story variants that were configured and unimplemented -------------
+   `story: 'alternating'` and `story: 'timeline'` emitted classes with no CSS
+   anywhere, so their beats were LESS structured than the plain stack. A field
+   with three values and one implementation is the pattern the first audit was
+   scored down for, and it survived into the second. */
+
+@media (min-width: 860px) {
+  .story-alternating .story-beat {
+    width: 58%;
+  }
+
+  .story-alternating .story-beat[data-beat='b'] {
+    margin-left: 42%;
+    text-align: right;
+  }
+
+  .story-alternating .story-beat[data-beat='b'] .story-body {
+    margin-left: auto;
+  }
+
+  .story-timeline {
+    position: relative;
+    padding-block: 1rem;
+  }
+
+  .story-timeline::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--border);
+  }
+
+  .story-timeline .story-beat {
+    width: 44%;
+    text-align: right;
+  }
+
+  .story-timeline .story-beat[data-beat='b'] {
+    margin-left: 56%;
+    text-align: left;
+  }
+
+  .story-timeline .story-body {
+    margin-left: auto;
+  }
+
+  .story-timeline .story-beat[data-beat='b'] .story-body {
+    margin-left: 0;
+  }
+}
+
+/* --- split's welcome section had an empty heading column -------------------
+   Its h2 is `visually-hidden`, so column 1 was blank beside the note. */
+
+@media (min-width: 940px) {
+  html[data-template='split'] main > section.section:has(.welcome-note) > .shell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html[data-template='split'] .welcome-note {
+    grid-column: 1;
+  }
+
+  html[data-template='split'] main > section.section:has(.welcome-note) > .shell::before {
+    display: none;
+  }
+}
+
+/* ===========================================================================
+   ROUND 3 CORRECTIONS
+
+   Round 3 put the axis at ~72 and named one disqualifier: at 390px nothing the
+   templates do is reachable. Every structural rule shipped so far sits behind a
+   min-width gate — the cards grid at 800, the columns grid at 900, the agenda
+   gutter at 640, the timeline spine at 900, the party bands at 820, both story
+   variants at 860 — so six of seven schedules rendered one identical stack on
+   the device most guests actually open the link on.
+
+   Everything in this block is either unconditional or a MAX-width rule.
+   =========================================================================== */
+
+/* --- The theme layer was centring every laid-out schedule -------------------
+   `html:not([data-theme='marry-monday']) .schedule-body { text-align: center }`
+   is (0,2,1) and beat `.schedule-timeline .schedule-item` at (0,2,0), so the
+   timeline's alternating cards, boxed's tiles and gate's ledger rows were all
+   positioned and then centre-set inside — which throws away most of the signal
+   each layout buys. */
+
+html[data-template='timeline'] .schedule-item .schedule-body {
+  text-align: right;
+}
+
+html[data-template='timeline'] .schedule-item:nth-child(even) .schedule-body {
+  text-align: left;
+}
+
+html[data-template='boxed'] .schedule-body,
+html[data-template='gate'] .schedule-body,
+html[data-template='card'] .schedule-body,
+html[data-template='split'] .schedule-body {
+  text-align: left;
+}
+
+/* Alignment is a structural decision, so it follows the page geometry: rail and
+   boxed left-set to agree with their left-set navigation, split already does. */
+html[data-template='rail'] .section-title,
+html[data-template='rail'] .section-num,
+html[data-template='boxed'] .section-title,
+html[data-template='boxed'] .section-num {
+  text-align: left;
+  margin-inline: 0;
+}
+
+/* --- gate's ledger had no ledger geometry ----------------------------------
+   The theme paints `.schedule-item` as a rounded bordered card on a surface
+   fill. A `border-bottom` at lower specificity never displaced it, so the
+   strongest-claiming template shared classic's silhouette. A ledger is ruled
+   rows, so the card chrome is nulled and the day moves inline. */
+
+html[data-template='gate'] .schedule-item {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  padding: 0;
+  margin: 0;
+}
+
+html[data-template='gate'] .schedule-day-header {
+  position: static;
+  margin: clamp(1.5rem, 4vw, 2.25rem) 0 0.25rem;
+  padding: 0;
+  border-bottom: 0;
+  text-align: left;
+  font-size: var(--label-size, 12px);
+  font-family: var(--font-body);
+  font-weight: var(--label-weight, 500);
+  letter-spacing: var(--label-tracking);
+  text-transform: var(--label-case, uppercase);
+  color: var(--muted);
+}
+
+html[data-template='gate'] .schedule-day-header .day-weekday,
+html[data-template='gate'] .schedule-day-header .day-date {
+  display: inline;
+}
+
+/* --- split's "days side by side" resolved to two tracks --------------------
+   `repeat(auto-fit, minmax(230px, 1fr))` inside a 662px body column gives two
+   315px tracks and six days wrap 2x3 — the same shape as boxed's tiles, which
+   is exactly what this variant existed to avoid. */
+
+@media (min-width: 900px) {
+  html[data-template='split'] .schedule-columns {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  html[data-template='split'] .schedule-columns .schedule-actions {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+  }
+}
+
+/* ===========================================================================
+   THE PHONE
+
+   The disqualifier. Each schedule gets a form that works in a 350px column, so
+   the axis exists on the device it is actually read on.
+   =========================================================================== */
+
+@media (max-width: 899px) {
+  /* TIMELINE — the spine and nodes work fine anchored LEFT in a phone column.
+     They were gated at 900px only because the alternation is, and the two are
+     separate ideas: alternation needs width, a spine does not. */
+  html[data-template='timeline'] .schedule-timeline .schedule-list {
+    position: relative;
+    padding-left: 1.6rem;
+  }
+
+  html[data-template='timeline'] .schedule-timeline .schedule-list::before {
+    content: '';
+    display: block;
+    position: absolute;
+    left: 3px;
+    top: 0.6rem;
+    bottom: 0.6rem;
+    width: 2px;
+    background: var(--border);
+  }
+
+  html[data-template='timeline'] .schedule-timeline .schedule-node {
+    display: block;
+    left: -1.6rem;
+    top: 0.9rem;
+    width: 9px;
+    height: 9px;
+  }
+
+  html[data-template='timeline'] .schedule-timeline .schedule-item {
+    padding-left: 0;
+  }
+}
+
+@media (max-width: 639px) {
+  /* CARD — the agenda gutter fits a phone; 5.5rem is enough for "Five in the
+     Afternoon" wrapped to two lines, and it keeps the template's one structural
+     idea alive at the width it matters. */
+  html[data-template='card'] .schedule-agenda .schedule-body {
+    display: grid;
+    grid-template-columns: 5.5rem minmax(0, 1fr);
+    column-gap: 0.75rem;
+    align-items: baseline;
+  }
+
+  html[data-template='card'] .schedule-agenda .schedule-body > * {
+    grid-column: 2;
+  }
+
+  html[data-template='card'] .schedule-agenda .schedule-time {
+    grid-column: 1;
+    grid-row: 1;
+    text-align: right;
+    margin: 0;
+    font-size: 0.82em;
+  }
+}
+
+@media (max-width: 799px) {
+  /* BOXED — a compact two-line tile: the event and its place, with the long
+     prose dropped. A tile is still a tile in one column. */
+  html[data-template='boxed'] .schedule-cards .schedule-item {
+    padding: 0.9rem 1rem;
+  }
+
+  html[data-template='boxed'] .schedule-cards .schedule-desc,
+  html[data-template='boxed'] .schedule-cards .schedule-blurb {
+    display: none;
+  }
+}
+
+@media (max-width: 899px) {
+  /* SPLIT — keeps its condensed column content on a phone, so it stays the
+     template that says less rather than becoming the template that says
+     everything in a narrower measure. */
+  html[data-template='split'] .schedule-desc,
+  html[data-template='split'] .schedule-blurb,
+  html[data-template='split'] .dresscode {
+    display: none;
+  }
+
+  html[data-template='split'] .schedule-day-header {
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.35rem;
+  }
+
+  /* The party keeps its treatment: a list is a list at any width. */
+  html[data-template='split'] .party-list .party-member + .party-member,
+  html[data-template='card'] .party-list .party-member + .party-member {
+    border-top: 1px solid var(--border);
+    padding-top: 1rem;
+    margin-top: 1rem;
+  }
+}
+
+@media (max-width: 819px) {
+  /* The bands party keeps its rule-per-member rhythm rather than flattening
+     into the same stack as the grid. */
+  html[data-template='boxed'] .party-bands .party-member {
+    border-bottom: 1px solid var(--border);
+    padding-block: 1rem;
+  }
+
+  html[data-template='boxed'] .party-bands .party-role {
+    display: inline-block;
+    margin-right: 0.5rem;
+  }
+}
+
+@media (max-width: 859px) {
+  /* The story keeps a left spine on a phone for the timeline variant, and an
+     indent for the alternating one, so three configured values remain three
+     rendered things. */
+  html[data-template='timeline'] .story-timeline {
+    position: relative;
+    padding-left: 1.4rem;
+  }
+
+  html[data-template='timeline'] .story-timeline::before {
+    content: '';
+    position: absolute;
+    left: 2px;
+    top: 0.4rem;
+    bottom: 0.4rem;
+    width: 1px;
+    background: var(--border);
+  }
+
+  html[data-template='boxed'] .story-alternating .story-beat[data-beat='b'] {
+    padding-left: 1.5rem;
+    border-left: 2px solid var(--border);
+  }
+}
+
+/* --- Three templates burned their entire mobile fold -----------------------
+   card, boxed and split each spent 841px on a cover carrying names alone — no
+   date, no reply button — and then repeated those names in the hero one screen
+   below. On a phone the cover earns its place only if it says something. */
+
+@media (max-width: 719px) {
+  html[data-template='card'] .splash,
+  html[data-template='boxed'] .splash,
+  html[data-template='split'] .splash {
+    min-height: 0;
+    padding-block: clamp(2.5rem, 9vw, 4rem);
+  }
+}
+
+/* ===========================================================================
+   THE HERO
+
+   Six of seven rendered the identical 794px centred block — the first screen of
+   three templates and the second of three more. It was the largest shared
+   surface left in the set.
+   =========================================================================== */
+
+/* rail: left-set against the rail, so the hero agrees with the page geometry. */
+@media (min-width: 1024px) {
+  html[data-template='rail'] .hero-inner {
+    text-align: left;
+  }
+
+  html[data-template='rail'] .hero-names,
+  html[data-template='rail'] .hero-eyebrow,
+  html[data-template='rail'] .hero-tagline,
+  html[data-template='rail'] .hero-cta {
+    margin-inline: 0;
+  }
+}
+
+/* split: the hero is divided like every section under it. */
+@media (min-width: 940px) {
+  html[data-template='split'] .hero .shell {
+    display: grid;
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    column-gap: clamp(2rem, 5vw, 4.5rem);
+    align-items: center;
+    text-align: left;
+  }
+
+  html[data-template='split'] .hero-eyebrow,
+  html[data-template='split'] .hero-names {
+    grid-column: 1;
+    text-align: left;
+    margin-inline: 0;
+  }
+
+  html[data-template='split'] .hero-tagline,
+  html[data-template='split'] .hero-cta {
+    grid-column: 2;
+    text-align: left;
+    margin-inline: 0;
+  }
+}
+
+/* card: compressed inside the card — the names cannot shout in a 670px frame. */
+html[data-template='card'] .hero-names {
+  font-size: clamp(1.9rem, 5.5vw, 3.2rem);
+}
+
+html[data-template='card'] .hero {
+  padding-block: clamp(1.5rem, 4vw, 2.5rem);
+}
+
+/* boxed: left-set inside the panel, agreeing with its numbered nav. */
+@media (min-width: 900px) {
+  html[data-template='boxed'] .hero-inner {
+    text-align: left;
+  }
+
+  html[data-template='boxed'] .hero-names,
+  html[data-template='boxed'] .hero-eyebrow,
+  html[data-template='boxed'] .hero-tagline,
+  html[data-template='boxed'] .hero-cta {
+    margin-inline: 0;
+  }
+}
+
+/* timeline: the hero sits on the spine's axis rather than the page's. */
+@media (min-width: 900px) {
+  html[data-template='timeline'] .hero-names {
+    font-size: clamp(2.6rem, 8vw, 6rem);
+  }
+}
+
+/* --- BANDED (rail) ----------------------------------------------------------
+   rail and classic were the only pair sharing a schedule verbatim. Eternity —
+   the template rail copies — does not stack cards: it bands its content, with
+   alternate rows tinted and the day carried inline rather than as a sticky
+   header. That is the difference between a rail bolted onto classic and a rail
+   with its own document.
+   --------------------------------------------------------------------------- */
+
+html[data-template='rail'] .schedule-banded .schedule-item {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: clamp(1rem, 2.5vw, 1.5rem) clamp(1rem, 2.5vw, 1.75rem);
+  margin: 0;
+}
+
+html[data-template='rail'] .schedule-banded .schedule-item:nth-child(odd) {
+  background: var(--surface);
+}
+
+html[data-template='rail'] .schedule-banded .schedule-node,
+html[data-template='rail'] .schedule-banded .schedule-list::before {
+  display: none;
+}
+
+html[data-template='rail'] .schedule-banded .schedule-body {
+  text-align: left;
+}
+
+/* The day is carried inline above the first event of each band rather than as a
+   sticky header, so the rail stays the only fixed thing on the page. */
+html[data-template='rail'] .schedule-banded .schedule-day-header {
+  position: static;
+  margin: clamp(1.5rem, 3.5vw, 2.25rem) 0 0.35rem;
+  padding: 0 clamp(1rem, 2.5vw, 1.75rem);
+  border-bottom: 0;
+  text-align: left;
+  font-size: var(--label-size, 12px);
+  font-family: var(--font-body);
+  font-weight: var(--label-weight, 500);
+  letter-spacing: var(--label-tracking);
+  text-transform: var(--label-case, uppercase);
+  color: var(--muted);
+}
+
+html[data-template='rail'] .schedule-banded .schedule-day-header .day-weekday,
+html[data-template='rail'] .schedule-banded .schedule-day-header .day-date {
+  display: inline;
+}
+
+/* ===========================================================================
+   ROUND 4 CORRECTIONS
+
+   Round 4 scored 78 and found two defects of exactly the class the round before
+   had been hunting — a theme rule beating a template rule — plus a hero that is
+   one identical object on five of seven templates at 390px.
+   =========================================================================== */
+
+/* --- The schedule's ground was decided by band parity, not by the template ---
+   `[data-theme='anvaya'] main > section.section:nth-of-type(even) .schedule-item`
+   is (0,4,1) and beat every `html[data-template='x'] .schedule-item` at (0,2,1).
+   So gate's ledger rows rendered as filled maroon blocks rather than ruled
+   lines, and four templates' items painted dark while three painted light —
+   purely because of where the schedule happened to fall in each `order`. An
+   off-by-one in section counting was carrying structural weight.
+
+   Scoped through `main > section.section` so the template matches the theme's
+   own shape and wins on being later. */
+
+/* `:nth-of-type(n)` matches everything and adds one to the class column. The theme rule is
+   `[data-theme] main > section.section:nth-of-type(even) .schedule-item` = (0,4,2); scoping through
+   `main > section.section .schedule-item` alone gives (0,3,3), which LOSES on the class column
+   before the type column is ever compared. This makes it (0,4,3). */
+html[data-template='gate'] main > section.section:nth-of-type(n) .schedule-item,
+html[data-template='rail'] main > section.section:nth-of-type(n) .schedule-item,
+html[data-template='timeline'] main > section.section:nth-of-type(n) .schedule-item {
+  background: transparent;
+}
+
+html[data-template='boxed'] main > section.section:nth-of-type(n) .schedule-item,
+html[data-template='card'] main > section.section:nth-of-type(n) .schedule-item,
+html[data-template='split'] main > section.section:nth-of-type(n) .schedule-item {
+  background: var(--surface);
+}
+
+/* --- classic advertised sticky day headers and did not have them -----------
+   `html:not([data-theme='marry-monday']) .schedule-day-header { position: static }`
+   unsticks them for seventeen of eighteen themes, so the blurb was false. It is
+   classic's one schedule idea, so it gets it back. */
+
+html[data-template='classic'] .schedule-day-header {
+  position: sticky;
+  top: var(--stick-top, 0px);
+  z-index: 5;
+  background: var(--bg);
+  padding-block: 0.4rem;
+}
+
+/* --- card and classic shared one day header -------------------------------
+   Both simply inherited the theme rule. card's day belongs in the agenda's own
+   time gutter, right-set against the rule, which is what the layout is for. */
+
+html[data-template='card'] .schedule-day-header {
+  position: static;
+  text-align: right;
+  font-size: var(--label-size, 12px);
+  font-family: var(--font-body);
+  font-weight: var(--label-weight, 500);
+  letter-spacing: var(--label-tracking);
+  text-transform: var(--label-case, uppercase);
+  color: var(--muted);
+  margin: clamp(1.25rem, 3vw, 1.75rem) 0 0.3rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid var(--border);
+}
+
+html[data-template='card'] .schedule-day-header .day-weekday,
+html[data-template='card'] .schedule-day-header .day-date {
+  display: inline;
+}
+
+/* --- timeline's phone text was right-ragged against a left rail ------------
+   The desktop alternation sets `text-align: right` on odd items. Below the
+   alternation breakpoint the spine moves to the left, so half the events were
+   ragged away from it. */
+
+@media (max-width: 899px) {
+  html[data-template='timeline'] .schedule-item .schedule-body,
+  html[data-template='timeline'] .schedule-item:nth-child(even) .schedule-body {
+    text-align: left;
+  }
+}
+
+/* --- split's headings ran edge to edge on a phone -------------------------
+   `.section-title` measured x=0, w=390 — a full-bleed band is intentional, the
+   absent gutter is not. */
+
+@media (max-width: 939px) {
+  html[data-template='split'] .section-title,
+  html[data-template='split'] .section-num {
+    padding-inline: var(--gutter);
+  }
+}
+
+/* --- split's desktop columns were 143px of content ------------------------
+   Three tracks inside a 662px body column is structurally right and
+   typographically unusable — "Nikkah & Baraat" broke over three lines. Three
+   tracks need the width; below that, two. */
+
+@media (min-width: 900px) and (max-width: 1279px) {
+  html[data-template='split'] .schedule-columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  html[data-template='split'] main > section.section:has(.schedule) > .shell {
+    grid-template-columns: minmax(0, 0.55fr) minmax(0, 1.45fr);
+  }
+}
+
+/* --- split needs a phone form that is not classic-minus-text ---------------
+   Its 390px item geometry was byte-identical to classic's; the only separator
+   was deleted content, which is the weakest kind of distinctness. Two-up day
+   cards keep "days side by side" alive at the width where it did not exist. */
+
+@media (max-width: 899px) {
+  html[data-template='split'] .schedule-columns {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    align-items: start;
+  }
+
+  html[data-template='split'] .schedule-columns .schedule-day {
+    margin: 0;
+  }
+
+  html[data-template='split'] .schedule-columns .schedule-item {
+    padding: 0.75rem;
+    border-radius: 0;
+  }
+
+  html[data-template='split'] .schedule-columns .schedule-actions {
+    display: none;
+  }
+}
+
+/* --- rail's bands did not break the shell on a phone ----------------------
+   A banded schedule that is an inset card with its corners squared is not a
+   band. Full-bleed rows, edge to edge. */
+
+@media (max-width: 1023px) {
+  html[data-template='rail'] .schedule-banded .schedule-item {
+    width: 100vw;
+    margin-inline: calc(50% - 50vw);
+    padding-inline: var(--gutter);
+  }
+}
+
+/* ===========================================================================
+   THE HERO, ON A PHONE
+
+   Round 4's largest remaining source of sameness: five of seven templates
+   opened on one identical block at 390px, because every hero differentiation
+   shipped last round sat inside a min-width gate. These are ungated and scoped
+   to beat `html:not([data-theme='marry-monday']) .hero-inner { text-align: center }`
+   at (0,2,1) by matching it and coming later.
+   =========================================================================== */
+
+html[data-template='rail'] .hero-inner,
+html[data-template='boxed'] .hero-inner {
+  text-align: left;
+}
+
+html[data-template='rail'] .hero-names,
+html[data-template='rail'] .hero-eyebrow,
+html[data-template='rail'] .hero-tagline,
+html[data-template='rail'] .hero-cta,
+html[data-template='boxed'] .hero-names,
+html[data-template='boxed'] .hero-eyebrow,
+html[data-template='boxed'] .hero-tagline,
+html[data-template='boxed'] .hero-cta {
+  margin-inline: 0;
+}
+
+/* timeline: the names sit on the spine's axis, over a rule, at their own size. */
+html[data-template='timeline'] .hero-names {
+  font-size: clamp(2.4rem, 9vw, 6.5rem);
+}
+
+html[data-template='timeline'] .hero-inner {
+  border-bottom: 2px solid var(--border);
+  padding-bottom: clamp(1.5rem, 4vw, 2.5rem);
+}
+
+/* split: a two-row division on a phone — names above a rule, date and reply
+   below it — rather than collapsing to the same centred stack as everyone
+   else. */
+@media (max-width: 939px) {
+  html[data-template='split'] .hero-inner {
+    text-align: left;
+    border-left: 2px solid var(--border);
+    padding-left: clamp(0.9rem, 4vw, 1.5rem);
+  }
+
+  html[data-template='split'] .hero-names,
+  html[data-template='split'] .hero-eyebrow,
+  html[data-template='split'] .hero-tagline,
+  html[data-template='split'] .hero-cta {
+    margin-inline: 0;
+  }
+}
+
+/* ===========================================================================
+   BOXED'S NAVIGATION AND ITS GROUND
+
+   Its nav was timeline's component with a counter and a different
+   justification. Its "backdrop which stays put" did not: `background-attachment`
+   computed to `scroll` and the fixed pseudo-element was transparent.
+   =========================================================================== */
+
+@media (min-width: 1100px) {
+  /* A stacked index down the inside of the panel, which is what "a table of
+     contents for a set of pages" should look like. */
+  html[data-template='boxed'] .anchor-nav-anchors ul {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    padding-block: 0.5rem;
+  }
+
+  html[data-template='boxed'] .anchor-nav-anchors li + li {
+    border-left: 0;
+    border-top: 1px solid var(--border);
+  }
+
+  html[data-template='boxed'] .anchor-nav-anchors li {
+    width: 100%;
+    padding-block: 0.35rem;
+  }
+}
+
+/* The ground is genuinely pinned now, rather than being a second body colour. */
+html[data-template='boxed'] body::before {
+  background: var(--surface);
+}

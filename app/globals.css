@@ -1,0 +1,2030 @@
+@import 'tailwindcss';
+
+/* ===========================================================================
+   Wedding site design system.
+
+   Hard rules, enforced by tests/e2e/design-integrity.spec.ts:
+     - NO linear-gradient anywhere. Real stationery has no gradients; ink is flat, and foil is a flat
+       metallic with a hard specular edge, not a gradient.
+     - NO box-shadow on content surfaces. Paper does not cast a soft blurred shadow onto other paper.
+       Separation is done with hairline rules.
+     - NO border-radius except one deliberate organic shape per theme.
+     - NO pure #FFFFFF background or pure #000000 text. Every stationer referenced uses a warm
+       off-white and a near-black that carries a hue.
+     - The typeface rule USED to be "no Inter / Roboto / Open Sans / Montserrat / Poppins". It is
+       not any more, and pretending otherwise while three of them ship would be worse than saying
+       so: every theme is now a copy of a specific published template, and those templates' own
+       @font-face blocks name Poppins-Light (aspen), Inter-Light (avril) and OlivieSans (alessia
+       and avril, stood in for by Montserrat). The rule is now: NO face that no source template
+       uses. Roboto, Lato and Open Sans are still banned, and the test still fails on them.
+     - NO emoji as a functional icon.
+   =========================================================================== */
+
+:root {
+  --measure: 62ch;
+  --col: 620px;
+  --gutter: clamp(1.25rem, 5vw, 2.5rem);
+  --section-gap: clamp(4.5rem, 12vw, 11rem);
+  --rule: 1px;
+
+  /* Motion. Slow, and applied to headings only — never to body copy, never to every element.
+     The design must still read well with all of this stripped out. */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur: 700ms;
+}
+
+/* ---------------------------------------------------------------------------
+   THEME 1 — Editorial Ivory
+   ink #1E2525 harvested from papier.com: a green-shifted near-black, not neutral grey.
+   --------------------------------------------------------------------------- */
+
+/* ---------------------------------------------------------------------------
+   THEME 2 — Haveli Gold
+   Palette harvested from anvaya.love. Umber ink, never neutral black.
+   --------------------------------------------------------------------------- */
+
+/* ---------------------------------------------------------------------------
+   THEME 3 — Letterpress Nocturne
+   This is dark STOCK, not dark mode: warm #F2EEE4 simulates white ink on navy card.
+   --------------------------------------------------------------------------- */
+
+/* ---------------------------------------------------------------------------
+   THEME 4 — Botanical Plate
+   Palette harvested from riflepaperco.com. The slate blue is the cool counterweight
+   that stops the sage-and-green going twee.
+   --------------------------------------------------------------------------- */
+/* ---------------------------------------------------------------------------
+   THEME TOKENS
+
+   Every palette below is HARVESTED from the source template's own stylesheet by
+   scripts/harvest.mjs — the numbers in the comments are how many times that hex
+   appears in that site's CSS. Nothing here was picked by eye.
+   See docs/TEMPLATE-SOURCES.md for the live URLs.
+   --------------------------------------------------------------------------- */
+
+/* 1. MARRY MONDAY <- veleyross.wedding (Awwwards Site of the Day)
+   #284135 x13 · #f3f2f1 x11 · #c3c2c0 x5 · #999790 x2 · #fdfdfb x1 */
+[data-theme='marry-monday'] {
+  --bg: #f3f2f1;
+  --surface: #fdfdfb;
+  --ink: #284135;
+  /* The source's secondary text is #999790 — a WARM NEUTRAL grey, not a green. It fails AA at
+     body size, so this is the same hue darkened to 4.68:1 rather than a tint of the ink, which is
+     what a green-tinted muted was. */
+  --muted: #6f6c66;
+  --accent: #284135;
+  --accent-text: #284135;
+  --accent-soft: #dfe3e0;
+  --border: #c3c2c0;
+  --metal: #284135;
+
+  --font-display: var(--font-fraunces), 'Fraunces', Georgia, serif;
+  --font-body: var(--font-archivo), 'Archivo', 'Helvetica Neue', sans-serif;
+  --display-weight: 400;
+  --display-tracking: -0.03em;
+  --display-leading: 0.86;
+  --display-case: none;
+  --radius: 0;
+  /* veleyross's micro-labels are set at +0.028em, not the wide editorial tracking a wedding site
+     reaches for by default. Harvested, not chosen. */
+  --label-tracking: 0.028em;
+
+  /* The source paints no filled surface anywhere — every control is a hairline underline. */
+  --btn-bg: transparent;
+  --btn-ink: #284135;
+  --btn-border: transparent;
+  --btn-bg-hover: transparent;
+  --btn-ink-hover: #284135;
+  --btn-border-hover: transparent;
+}
+
+/* 2. ALESSIA <- myblissandbone.com/alessia
+   #9c0a0d x61 · #fffaf1 x23 · #f3f1ee x4 · #9a9490 x1 · peach #ffd8c7 */
+[data-theme='alessia'] {
+  --bg: #fffaf1;
+  --surface: #f3f1ee;
+  /* The source sets EVERY text element to the crimson — body, p, h2, h3, h4, h5 all #9c0a0d, with
+     no dark ink anywhere on the page. Copying the hex but demoting it to an accent, which is what
+     this used to do, reproduces the palette and loses the design. 8.20:1 on the cream. */
+  --ink: #9c0a0d;
+  --muted: #8a4a4c;      /* a desaturated crimson, not a grey — 6.38:1 */
+  --accent: #9c0a0d;
+  --accent-text: #9c0a0d;
+  --accent-soft: #ffd8c7; /* the source's block colour, on .imgCont fields */
+  --border: #e6ddd2;
+  --metal: #9c0a0d;
+
+  /* ROLES, settled by reading the source's own @font-face blocks rather than a font-family sweep.
+     It ships three faces — OlivieSans-Regular, PermanentMarker-Regular, kalinda-script-regular —
+     and declares `body { font: 16px/1.5em "PermanentMarker-Regular"; letter-spacing: 1px }`.
+     The marker IS the running text. Round 3 made it the display face; round 4 demoted it to
+     captions; both were wrong, in opposite directions, because the harvest could not see
+     @font-face and reported this template's only family as `bootstrap-icons`.
+     OlivieSans -> Montserrat at NORMAL weight (the source declares `font-weight: normal` in all
+     six of its slots) carries h1 and h2. */
+  --font-display: var(--font-montserrat), 'Montserrat', 'Helvetica Neue', sans-serif;
+  --font-body: var(--font-marker), 'Permanent Marker', cursive;
+  --font-alt: var(--font-montserrat), 'Montserrat', 'Helvetica Neue', sans-serif;
+  --font-script: var(--font-caveat), 'Caveat', cursive;
+  --display-weight: 400;
+  --display-tracking: -0.01em;
+  --display-leading: 1.02;
+  --display-case: none;
+  --radius: 0;
+  --label-tracking: 0.06em;   /* source body carries letter-spacing: 1px on 16px */
+  --body-size: 17px;
+
+  /* The source's button is an outlined, fully-rounded pill set in its script face. */
+  --btn-bg: transparent;
+  --btn-ink: #9c0a0d;
+  --btn-border: #9c0a0d;
+  --btn-radius: 999px;
+  --btn-font: var(--font-script), cursive;
+  --btn-size: 19px;
+  --btn-case: none;
+  --btn-tracking: 0.01em;
+  --btn-bg-hover: #9c0a0d;
+  --btn-ink-hover: #fffaf1;
+  --btn-border-hover: #9c0a0d;
+}
+
+/* 3. AVRIL <- myblissandbone.com/avril
+   #013ab2 x65 · #fffaf1 x21 · #9a9490 x1 */
+[data-theme='avril'] {
+  --bg: #fffaf1;
+  --surface: #f3f1ee;
+  --ink: #013ab2;
+  /* The source sets body, p, h4 and h5 to the blue as well; a neutral grey secondary is a tone it
+     never uses. This is the blue desaturated toward slate, not a grey — 6.59:1 on the cream. */
+  --muted: #4a5a80;
+  --accent: #013ab2;
+  --accent-text: #013ab2;
+  --accent-soft: #d5e0f4;
+  --border: #ddd7cc;
+  --metal: #013ab2;
+
+  --font-display: var(--font-allura), 'Allura', cursive;
+  --font-body: var(--font-inter), 'Inter', 'Helvetica Neue', sans-serif;
+  --font-alt: var(--font-poppins), 'Poppins', sans-serif;
+  --display-weight: 400;
+  --display-tracking: 0em;
+  --display-leading: 1.1;
+  --display-case: none;
+  --radius: 8px;              /* source .button carries border-radius: 8px */
+  --label-tracking: 0.4em;    /* source h3: 7px of tracking on 17px */
+
+  --btn-bg: transparent;
+  --btn-ink: #013ab2;
+  --btn-border: #013ab2;
+  --btn-radius: 8px;
+  --btn-tracking: 0.33em;     /* source .button: 5px on 15px */
+  --btn-bg-hover: #013ab2;
+  --btn-ink-hover: #fffaf1;
+}
+
+/* 4. ASPEN <- myblissandbone.com/aspen
+   #595141 x39 · #978f8b x21 · #ffffff x17 · #cfc7c1 x9 */
+[data-theme='aspen'] {
+  --bg: #ffffff;
+  --surface: #f7f5f3;
+  --ink: #595141;
+  --muted: #746d69;      /* harvested #978f8b, darkened to clear AA on both grounds */
+  --accent: #595141;
+  --accent-text: #595141;
+  --accent-soft: #e8e3df;
+  --border: #cfc7c1;
+  --metal: #595141;
+
+  --font-display: var(--font-poppins), 'Poppins', 'Helvetica Neue', sans-serif;
+  --font-body: var(--font-poppins), 'Poppins', 'Helvetica Neue', sans-serif;
+  --display-weight: 200;
+  /* The source sets letter-spacing: 0 on body, p, h2, h3, h4, h5 AND .button — every rule it
+     writes. Airing the type out is the thing that made this read as designed rather than copied. */
+  --display-tracking: 0em;
+  --display-leading: 1.16;
+  --display-case: none;
+  --radius: 0;
+  --label-tracking: 0em;
+
+  /* This has been wrong twice. The source's OUTER `.button` computes `border-width: 0` — which is
+     what round 5 measured — but the visible box is on the inner `span`:
+     `.button span { background: none; border: 1px solid #CFC7C1; border-radius: 0; padding: 5px 20px;
+     min-width: 160px }`. Measuring the wrong element made this borderless and, worse, made it
+     disagree with kelsey, which is built from the identical Bliss & Bone base sheet. */
+  --btn-bg: transparent;
+  --btn-ink: #595141;
+  --btn-border: #cfc7c1;
+  --btn-size: 17px;
+  --btn-tracking: 0em;
+  --btn-case: none;
+  --btn-bg-hover: transparent;
+  --btn-ink-hover: #595141;
+  --btn-border-hover: transparent;
+}
+
+/* 5. KELSEY <- myblissandbone.com/kelsey
+   #e0d8cb x56 · #7f4928 x21 · #c8a99a x9 — inverted: dark ink on a TAN ground */
+/* The page is RUST. `html { background: #7F4928 }` with `body { color: #E0D8CB }`, read straight
+   off the source rather than inferred.
+   This token block has now been wrong twice in opposite directions, and both times for the same
+   reason: the harvest's frequency census counts DECLARATIONS, not painted area, and cannot tell a
+   foreground from a background. `#e0d8cb x56` looked like a dominant ground; it is the dominant
+   TEXT colour. The harvest reports `html { background }` and `body { color }` explicitly now, so
+   this cannot be re-derived wrongly a third time.
+   The source does alternate — but it sets LIGHT blocks into the rust field, not rust bands into a
+   light page. Those are in compositions.css. */
+[data-theme='kelsey'] {
+  --bg: #7f4928;
+  --surface: #6d3d20;
+  --ink: #e0d8cb;        /* 5.15:1 on the rust */
+  --muted: #e2d2c8;      /* 4.95:1 — the harvested #c8a99a is 3.33:1 and cannot carry body copy */
+  --accent: #e0d8cb;
+  --accent-text: #e0d8cb;
+  --accent-soft: #c8a99a;
+  --border: #a97a5c;
+  --metal: #c8a99a;
+
+  --font-display: var(--font-ebgaramond), 'EB Garamond', Georgia, serif;
+  --font-body: var(--font-ebgaramond), 'EB Garamond', Georgia, serif;
+  --display-weight: 400;
+  /* `letter-spacing: 0px` on body, .button and input — all three, verified in the source's own
+     declarations. Round 4 put 0.05em back on the claim that its caps headings are tracked. They
+     are not; that was an eye judgement dressed up as a harvest. */
+  --display-tracking: 0em;
+  --display-leading: 1.06;
+  --display-case: none;
+  --radius: 0;
+  --label-tracking: 0em;
+
+  --btn-bg: transparent;         /* source .button: `background: none; border-radius: 0` */
+  --btn-ink: #e0d8cb;
+  --btn-border: #c8a99a;
+  --btn-tracking: 0em;
+  --btn-bg-hover: #e0d8cb;
+  --btn-ink-hover: #7f4928;
+  --btn-border-hover: #e0d8cb;
+}
+
+/* 6. ANVAYA <- anvaya.love — taken from its own named design tokens
+   --background #fbf9f5 · --foreground #1b1c1a · --template-primary #570013 (x13)
+   --gold #d4af37 (x7) · --border #e0d0d0 (x5) · --muted-foreground #6f5c5d (x9) · --muted #f5f3ef */
+[data-theme='anvaya'] {
+  --bg: #fbf9f5;
+  --surface: #f5f3ef;
+  --ink: #1b1c1a;
+  --muted: #6f5c5d;
+  /* #570013 is what the source actually declares — 13 occurrences, and the literal fallback in
+     `var(--template-primary, #570013)`. #800020 sat here for three rounds and appears nowhere in
+     the harvest. 14.12:1 on the cream. */
+  --accent: #570013;
+  --accent-text: #570013;
+  --accent-soft: #e0d0d0;
+  --border: #e0d0d0;
+  --metal: #d4af37;
+  /* Gold as a HAIRLINE is #d4af37. Gold as TEXT cannot be: 2.00:1 on this cream is not a near
+     miss, it is unreadable. The eyebrow the source sets in gold is set in this deeper antique
+     gold instead. 5.15:1 on the ground and 4.89:1 on the panels — it has to clear AA on both,
+     and 4.66/4.42 did not: axe caught the panel case on the italic event captions. */
+  --metal-text: #836618;
+
+  /* The source's display face IS Cormorant Garamond (h1 64px / weight 300 / -0.96px tracking) and
+     its running text is a neutral sans. Bodoni Moda — a didone the source does not load — used to
+     sit in the display slot, which pushed Cormorant down into the body and left the page with no
+     sans at all. Roles restored to the source's. */
+  --font-display: var(--font-cormorant), 'Cormorant Garamond', Georgia, serif;
+  --font-body: var(--font-inter), 'Inter', 'Helvetica Neue', sans-serif;
+  --font-indic: var(--font-indic-face), 'Noto Nastaliq Urdu', serif;
+  --display-weight: 300;
+  --display-tracking: -0.015em;
+  --display-leading: 1.0;
+  --display-case: none;
+  --radius: 999px;            /* the source's CTA is a fully-rounded pill */
+  --label-tracking: 0.18em;
+
+  --btn-radius: 999px;
+  --btn-bg: #570013;
+  --btn-border: #570013;
+  --btn-ink: #fbf9f5;
+  --btn-bg-hover: #3d000d;
+  --btn-border-hover: #3d000d;
+}
+
+
+/* ===========================================================================
+   ZOLA TEMPLATES
+
+   Everything below is Zola's own `public_theme_v2` token object, which every
+   published Zola site ships inside its Next.js payload — so these are not
+   measurements off a screenshot, they are the values Zola's renderer reads.
+   Each block names the live couple's site it was taken from.
+
+   Zola's model is worth understanding before copying it: a template is a colour
+   variant of a "theme group", and the whole design is nine components with a
+   type scale per component. That is why the sizes below are so specific.
+   =========================================================================== */
+
+/* 7. MALINA (Black) <- zola.com/wedding/latoyaandtyran2018
+   swatch_color #131313 · text #F5EFE8 · names 85px UPPERCASE, +3px · headings 30px
+   The only genuinely dark design in the set, from either source. */
+[data-theme='malina'] {
+  --bg: #131313;
+  --surface: #1c1c1c;
+  --ink: #f5efe8;        /* 16.27:1 */
+  --muted: #b9aca2;      /* 8.39:1 — Zola sets one ink; this is a warm step down that still clears AA */
+  --accent: #f5efe8;
+  --accent-text: #f5efe8;
+  --accent-soft: #3a3532;
+  --border: #3a3532;
+  --metal: #b9aca2;
+
+  --font-display: var(--font-prata), 'Prata', Georgia, serif;
+  --font-body: var(--font-jost), 'Jost', 'Helvetica Neue', sans-serif;
+  --display-weight: 400;
+  --display-tracking: 0.035em;  /* 3px on 85px */
+  --display-leading: 1.6;       /* Zola really does set 1.6 on the display line */
+  --display-case: uppercase;
+  --radius: 0;
+  --label-tracking: 0.1em;
+
+  --btn-bg: #f5efe8;
+  --btn-ink: #131313;
+  --btn-border: #f5efe8;
+  --btn-tracking: 0px;
+  --btn-bg-hover: transparent;
+  --btn-ink-hover: #f5efe8;
+  --btn-border-hover: #f5efe8;
+  --body-size: 16px;
+  --section-size: 30px;
+  --section-tracking: 3px;
+  --btn-size: 16px;
+  --btn-case: none;
+  --btn-tracking: 0px;
+  --btn-weight: 400;
+  --label-size: 16px;
+  --faq-size: 30px;
+  --section-case: uppercase;
+  --faq-tracking: 3px;
+  --faq-case: uppercase;
+  --label-weight: 400;
+  --label-case: none;
+  --event-size: 30px;
+  --event-tracking: 3px;
+  --item-size: 25px;
+  --item-tracking: 3px;
+
+}
+
+/* 8. MORRISON <- zola.com/wedding/jamesandtorrie2022
+   #F8F8F8 page · #141414 ink · Cardo headings 56px, +1px, sentence case · Circular body
+   Signature: an inset WHITE content column, 850px wide, floating on the grey page. */
+[data-theme='morrison'] {
+  --bg: #f8f8f8;
+  --surface: #ffffff;
+  --ink: #141414;        /* 17.35:1 */
+  --muted: #5c5c5c;
+  --accent: #141414;
+  --accent-text: #141414;
+  --accent-soft: #e6e6e6;
+  --border: #e0e0e0;
+  --metal: #141414;
+
+  --font-display: var(--font-cardo), 'Cardo', Georgia, serif;
+  --font-body: var(--font-jost), 'Jost', 'Helvetica Neue', sans-serif;
+  --display-weight: 400;
+  --display-tracking: 0.018em;  /* 1px on 56px */
+  --display-leading: 1.3;
+  --display-case: none;
+  --radius: 0;
+  --label-tracking: 0.08em;
+
+  --btn-bg: #141414;
+  --btn-ink: #f8f8f8;
+  --btn-border: #141414;
+  --btn-bg-hover: #000000;
+  --btn-border-hover: #000000;
+  --body-size: 16px;
+  --section-size: 40px;
+  --section-tracking: 1px;
+  --btn-size: 16px;
+  --btn-case: none;
+  --btn-tracking: 0px;
+  --btn-weight: 400;
+  --label-size: 16px;
+  --faq-size: 40px;
+  --section-case: none;
+  --faq-tracking: 1px;
+  --faq-case: none;
+  --label-weight: 400;
+  --label-case: none;
+  --event-size: 40px;
+  --event-tracking: 1px;
+  --item-size: 40px;
+  --item-tracking: 1px;
+  --eyebrow-case: lowercase;
+
+}
+
+/* 9. GOUNDRY (Dusty Rose) <- zola.com/wedding/lucy-gavin
+   #BD989F ground · #49323C ink · Mrs Eaves SMALL CAPS headings 56px UPPERCASE
+   A mid-tone COLOURED ground, which nothing else here has. */
+[data-theme='goundry'] {
+  --bg: #bd989f;
+  --surface: #c9a8ae;
+  --ink: #49323c;        /* 4.52:1 — Zola's own pairing, and only just AA */
+  /* On a mid-tone ground the usual "lighter secondary" cannot clear AA at all, so the
+     secondary tone goes DARKER than the ink instead. Stated rather than fudged. */
+  --muted: #3a2831;      /* 5.60:1 */
+  --accent: #49323c;
+  --accent-text: #3a2831;
+  --accent-soft: #d3b7bc;
+  --border: #a67f87;
+  --metal: #49323c;
+
+  --font-display: var(--font-cormorant-sc), 'Cormorant SC', Georgia, serif;
+  --font-body: var(--font-baskerville), 'Libre Baskerville', Georgia, serif;
+  --display-weight: 400;
+  --display-tracking: 0em;
+  --display-leading: 1.11;
+  --display-case: uppercase;
+  --radius: 0;
+  --label-tracking: 0.12em;
+
+  --btn-bg: #49323c;
+  --btn-ink: #f0e2e5;
+  --btn-border: #49323c;
+  --btn-bg-hover: #49323c;
+  --btn-ink-hover: #bd989f;
+  --btn-border-hover: #49323c;
+  --body-size: 16px;
+  --section-size: 64px;
+  --section-tracking: 0px;
+  --btn-size: 16px;
+  --btn-case: none;
+  --btn-tracking: 0px;
+  --btn-weight: 400;
+  --label-size: 16px;
+  --faq-size: 64px;
+  --section-case: uppercase;
+  --faq-tracking: 0px;
+  --faq-case: uppercase;
+  --label-weight: 400;
+  --label-case: none;
+  --event-size: 64px;
+  --event-tracking: 0px;
+  --item-size: 48px;
+  --item-tracking: 0px;
+
+}
+
+/* 10. BUXTON (Light Tan) <- zola.com/wedding/winsteadgalindowedding
+    #E2DDD7 ground · #364153 navy-slate ink · one face, Libre Baskerville, throughout
+    Names 56px UPPERCASE with FIVE pixels of tracking. Ships NO photographs at all —
+    its artwork is a watercolour greenery arch, which is why it copies cleanly here. */
+[data-theme='buxton'] {
+  --bg: #e2ddd7;
+  --surface: #d8d2ca;
+  --ink: #364153;        /* 7.63:1 */
+  --muted: #4d5665;
+  --accent: #364153;
+  --accent-text: #364153;
+  --accent-soft: #c3bdb3;
+  --border: #c3bdb3;
+  --metal: #6c7787;
+
+  --font-display: var(--font-baskerville), 'Libre Baskerville', Georgia, serif;
+  --font-body: var(--font-baskerville), 'Libre Baskerville', Georgia, serif;
+  --display-weight: 400;
+  --display-tracking: 0.089em;  /* 5px on 56px */
+  --display-leading: 1.6;
+  --display-case: uppercase;
+  --radius: 0;
+  --label-tracking: 0.14em;
+
+  --btn-bg: #364153;
+  --btn-ink: #e2ddd7;
+  --btn-border: #364153;
+  --btn-tracking: 0px;
+  --btn-bg-hover: #364153;
+  --btn-ink-hover: #e2ddd7;
+  --btn-border-hover: #364153;
+  --body-size: 16px;
+  --section-size: 45px;
+  --section-tracking: 3px;  /* the 45px component carries 3px; 2px belongs to the 36px one */
+  --btn-size: 16px;
+  --btn-case: none;
+  --btn-tracking: 0px;
+  --btn-weight: 400;
+  --label-size: 16px;
+  --faq-size: 45px;
+  --section-case: uppercase;
+  --faq-tracking: 3px;
+  --faq-case: uppercase;
+  --label-weight: 400;
+  --label-case: none;
+  --event-size: 45px;
+  --event-tracking: 3px;
+  --item-size: 36px;
+  --item-tracking: 2px;
+  --eyebrow-case: uppercase;
+
+}
+
+/* 11. GALATA <- zola.com/wedding/langponcerwedding
+    #FFFFFF · #000000 · accent #546E6F, a slate teal — the only template of the twelve
+    whose accent differs from its ink. Cormorant Garamond headings 56px UPPERCASE. */
+[data-theme='galata'] {
+  --bg: #ffffff;
+  --surface: #f4f6f6;
+  --ink: #000000;
+  --muted: #4a5c5d;
+  --accent: #546e6f;     /* 5.47:1 */
+  --accent-text: #45595a;
+  --accent-soft: #d5dedd;
+  --border: #cfd8d8;
+  --metal: #546e6f;
+
+  --font-display: var(--font-cormorant), 'Cormorant Garamond', Georgia, serif;
+  --font-body: var(--font-baskerville), 'Libre Baskerville', Georgia, serif;
+  --display-weight: 400;
+  --display-tracking: 0em;
+  --display-leading: 1.2;
+  --display-case: uppercase;
+  --radius: 0;
+  --label-tracking: 0.16em;
+
+  --btn-bg: #546e6f;
+  --btn-ink: #ffffff;
+  --btn-border: #546e6f;
+  --btn-bg-hover: #45595a;
+  --btn-border-hover: #45595a;
+  --body-size: 16px;
+  --section-size: 40px;
+  --section-tracking: 0px;
+  --btn-size: 16px;
+  --btn-case: none;
+  --btn-tracking: 0px;
+  --btn-weight: 400;
+  --label-size: 16px;
+  --faq-size: 40px;
+  --section-case: uppercase;
+  --faq-tracking: 0px;
+  --faq-case: uppercase;
+  --label-weight: 400;
+  --label-case: none;
+  --event-size: 40px;
+  --event-tracking: 0px;
+  --item-size: 40px;
+  --item-tracking: 0px;
+
+}
+
+/* 12. ABBEY <- zola.com/wedding/blakeandhannahmay23
+    #F7F5F2 · #4E4E4E · Pinyon Script names 56px over Libre Baskerville.
+    Zola's own "classic design", and the most conventional thing in the whole set —
+    which is the point: it is what most couples actually pick. */
+[data-theme='abbey'] {
+  --bg: #f7f5f2;
+  --surface: #efece7;
+  --ink: #4e4e4e;        /* 7.65:1 */
+  --muted: #6b6b6b;      /* 4.90:1 */
+  --accent: #4e4e4e;
+  --accent-text: #4e4e4e;
+  --accent-soft: #e2ddd5;
+  --border: #ded9d2;
+  --metal: #8a8378;
+
+  --font-display: var(--font-pinyon), 'Pinyon Script', cursive;
+  --font-body: var(--font-baskerville), 'Libre Baskerville', Georgia, serif;
+  --display-weight: 400;
+  --display-tracking: 0em;
+  --display-leading: 1.3;
+  --display-case: none;
+  --radius: 0;
+  --label-tracking: 0.14em;
+
+  --btn-bg: #4e4e4e;
+  --btn-ink: #f7f5f2;
+  --btn-border: #4e4e4e;
+  --btn-bg-hover: #4e4e4e;
+  --btn-ink-hover: #f7f5f2;
+  --btn-border-hover: #4e4e4e;
+  --body-size: 16px;
+  --section-size: 40px;
+  --section-tracking: 0px;
+  --btn-size: 16px;
+  --btn-case: none;
+  --btn-tracking: 0px;
+  --btn-weight: 400;
+  --label-size: 16px;
+  --faq-size: 40px;
+  --section-case: capitalize;
+  --faq-tracking: 0px;
+  --faq-case: capitalize;
+  --label-weight: 400;
+  --label-case: none;
+  --event-size: 40px;
+  --event-tracking: 0px;
+  --item-size: 40px;
+  --item-tracking: 0px;
+  --event-case: capitalize;
+  --item-case: none;
+  --eyebrow-case: lowercase;
+
+}
+
+
+/* ===========================================================================
+   THE KNOT TEMPLATES
+
+   The Knot ships no per-theme stylesheet. A theme is a JSON token object in
+   `__NEXT_DATA__` (`weddingWebsiteResult.theme.themeStyles[0].styles`), applied
+   at runtime by styled-components — so every value below is The Knot's own,
+   read out of a live published wedding site rather than measured.
+
+   Its scale maps to elements like this, which is why the sizes are so exact:
+     s1 -> couple names   s2 -> page title   s3 -> sub-headline
+     s4 -> item title     s5 -> nav          s6 -> body, input, button
+   =========================================================================== */
+
+/* 13. VINTAGE HOLLYWOOD (Black) <- theknot.com themeId 4642
+    #231f20 ground · GOLD #e9b970 type · names 56px UPPERCASE with 6px of tracking.
+    Gold as the ink rather than as an ornament, which nothing else here does — and
+    on this ground it measures 9.03:1, where on cream it would be unreadable. */
+[data-theme='hollywood'] {
+  --bg: #231f20;
+  --surface: #2e2a2b;
+  --ink: #e9b970;        /* 9.03:1 */
+  --muted: #c39a63;      /* 6.30:1 */
+  --accent: #e9b970;
+  --accent-text: #e9b970;
+  --accent-soft: #4a4034;
+  --border: #4a4034;
+  --metal: #e9b970;
+
+  --font-display: var(--font-playfair), 'Playfair Display', Georgia, serif;
+  --font-body: var(--font-jost), 'Jost', 'Helvetica Neue', sans-serif;
+  --display-weight: 400;   /* s1 is `lighter`; Playfair Display's lightest published weight is 400 */
+  --display-tracking: 0.107em;   /* 6px on 56px */
+  --display-leading: 1.2;
+  --display-case: uppercase;
+  --radius: 0;
+  --label-tracking: 0px;     /* 3px on 32px */
+
+  --btn-bg: #e9b970;
+  --btn-ink: #231f20;
+  --btn-border: #e9b970;
+  --btn-bg-hover: #ba945a;
+  --btn-border-hover: #ba945a;
+  --body-size: 16px;
+  --body-tracking: 1px;
+  --section-size: 41px;
+  --section-tracking: 3px;
+  --btn-size: 16px;
+  --btn-weight: 700;
+  --btn-case: uppercase;
+  --btn-tracking: 2px;
+  --label-size: 12px;
+  --faq-size: 41px;
+  --section-case: uppercase;
+  --label-weight: 400;
+  --label-case: none;
+  --faq-tracking: var(--section-tracking);
+  --faq-case: var(--section-case);
+  --event-size: 32px;
+  --event-tracking: 3px;
+  --item-size: 21px;
+  --item-tracking: 3px;
+  --head-font: var(--font-body);
+  --item-font: var(--font-body);
+
+}
+
+/* 14. LUCKY CIRCLE (Red) <- theknot.com
+    A saturated #D82B45 PAGE with white type. Not an accent on a pale ground —
+    the whole paper is red, which no other template in the set attempts. */
+[data-theme='lucky'] {
+  --bg: #d82b45;
+  --surface: #c2263d;
+  --ink: #ffffff;        /* 4.83:1 */
+  /* A lighter secondary cannot clear AA on this ground — #ffd9de measures 3.73:1 —
+     so, as The Knot itself does, there is one ink and the hierarchy is size and
+     weight rather than tone. */
+  --muted: #ffffff;
+  --accent: #ffffff;
+  --accent-text: #ffffff;
+  --accent-soft: #e8697c;
+  --border: #e8697c;
+  --metal: #ffffff;
+
+  --font-display: var(--font-arsenal), 'Arsenal', Georgia, serif;
+  --font-body: var(--font-jost), 'Jost', 'Helvetica Neue', sans-serif;
+  --display-weight: 400;
+  --display-tracking: 0.1em;     /* 6px on 60px */
+  --display-leading: 1.15;
+  --display-case: uppercase;
+  --radius: 0;
+  --label-tracking: 0px;
+
+  --btn-bg: #ffffff;
+  --btn-ink: #d82b45;
+  --btn-border: #ffffff;
+  --btn-bg-hover: #cccccc;
+  --btn-border-hover: #cccccc;
+  --body-size: 16px;
+  --body-tracking: 1px;
+  --section-size: 42px;
+  --section-tracking: 3px;
+  --btn-size: 16px;
+  --btn-weight: 700;
+  --btn-case: uppercase;
+  --btn-tracking: 2px;
+  --label-size: 12px;
+  --faq-size: 42px;
+  --section-case: uppercase;
+  --label-weight: 400;
+  --label-case: none;
+  --faq-tracking: var(--section-tracking);
+  --faq-case: var(--section-case);
+  --event-size: 32px;
+  --event-tracking: 3px;
+  --item-size: 20px;
+  --item-tracking: 2px;
+  --head-font: var(--font-display);
+  --item-font: var(--font-body);
+
+}
+
+/* 15. SURROUND (Yellow) <- theknot.com
+    #DCBA6A ochre ground with #67471E brown ink, and THREE faces where most of
+    these have two: Bellefair for the names, Montserrat for sub-headings, EB
+    Garamond for running text. */
+[data-theme='surround'] {
+  --bg: #dcba6a;
+  --surface: #d0ac59;
+  --ink: #67471e;        /* 4.52:1 — The Knot's own pairing, and only just AA */
+  --muted: #523714;      /* 5.89:1 — darker, not lighter; see Goundry for why */
+  --accent: #67471e;
+  --accent-text: #523714;
+  --accent-soft: #c9a44f;
+  --border: #b8944a;
+  --metal: #67471e;
+
+  --font-display: var(--font-bellefair), 'Bellefair', Georgia, serif;
+  --font-body: var(--font-ebgaramond), 'EB Garamond', Georgia, serif;
+  --font-alt: var(--font-montserrat), 'Montserrat', sans-serif;
+  --display-weight: 400;
+  --display-tracking: 0.107em;   /* 6px on 56px */
+  --display-leading: 1.2;
+  --display-case: uppercase;
+  --radius: 0;
+  --label-tracking: 1px;     /* 3px on 28px */
+
+  --btn-bg: #67471e;
+  --btn-ink: #dcba6a;
+  --btn-border: #67471e;
+  --btn-bg-hover: #523918;
+  --btn-border-hover: #523918;
+  --body-size: 17px;
+  --body-tracking: 2px;
+  --section-size: 36px;
+  --section-tracking: 3px;
+  --btn-size: 17px;
+  --btn-weight: 600;
+  --btn-case: none;
+  --btn-tracking: 2px;
+  --label-size: 14px;
+  --faq-size: 36px;
+  --section-case: uppercase;
+  --label-weight: 400;
+  --label-case: none;
+  --faq-tracking: var(--section-tracking);
+  --faq-case: var(--section-case);
+  --event-size: 28px;
+  --event-tracking: 3px;
+  --item-size: 20px;
+  --item-tracking: 2px;
+  --head-font: var(--font-alt);
+  --item-font: var(--font-alt);
+
+}
+
+/* 16. MARRAKESH TILE (Teal) <- theknot.com
+    White with #2D808B teal as the ink, names in a fine handwriting face at 65px,
+    and sub-headings set LOWERCASE — the only template of the eighteen that does. */
+[data-theme='marrakesh'] {
+  --bg: #ffffff;
+  --surface: #f0f7f8;
+  --ink: #2d808b;        /* 4.59:1 */
+  --muted: #256b74;      /* 6.12:1 */
+  --accent: #2d808b;
+  --accent-text: #256b74;
+  --accent-soft: #cfe4e6;
+  --border: #cfe4e6;
+  --metal: #2d808b;
+
+  --font-display: var(--font-belle-aurore), 'La Belle Aurore', cursive;
+  --font-body: var(--font-averia), 'Averia Serif Libre', Georgia, serif;
+  --display-weight: 400;
+  --display-tracking: 0em;
+  --display-leading: 1.15;
+  --display-case: none;
+  --radius: 0;
+  --label-tracking: 0px;
+
+  --btn-bg: #2d808b;
+  --btn-ink: #ffffff;
+  --btn-border: #2d808b;
+  --btn-bg-hover: #5799a2;
+  --btn-border-hover: #5799a2;
+  --body-size: 16px;
+  --body-tracking: 1px;
+  --section-size: 42px;
+  --section-tracking: 3px;
+  --btn-size: 16px;
+  --btn-weight: 700;
+  --btn-case: uppercase;
+  --btn-tracking: 2px;
+  --label-size: 13px;
+  --faq-size: 42px;
+  --section-case: uppercase;
+  --event-case: lowercase;
+  --label-weight: 300;
+  --label-case: none;
+  --faq-tracking: var(--section-tracking);
+  --faq-case: var(--section-case);
+  --event-size: 40px;
+  --event-tracking: 0px;
+  --item-size: 21px;
+  --item-tracking: 3px;
+  --head-font: var(--font-body);
+  --item-font: var(--font-body);
+
+}
+
+/* 17. OFFICIALLY OFFICIAL (Cream) <- theknot.com
+    #FAE2C3 apricot with #C42412 red, names in Oswald at 58px with EIGHT pixels of
+    tracking over a MONOSPACE body. The only mono in the set, from any source. */
+[data-theme='official'] {
+  --bg: #fae2c3;
+  --surface: #f2d5ae;
+  --ink: #c42412;        /* 4.64:1 */
+  --muted: #8f1a0d;      /* 7.21:1 */
+  --accent: #c42412;
+  --accent-text: #8f1a0d;
+  --accent-soft: #e8c69f;
+  --border: #ddb98f;
+  --metal: #c42412;
+
+  --font-display: var(--font-oswald), 'Oswald', 'Helvetica Neue', sans-serif;
+  --font-body: var(--font-dm-mono), 'DM Mono', ui-monospace, monospace;
+  --display-weight: 400;
+  --display-tracking: 0.138em;   /* 8px on 58px */
+  --display-leading: 1.15;
+  --display-case: uppercase;
+  --radius: 0;
+  --label-tracking: 0px;     /* 4px on 32px */
+
+  --btn-bg: #c42412;
+  --btn-ink: #fae2c3;
+  --btn-border: #c42412;
+  --btn-bg-hover: #d05041;   /* the source hover goes LIGHTER, not darker */
+  --btn-border-hover: #d05041;
+  /* The token says 15px. Held at the 16px floor — see the note on `body`. */
+  --body-size: 16px;
+  --section-size: 40px;
+  --section-tracking: 4px;
+  --btn-size: 15px;
+  --btn-weight: 700;
+  --btn-case: uppercase;
+  --btn-tracking: 2px;
+  --label-size: 12px;
+  --faq-size: 40px;
+  --section-case: uppercase;
+  --label-weight: 300;
+  --label-case: none;
+  --faq-tracking: var(--section-tracking);
+  --faq-case: var(--section-case);
+  --event-size: 32px;
+  --event-tracking: 4px;
+  --item-size: 20px;
+  --item-tracking: 2px;
+  --head-font: var(--font-display);
+  --item-font: var(--font-body);
+
+}
+
+/* 18. ELEGANT INDUSTRIAL <- theknot.com
+    #F7F6F4 with #595C58 ink and a SEPARATE #9b5a44 rust accent — one of only two
+    templates across all three sources whose accent is not its ink. Names in Saira
+    Extra Condensed, the only condensed face in the set. */
+[data-theme='industrial'] {
+  --bg: #f7f6f4;
+  --surface: #edece8;
+  --ink: #595c58;        /* 6.28:1 */
+  --muted: #6d7069;      /* 4.66:1 */
+  --accent: #9b5a44;     /* 4.94:1 */
+  --accent-text: #8a4f3b;
+  --accent-soft: #e3d2ca;
+  --border: #dbc4bc;   /* `.Event div` and `.Nav Mobile` both state this */
+  --metal: #9b5a44;
+
+  --font-display: var(--font-saira-condensed), 'Saira Extra Condensed', 'Helvetica Neue', sans-serif;
+  --font-body: var(--font-darker-grotesque), 'Darker Grotesque', 'Helvetica Neue', sans-serif;
+  --display-weight: 400;
+  --display-tracking: 0.067em;   /* 4px on 60px */
+  --display-leading: 1.05;
+  --display-case: uppercase;
+  --radius: 0;
+  --label-tracking: 0px;
+
+  --btn-bg: #9b5a44;
+  --btn-ink: #f7f6f4;
+  --btn-border: #9b5a44;
+  --btn-bg-hover: #744433;
+  --btn-ink-hover: #f7f6f4;
+  --btn-border-hover: #744433;
+  /* The token says 14px at weight 500, and `body { text-transform: uppercase }` —
+     ALL running copy in this template is caps, which is most of its voice. Size held at
+     the 16px floor; the case and the weight are the source's. */
+  --body-size: 16px;
+  --body-weight: 500;
+  --body-case: uppercase;
+  --section-size: 42px;
+  --section-tracking: 0px;
+  --btn-size: 16px;
+  --btn-weight: 600;
+  --btn-case: uppercase;
+  --btn-tracking: 2px;
+  --label-size: 12px;
+  --faq-size: 42px;
+  --section-case: uppercase;
+  --label-weight: 500;
+  --label-case: uppercase;
+  --faq-tracking: var(--section-tracking);
+  --faq-case: var(--section-case);
+  --event-size: 32px;
+  --event-tracking: 0px;
+  --item-size: 24px;
+  --item-tracking: 0px;
+  --head-font: var(--font-display);
+  --item-font: var(--font-display);
+
+}
+
+/* =========================================================================== */
+
+* {
+  box-sizing: border-box;
+}
+
+/* Paint on <html>, which is the element the theme custom properties are declared on.
+   WebKit was observed failing to resolve ANY var() on <body> for one route — even font-family fell
+   back to -webkit-standard — leaving the page unstyled while <html> resolved the same tokens fine.
+   Rather than depend on custom-property inheritance crossing that boundary, set the ground and the
+   ink here and let <body> inherit plain values. It is also simply more correct: an unpainted body
+   borrows whatever is behind it. */
+html {
+  -webkit-text-size-adjust: 100%;
+  /* Tailwind's preflight puts a system stack here that names Roboto. Own it from the root. */
+  font-family: var(--font-body);
+  background-color: var(--bg);
+  color: var(--ink);
+}
+
+body {
+  margin: 0;
+  /* Inherited from <html> rather than re-resolved from a custom property — see the note above. */
+  background-color: inherit;
+  color: inherit;
+  font-family: inherit;
+  /* Each source states its own body size, and they differ — 16px across Zola, 16px on three of
+     The Knot's, 17px on Surround, 15px on Officially Official, 14px on Elegant Industrial. A
+     single house value silently overwrote eleven of twelve. It is a token now.
+
+     The floor is 16px and two themes are held at it against their sources: iOS Safari zooms the
+     page when a focused input is under 16px, and this project's own NF4 notes that wedding guest
+     lists skew elderly. That is the one place the type scale does not follow the token, and it is
+     enforced by a test rather than left to memory. */
+  font-size: var(--body-size, 17px);
+  letter-spacing: var(--body-tracking, normal);
+  text-transform: var(--body-case, none);
+  line-height: 1.65;
+  font-weight: var(--body-weight, 400);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Paper grain. Generated in-page with SVG turbulence: zero network requests, zero asset weight,
+   and it survives a strict CSP. Above ~8% it reads as a dirty screen rather than as stock. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+main,
+header,
+footer {
+  position: relative;
+  z-index: 1;
+}
+
+/* --- Typography ----------------------------------------------------------- */
+
+.display {
+  font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  letter-spacing: var(--display-tracking);
+  line-height: var(--display-leading);
+  text-transform: var(--display-case);
+  margin: 0;
+}
+
+/* The names. Display-to-body ratio must exceed 6:1 — under 4:1 reads as a template. */
+.display-xl {
+  /* The floor matters more than the ceiling: at 390px the old 3.25rem minimum gave only a 3.06:1
+     ratio against body copy, which reads as a template. Mobile is the primary device here. */
+  font-size: clamp(4.5rem, 19vw, 8rem);
+}
+.display-lg {
+  font-size: clamp(2.25rem, 6vw, 3.75rem);
+}
+.display-md {
+  font-size: clamp(1.6rem, 3.6vw, 2.4rem);
+}
+
+/* Uppercase eyebrow. The wide tracking is what makes it read as typeset rather than defaulted. */
+.label {
+  font-family: var(--font-body);
+  /* 11px appears in NO source token object in this project. Zola's smallest stated step across all
+     six of its themes is 16px; The Knot's `tiny` is 12px, or 14px on Surround. The token carries
+     each source's own value and the 11px house default is only a fallback for themes that have no
+     stated small step. */
+  font-size: var(--label-size, 11px);
+  font-weight: var(--label-weight, 500);
+  text-transform: var(--label-case, uppercase);
+  letter-spacing: var(--label-tracking);
+  color: var(--muted);
+  margin: 0;
+}
+
+/* Times must align vertically down a column — that is what makes a schedule feel like a printed
+   itinerary rather than a list of divs. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+.prose {
+  max-width: var(--measure);
+  color: var(--ink);
+}
+.prose p {
+  margin: 0 0 1.1em;
+}
+.prose p:last-child {
+  margin-bottom: 0;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+/* --- Structure ------------------------------------------------------------ */
+
+.shell {
+  max-width: var(--col);
+  margin: 0 auto;
+  padding-inline: var(--gutter);
+}
+
+.wide {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding-inline: var(--gutter);
+}
+
+.section {
+  padding-block: var(--section-gap);
+}
+
+/* Letterpress hairline: the inset light line beneath mimics the debossed impression of letterpress
+   on cotton stock. It is the single cheapest detail that reads as "printed". */
+.rule {
+  border: 0;
+  border-top: var(--rule) solid var(--border);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--bg) 88%, #fff);
+  margin: 0;
+}
+
+/* --- Controls ------------------------------------------------------------- */
+
+a {
+  color: inherit;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.25em;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* Every interactive target is at least 44px. Guest lists skew elderly and this is read on phones. */
+/* A button is not a house style. Four of the six source templates draw it as an OUTLINE
+   (`background: none`) and veleyross puts no filled surface on the page at all, so the fill,
+   the radius and the label case are per-theme tokens rather than one shared rectangle.
+   Defaults below are the filled treatment; each theme overrides what its source does differently. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6em;
+  min-height: 48px;
+  padding: 0.85em 1.6em;
+  border: var(--btn-width, var(--rule)) solid var(--btn-border, var(--accent));
+  border-radius: var(--btn-radius, var(--radius));
+  background: var(--btn-bg, var(--accent));
+  color: var(--btn-ink, var(--bg));
+  font-family: var(--btn-font, var(--font-body));
+  font-size: var(--btn-size, 12px);
+  font-weight: var(--btn-weight, 500);
+  text-transform: var(--btn-case, uppercase);
+  letter-spacing: var(--btn-tracking, var(--label-tracking));
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 220ms var(--ease), color 220ms var(--ease), border-color 220ms var(--ease);
+}
+
+.btn:hover {
+  background: var(--btn-bg-hover, var(--accent));
+  border-color: var(--btn-border-hover, var(--accent));
+  color: var(--btn-ink-hover, var(--bg));
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--border);
+}
+.btn-ghost:hover {
+  background: transparent;
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+
+.field {
+  display: block;
+  width: 100%;
+  min-height: 52px;
+  padding: 0.75em 0.9em;
+  background: color-mix(in srgb, var(--bg) 60%, var(--surface));
+  border: var(--rule) solid var(--border);
+  border-radius: var(--radius);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 17px; /* 16px+ prevents iOS Safari zooming the page on focus */
+  line-height: 1.4;
+}
+
+.field::placeholder {
+  color: var(--muted);
+  opacity: 0.85;
+}
+
+.field:focus {
+  border-color: var(--accent);
+}
+
+textarea.field {
+  min-height: 110px;
+  resize: vertical;
+}
+
+/* --- Motion --------------------------------------------------------------- */
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.rise {
+  animation: rise var(--dur) var(--ease) both;
+}
+
+/* Botanical Plate: plates develop like ink appearing — no translate, because a printed plate
+   does not slide onto the page. */
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* --- Print: guests genuinely print and screenshot the schedule ------------- */
+
+@media print {
+  body::before,
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+    color: #000;
+  }
+  .section {
+    padding-block: 1.5rem;
+    break-inside: avoid;
+  }
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ===========================================================================
+   SCHEDULE — the left-anchored day-grouped rail.
+   =========================================================================== */
+
+.schedule {
+  --rail-x: 20px;
+  --rail-indent: 44px;
+}
+
+@media (min-width: 720px) {
+  .schedule {
+    --rail-x: 8px;
+    --rail-indent: 64px;
+  }
+}
+
+.schedule-day + .schedule-day {
+  margin-top: clamp(2.5rem, 6vw, 4rem);
+}
+
+/* Sticky day headers replace day tabs at zero interaction cost, and keep orientation while
+   scrolling a long weekend.
+
+   The offset matters: on an identified page the "viewing as" bar is also sticky at top 0, and
+   without this the day name pins underneath it and disappears. */
+.schedule-day-header {
+  position: sticky;
+  top: var(--stick-top, 0px);
+  z-index: 2;
+  margin: 0 0 1.75rem;
+  padding: 0.7rem 0 0.6rem;
+  background: var(--bg);
+  border-bottom: var(--rule) solid var(--border);
+  color: var(--ink);
+}
+
+.schedule-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+}
+
+/* The rail itself. In Haveli Gold this is the gold thread that ties the multi-day event together. */
+.schedule-list::before {
+  content: '';
+  position: absolute;
+  left: var(--rail-x);
+  top: 0.75rem;
+  bottom: 0.75rem;
+  width: 1px;
+  background: var(--border);
+}
+
+.schedule-item {
+  position: relative;
+  padding-left: var(--rail-indent);
+  padding-bottom: clamp(2.25rem, 5vw, 3.25rem);
+}
+
+.schedule-item:last-child {
+  padding-bottom: 0;
+}
+
+/* An open circle node on the rail. Deliberately NOT an icon: generic line icons for schedule events
+   (champagne glass, rings, cake) are the most template-coded detail available. */
+.schedule-node {
+  position: absolute;
+  left: calc(var(--rail-x) - 4px);
+  top: 0.72rem;
+  width: 9px;
+  height: 9px;
+  border: 1px solid var(--muted);
+  border-radius: 50%;
+  background: var(--bg);
+}
+
+.schedule-item.is-main .schedule-node {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+/* Time and name on SEPARATE lines, never side by side — side-by-side wraps horribly on a phone. */
+.schedule-time {
+  margin-bottom: 0.35rem;
+  color: var(--muted);
+}
+
+.schedule-tz {
+  /* Was color-mix(--muted 78%, transparent), which measured 3.16:1 — fading a token toward the
+     ground silently breaks the contrast the token was chosen for. Distinguish it with weight
+     instead of by washing it out. */
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.schedule-name {
+  margin: 0 0 0.5rem;
+}
+
+.schedule-blurb {
+  margin: 0 0 0.6rem;
+  max-width: 54ch;
+}
+
+.schedule-venue {
+  margin: 0 0 0.35rem;
+  font-size: 15px;
+}
+
+.schedule-venue-name {
+  font-weight: 500;
+}
+
+.schedule-samevenue {
+  font-style: italic;
+  font-size: 14px;
+}
+
+.schedule-arrive {
+  margin: 0.35rem 0 0.6rem;
+  font-size: 15px;
+  color: var(--accent-text);
+}
+
+.schedule-desc {
+  margin: 0 0 0.9rem;
+  max-width: 58ch;
+  font-size: calc(var(--body-size, 17px) * 0.97);
+}
+
+.schedule-unplugged {
+  margin: 0.9rem 0 0;
+  padding-left: 0.9rem;
+  border-left: 2px solid var(--accent-soft);
+  font-size: 14.5px;
+  max-width: 52ch;
+  color: var(--muted);
+}
+
+.schedule-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+  margin-top: 1.1rem;
+}
+
+.btn-sm {
+  min-height: 44px;
+  padding: 0.55em 1.05em;
+  /* Was a flat 11px, so on the Zola themes the hero CTA rendered as a filled sentence-case slab
+     while the event triads rendered as 11px hairline outline boxes — two button systems on one
+     page. The small variant is a step off the theme's own button size, not a separate scale. */
+  font-size: max(11px, calc(var(--btn-size, 12px) * 0.8));
+}
+
+.schedule-norsvp {
+  color: var(--muted);
+  font-style: normal;
+}
+
+/* --- Attire block --------------------------------------------------------- */
+
+.dresscode {
+  margin-top: 1rem;
+  padding: 0.95rem 0 0;
+  border-top: var(--rule) solid var(--border);
+  max-width: 56ch;
+}
+
+.dresscode-head {
+  margin: 0 0 0.4rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.dresscode-label {
+  font-size: 15.5px;
+  font-weight: 500;
+}
+
+/* Dress code is a PARAGRAPH, not a chip: real values run 40-140 characters and must wrap. */
+.dresscode-note,
+.dresscode-modesty,
+.dresscode-permission {
+  margin: 0.45rem 0 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.dresscode-permission {
+  color: var(--ink);
+  font-style: italic;
+}
+
+.swatches {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.1rem;
+  margin: 0.7rem 0 0;
+  padding: 0;
+}
+
+.swatch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 13.5px;
+}
+
+/* Guests see the exact colour, not the word for it. */
+.swatch-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  /* A white swatch on a white ground showed nothing but its diagonal "avoid" slash, which reads as
+     a scratch on the page. 22% of the ink is invisible on several of the eighteen grounds. */
+  border: 1px solid color-mix(in srgb, var(--ink) 55%, transparent);
+  flex: none;
+}
+
+.swatch-dot-avoid {
+  position: relative;
+  opacity: 0.55;
+}
+
+.swatch-dot-avoid::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-top: 1px solid var(--ink);
+  transform: rotate(-45deg);
+  transform-origin: center;
+  top: 50%;
+  height: 0;
+}
+
+.swatches-avoid .swatch-label {
+  color: var(--muted);
+}
+
+/* ===========================================================================
+   PAGE SECTIONS
+   =========================================================================== */
+
+/* Measured, not guessed: 46px min-height + 2 x 0.4rem padding + 1px rule = 59px.
+   Declared on :root too so fixed-position ornament (the nocturne frame) can offset by it —
+   a custom property set on <main> is not visible to a body pseudo-element. */
+:root:has(.viewing-bar) {
+  --stick-top: 59px;
+}
+
+.has-bar {
+  --stick-top: 59px;
+}
+
+.viewing-bar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--surface);
+  border-bottom: var(--rule) solid var(--border);
+}
+
+.viewing-bar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 46px;
+  padding-block: 0.4rem;
+}
+
+.viewing-name {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.viewing-switch {
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* --- Hero ----------------------------------------------------------------- */
+
+.hero {
+  padding-block: clamp(3.5rem, 14vw, 9rem) clamp(2.5rem, 8vw, 5rem);
+}
+
+.hero-eyebrow {
+  margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
+  animation-delay: 60ms;
+}
+
+.hero-names {
+  animation-delay: 140ms;
+  /* Optical, not mathematical, centring: nudged to sit right by eye. */
+  margin-left: -0.03em;
+}
+
+/* The ampersand is the only ornament in the system. Italic, larger, in the accent, baseline-shifted.
+   This single character carries the whole design. */
+.amp {
+  display: block;
+  font-style: italic;
+  font-size: 0.52em;
+  color: var(--accent);
+  line-height: 1;
+  margin: 0.12em 0 0.1em;
+  padding-left: 0.06em;
+}
+
+.hero-tagline {
+  margin: clamp(1.5rem, 4vw, 2.25rem) 0 0;
+  max-width: 34ch;
+  font-size: 17px;
+  color: var(--muted);
+  animation-delay: 240ms;
+}
+
+.hero-cta {
+  margin: clamp(2rem, 5vw, 3rem) 0 0;
+  animation-delay: 340ms;
+}
+
+.welcome-note {
+  margin: clamp(2rem, 5vw, 3rem) 0 0;
+  /* Was a hard 18px, which overrode every theme's own body token on the largest paragraph above
+     the fold — the one place a wrong body size is most visible. */
+  font-size: calc(var(--body-size, 17px) * 1.06);
+  line-height: 1.7;
+}
+
+/* --- Sections ------------------------------------------------------------- */
+
+/* Roman numerals hung above each section title. A typographic mark, not an icon. */
+.section-num {
+  margin: clamp(2rem, 5vw, 3rem) 0 0.8rem;
+  color: var(--accent-text);
+}
+
+.section-title {
+  margin: 0 0 clamp(1.5rem, 4vw, 2.25rem);
+}
+
+.section-lede {
+  margin: -0.75rem 0 2rem;
+  font-size: 16px;
+  max-width: 52ch;
+}
+
+.unlock {
+  margin-top: clamp(2rem, 5vw, 3rem);
+}
+
+/* --- Content blocks ------------------------------------------------------- */
+
+.blocks {
+  display: grid;
+  gap: clamp(1.75rem, 4vw, 2.5rem);
+}
+
+.block-title {
+  margin: 0 0 0.4rem;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: var(--label-tracking);
+  color: var(--accent-text);
+}
+
+.block-body {
+  margin: 0;
+  max-width: 58ch;
+}
+
+.block-link {
+  display: inline-block;
+  margin-top: 0.5rem;
+  font-size: 14px;
+  color: var(--ink);
+  text-decoration-color: var(--accent);
+  min-height: 44px;
+  line-height: 44px;
+}
+
+/* --- FAQ ------------------------------------------------------------------ */
+
+/* Rendered as a plain definition list, fully expanded. An accordion here would hide load-bearing
+   answers behind a tap and break the screenshot that guests actually keep. */
+.faq {
+  margin: 0;
+}
+
+.faq-item + .faq-item {
+  margin-top: clamp(1.5rem, 3.5vw, 2.25rem);
+  padding-top: clamp(1.5rem, 3.5vw, 2.25rem);
+  border-top: var(--rule) solid var(--border);
+}
+
+.faq-q {
+  margin: 0 0 0.45rem;
+  font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-size: clamp(1.2rem, 2.6vw, 1.45rem);
+  line-height: 1.25;
+  letter-spacing: 0;
+}
+
+.faq-a {
+  margin: 0;
+  max-width: 60ch;
+  color: var(--muted);
+  font-size: calc(var(--body-size, 17px) * 1.0);
+}
+
+/* --- Footer --------------------------------------------------------------- */
+
+.site-footer {
+  padding-block: clamp(2.5rem, 7vw, 5rem) clamp(3rem, 8vw, 6rem);
+}
+
+.footer-inner {
+  margin-top: 1.5rem;
+}
+
+.footer-contact {
+  margin: 0.7rem 0 0;
+  font-size: calc(var(--body-size, 17px) * 0.94);
+  max-width: 52ch;
+}
+
+/* ===========================================================================
+   RSVP FORM
+   =========================================================================== */
+
+.rsvp-title {
+  margin-top: 1rem;
+}
+
+.rsvp-party {
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.notice {
+  margin: 1.5rem 0 0;
+  padding: 0.9rem 1.1rem;
+  border-left: 2px solid var(--accent);
+  background: var(--surface);
+  font-size: 15.5px;
+  max-width: 58ch;
+}
+
+.notice p {
+  margin: 0;
+}
+
+.notice-ok {
+  border-left-color: var(--accent);
+}
+
+.notice-warn {
+  border-left-color: var(--muted);
+}
+
+.rsvp-form {
+  margin-top: clamp(2rem, 5vw, 3rem);
+}
+
+.rsvp-fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.rsvp-fieldset[disabled] {
+  opacity: 0.5;
+}
+
+.rsvp-event,
+.rsvp-block {
+  margin-top: clamp(2.5rem, 6vw, 4rem);
+}
+
+.rsvp-event-name {
+  margin: 0.35rem 0 0.25rem;
+}
+
+.rsvp-venue {
+  margin: 0 0 0.5rem;
+  font-size: 15px;
+}
+
+.rsvp-lede {
+  margin: 0.5rem 0 0;
+  font-size: 15.5px;
+  max-width: 54ch;
+}
+
+/* One fieldset per person per event. Proper fieldset/legend grouping is what makes the matrix
+   navigable with a screen reader — otherwise every radio pair reads as an unlabelled "yes/no". */
+.person {
+  border: 0;
+  border-top: var(--rule) solid var(--border);
+  margin: 1.5rem 0 0;
+  padding: 1.1rem 0 0;
+  min-width: 0;
+}
+
+.person-name {
+  padding: 0;
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.person-tag {
+  font-weight: 400;
+  font-size: 14px;
+}
+
+.choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  margin-top: 0.85rem;
+}
+
+/* The whole label is the target, and it is at least 48px tall. Guest lists skew elderly, this is
+   read on phones, and a 20px radio dot is not a usable target. */
+.choice {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 48px;
+  padding: 0.5rem 1rem 0.5rem 0.85rem;
+  border: var(--rule) solid var(--border);
+  background: color-mix(in srgb, var(--bg) 55%, var(--surface));
+  font-size: 15px;
+  cursor: pointer;
+  transition: border-color 200ms var(--ease), background 200ms var(--ease);
+}
+
+.choice:hover {
+  border-color: var(--muted);
+}
+
+.choice:has(input:checked) {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 9%, var(--bg));
+}
+
+.choice input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+  margin: 0;
+  flex: none;
+}
+
+.field-row {
+  margin: 1rem 0 0;
+}
+
+.field-row .label {
+  display: block;
+  margin-bottom: 0.4rem;
+}
+
+select.field {
+  appearance: none;
+  background-image: none;
+}
+
+.grid-2 {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 560px) {
+  .grid-2 {
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem 1.25rem;
+  }
+}
+
+.rsvp-submit {
+  margin-top: clamp(2.5rem, 6vw, 4rem);
+  padding-top: 1.75rem;
+  border-top: var(--rule) solid var(--border);
+}
+
+.rsvp-submit-note {
+  margin: 0.9rem 0 0;
+  font-size: 14.5px;
+  max-width: 46ch;
+}
+
+/* ===========================================================================
+   FIND / THEMES / ADMIN
+   =========================================================================== */
+
+.find-shell { max-width: 540px; }
+.find-form { margin-top: 1.75rem; display: grid; gap: 1rem; justify-items: start; }
+.find-candidates { margin-top: 1.75rem; }
+.candidate-list { list-style: none; margin: 0.75rem 0 0; padding: 0; display: grid; gap: 0.6rem; justify-items: start; }
+.candidate { text-transform: none; letter-spacing: 0.02em; font-size: 14px; }
+.find-help { margin-top: clamp(2.5rem, 6vw, 4rem); }
+.find-help-title { margin: 1.25rem 0 0.75rem; }
+.find-message { margin-top: 1.25rem; display: grid; gap: 0.25rem; justify-items: start; }
+.find-message .grid-2, .find-message .field-row { width: 100%; }
+.find-alt { margin: 0.9rem 0 0; font-size: 14.5px; }
+
+/* --- Theme gallery -------------------------------------------------------- */
+
+.theme-grid {
+  display: grid;
+  gap: clamp(1.5rem, 3vw, 2.25rem);
+  margin-top: clamp(2rem, 5vw, 3rem);
+}
+
+@media (min-width: 760px) {
+  .theme-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.theme-card {
+  padding: 1.5rem;
+  border: var(--rule) solid var(--border);
+  background: color-mix(in srgb, var(--surface) 55%, var(--bg));
+}
+
+.theme-card.is-live { border-color: var(--accent); }
+
+.theme-swatches { display: flex; margin-bottom: 1.1rem; }
+.theme-swatch { width: 46px; height: 46px; border: 1px solid color-mix(in srgb, var(--ink) 14%, transparent); }
+.theme-swatch + .theme-swatch { margin-left: -1px; }
+.theme-name { margin: 0 0 0.3rem; }
+.theme-mood { margin-bottom: 0.8rem; }
+.theme-blurb { margin: 0 0 0.8rem; font-size: 15.5px; max-width: 46ch; }
+.theme-ref { margin: 0; font-size: 13px; }
+.theme-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; margin-top: 1.25rem; }
+.theme-signin { margin-top: 2rem; }
+
+/* --- Admin ---------------------------------------------------------------
+   Deliberately plainer than the guest site. This is a tool, not an invitation, and dressing it up
+   would make the numbers harder to read.
+   ------------------------------------------------------------------------- */
+
+.admin-nav { border-bottom: var(--rule) solid var(--border); background: var(--surface); }
+.admin-nav-inner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; padding-block: 0.5rem; }
+.admin-nav-list { list-style: none; display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; margin: 0; padding: 0; }
+.admin-nav-link {
+  display: inline-flex; align-items: center; min-height: 44px;
+  font-family: var(--font-body); font-size: 11px; font-weight: 500;
+  text-transform: uppercase; letter-spacing: var(--label-tracking);
+  color: var(--muted); text-decoration: none; background: none; border: 0; cursor: pointer;
+}
+.admin-nav-link:hover, .admin-nav-link.is-active { color: var(--accent-text); }
+.admin-signout { padding: 0; }
+
+.admin-body { padding-block: clamp(2rem, 5vw, 3.5rem) 5rem; }
+.admin-h1 { margin: 0 0 2rem; }
+.admin-h2 { font-family: var(--font-body); font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: var(--label-tracking); color: var(--muted); margin: 0 0 0.5rem; }
+.admin-count { color: var(--accent-text); margin-left: 0.4rem; }
+.admin-note { margin: 0 0 1.5rem; font-size: 14.5px; color: var(--muted); max-width: 64ch; }
+.admin-warn { border-left: 2px solid var(--accent-soft); padding-left: 0.9rem; }
+.admin-section { margin-top: clamp(2.5rem, 6vw, 4rem); }
+.admin-empty { color: var(--muted); font-size: 15px; }
+
+.tally-grid { display: grid; gap: 1rem; }
+@media (min-width: 720px) { .tally-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); } }
+
+.tally { border: var(--rule) solid var(--border); padding: 1.1rem 1.2rem; background: color-mix(in srgb, var(--surface) 45%, var(--bg)); }
+.tally-name { margin: 0.3rem 0 0.7rem; font-family: var(--font-display); font-weight: var(--display-weight); font-size: 1.35rem; letter-spacing: 0; }
+.tally-audience { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0 0 1rem; }
+
+.chip { display: inline-block; padding: 0.2rem 0.55rem; border: 1px solid var(--border); font-size: 11px; letter-spacing: 0.06em; color: var(--muted); }
+.chip-all { border-color: var(--muted); }
+.chip-named { border-style: dashed; }
+.chip-private { border-color: var(--accent); color: var(--accent-text); }
+.chip-warn { border-color: var(--accent); color: var(--accent-text); font-weight: 500; }
+
+.buckets { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin: 0; }
+.bucket dt { font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); }
+.bucket dd { margin: 0.15rem 0 0; font-size: 1.5rem; font-family: var(--font-display); line-height: 1; }
+.bucket-yes { color: var(--accent-text); }
+.bucket-wait { color: var(--ink); }
+
+.meals { list-style: none; margin: 1rem 0 0; padding: 0.9rem 0 0; border-top: var(--rule) solid var(--border); font-size: 13.5px; }
+.meals li { display: flex; justify-content: space-between; gap: 1rem; padding: 0.15rem 0; color: var(--muted); }
+
+.table-wrap { overflow-x: auto; border: var(--rule) solid var(--border); }
+.table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 640px; }
+.table th, .table td { text-align: left; padding: 0.7rem 0.9rem; border-bottom: var(--rule) solid var(--border); vertical-align: top; }
+.table th { font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); font-weight: 500; }
+.table tr:last-child td { border-bottom: 0; }
+.table .num { text-align: right; }
+.table .small { font-size: 13px; }
+.token { font-size: 12px; word-break: break-all; color: var(--muted); }
+
+.messages { list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem; }
+.message { border-left: 2px solid var(--border); padding-left: 1rem; }
+.message-meta { margin-bottom: 0.3rem; }
+.message-body { margin: 0; font-size: 15px; max-width: 62ch; }
+
+.preview-grid { display: grid; gap: 2rem; }
+@media (min-width: 860px) { .preview-grid { grid-template-columns: 280px 1fr; gap: 3rem; } }
+.household-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.15rem; }
+.household-link { display: block; padding: 0.65rem 0.75rem; min-height: 44px; font-size: 14px; text-decoration: none; border: 1px solid transparent; }
+.household-link:hover { border-color: var(--border); }
+.household-link.is-active { border-color: var(--accent); color: var(--accent-text); }
+.sees-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
+.sees-item { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; padding: 0.7rem 0; border-bottom: var(--rule) solid var(--border); font-size: 15px; }
+.preview-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; margin-top: 1.5rem; }
+.preview-code { font-size: 13px; }
+
+/* --- Invite manager ------------------------------------------------------- */
+
+.invite-form { display: grid; gap: 0.5rem; justify-items: start; margin-bottom: 1.5rem; }
+.invite-form .grid-2, .invite-form .field-row, .invite-form fieldset { width: 100%; }
+.checks-events { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.5rem; }
+.share-url { margin: 0 0 0.75rem; }
+.share-url code { font-size: 14px; word-break: break-all; }
+.event-chips { display: inline-flex; flex-wrap: wrap; gap: 0.25rem; }
+.danger-row { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.5rem; padding-top: 1.25rem; border-top: var(--rule) solid var(--border); }
+.is-revoked { opacity: 0.55; }
+.rsvp-person { margin-top: clamp(2rem, 5vw, 3rem); }
+.rsvp-events { display: grid; gap: 0.25rem; margin-top: 0.5rem; }

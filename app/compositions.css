@@ -1,0 +1,2197 @@
+/* ===========================================================================
+   PER-THEME COMPOSITION
+
+   Each theme copies the LAYOUT SIGNATURE of its source template, not only the
+   palette. The signature is the thing you would recognise the original by.
+
+   Sources and harvested values: docs/TEMPLATE-SOURCES.md
+   =========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   MARRY MONDAY's desktop margin grid.
+
+   The day header moves out into the left margin as a running head on wide
+   screens. The grid is pulled left by exactly the margin column plus the gap, so
+   column two begins at the shell's own content edge — otherwise the running head
+   eats the measure and the schedule collapses to a ~200px column.
+
+   This used to apply to ALL SIX themes, which is most of why three audit rounds
+   said "one skeleton, six paint jobs": every theme rendered the same left-aligned
+   document with the same date gutter, while five of the six sources are centre-
+   composed. veleyross positions absolutely on a twelve-column grid, so the
+   running head is right for THIS template and wrong for the rest. The centre
+   composition the other five need is below.
+   --------------------------------------------------------------------------- */
+
+/* Gated at 1360, not 1100. `.shell` is min(1320px, 94vw), so at 1440 there are 60px of gutter and
+   the grid pulls 232px + 3.5rem into it — the running head rendered off the left edge of the
+   window, mid-word ("riday / ruary"). At the width these screenshots are taken at, the one device
+   this theme is recognised by was truncated. The shell is capped inside the query so the pull-left
+   always has room. */
+@media (min-width: 1360px) {
+  /* `[data-theme] .shell` later in this file matched at the same specificity and won, because a
+     media query adds none — so this cap was dead code and the running head still rendered off the
+     left edge, mid-word. Raised above that rule's specificity, and sized properly: the grid pulls
+     232px + 3.5rem = 288px left, so the shell has to leave at least that much gutter. */
+  [data-theme='marry-monday'][data-theme] .shell {
+    max-width: min(820px, 58vw);
+  }
+
+  [data-theme='marry-monday'] .schedule-day {
+    display: grid;
+    grid-template-columns: 232px 1fr;
+    column-gap: 3.5rem;
+    align-items: start;
+    margin-left: calc(-232px - 3.5rem);
+  }
+
+  [data-theme='marry-monday'] .schedule-day-header {
+    position: sticky;
+    top: calc(var(--stick-top, 0px) + 2.5rem);
+    margin: 0;
+    padding: 0;
+    border-bottom: 0;
+    text-align: right;
+    background: transparent;
+    font-size: clamp(1.05rem, 1.4vw, 1.35rem);
+    line-height: 1.15;
+    text-wrap: balance;
+  }
+
+  [data-theme='marry-monday'] .day-weekday,
+  [data-theme='marry-monday'] .day-date {
+    display: block;
+  }
+
+  [data-theme='marry-monday'] .schedule-list {
+    grid-column: 2;
+  }
+
+  [data-theme='marry-monday'] .schedule {
+    --rail-x: 0px;
+    --rail-indent: 40px;
+  }
+}
+
+.day-date {
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------------------
+   1. MARRY MONDAY  <-  veleyross.wedding
+
+   The signature is type sized in VIEWPORT UNITS. The original sets its display
+   line at 22.22vw and a secondary display at 7.78vw, so the headline spans the
+   whole window at every width rather than sitting inside a column. Body copy is
+   vw-based too (0.9vw / 0.83vw), clamped here so it stays readable.
+
+   Second signature: a bar pinned to the BOTTOM of the window as well as the top.
+   --------------------------------------------------------------------------- */
+
+/* The names are the SMALLER element here. The source's 22.22vw belongs to `.h-s1-no`, the date
+   numerals, not to the lockup — a fidelity note corrected after the first audit. */
+[data-theme='marry-monday'] .hero-names {
+  font-size: clamp(2rem, 7.8vw, 7rem);
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+}
+
+[data-theme='marry-monday'] .amp {
+  display: inline;
+  font-size: 0.62em;
+  margin: 0 0.06em;
+  font-style: italic;
+  color: var(--ink);
+}
+
+[data-theme='marry-monday'] .shell {
+  max-width: min(1320px, 94vw);
+}
+
+[data-theme='marry-monday'] .section-title {
+  font-size: clamp(2rem, 7.8vw, 7rem);
+  line-height: 0.9;
+}
+
+[data-theme='marry-monday'] .hero-eyebrow {
+  font-size: clamp(0.7rem, 0.9vw, 0.95rem);
+}
+
+/* The signature. Source: `.h-s1-no { font-size: 22.22222vw; line-height: 22.22222vw;
+   letter-spacing: -.88889vw }` with `-webkit-text-stroke-color: #c3c2c0` — the numerals are
+   OUTLINED, not filled, and they span the window edge to edge. */
+[data-theme='marry-monday'] .hero-numeric {
+  /* veleyross.wedding sets .h-s1-no at 22.22vw with letter-spacing -.889vw and paints it as an
+     OUTLINE (-webkit-text-stroke-color:#c3c2c0), not a fill. Canela's figures are narrower than
+     Fraunces', so at 22.22vw our twelve characters run past the right edge and clip mid-glyph.
+     The element is pulled full-bleed out of the centred shell and the size solved so the string
+     ends flush with the viewport — the source's proportion, our substitute's metrics. */
+  display: block;
+  font-family: var(--font-display);
+  font-variant-numeric: lining-nums tabular-nums;
+  font-size: 19.6vw;
+  line-height: 0.86;
+  letter-spacing: -0.78vw;
+  margin-top: 0.06em;
+  margin-inline: calc(50% - 50vw);
+  padding-inline: 2vw;
+  text-align: center;
+  white-space: nowrap;
+  color: transparent;
+  -webkit-text-stroke: 1.5px #c3c2c0;
+  text-stroke: 1.5px #c3c2c0;
+}
+
+/* Founders Grotesk Light at 0.89vw is the source's running text — a whisper under the display
+   line. Regular weight at a comfortable reading size lost that entirely. */
+[data-theme='marry-monday'] .prose,
+[data-theme='marry-monday'] .schedule-desc,
+[data-theme='marry-monday'] .faq-a,
+[data-theme='marry-monday'] .block-body,
+[data-theme='marry-monday'] .hero-tagline {
+  font-weight: 300;
+}
+
+/* --- the rotated left-edge rail, and the stacked corner marks --------------
+   `#nav-link-w { transform: rotate(-90deg) }` — veleyross runs its navigation vertically up the
+   left margin, and pins a stacked monogram to the top-left and the date to the top-right. It is
+   the furniture you recognise the site by before you have read a word of it. Decorative here:
+   the real navigation is the document order. */
+
+[data-theme='marry-monday'] .edge-rail {
+  display: flex;
+  position: fixed;
+  left: 3.4vw;
+  bottom: 5.4vw;
+  transform-origin: 0 100%;
+  transform: rotate(-90deg);
+  gap: 2.2rem;
+  z-index: 24;
+  pointer-events: none;
+}
+
+[data-theme='marry-monday'] .edge-rail span {
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.028em;
+  color: var(--ink);
+  border-bottom: 2px solid var(--ink);
+  padding-bottom: 2px;
+  white-space: nowrap;
+}
+
+[data-theme='marry-monday'] .corner-mark {
+  display: block;
+  position: fixed;
+  top: calc(var(--stick-top, 0px) + 1.6rem);
+  z-index: 24;
+  font-family: var(--font-body);
+  font-size: 10px;
+  line-height: 1.5;
+  letter-spacing: 0.028em;
+  text-transform: uppercase;
+  color: var(--ink);
+  pointer-events: none;
+}
+
+[data-theme='marry-monday'] .corner-mark-start { left: 3.4vw; }
+[data-theme='marry-monday'] .corner-mark-end { right: 3.4vw; text-align: right; }
+
+/* Both are furniture for a wide window. On a phone they would sit on top of the content. */
+@media (max-width: 900px) {
+  [data-theme='marry-monday'] .edge-rail,
+  [data-theme='marry-monday'] .corner-mark {
+    display: none;
+  }
+}
+
+/* Not a rectangle: veleyross draws every control as a hairline underline, and the page carries no
+   filled surface at all. The token block makes the fill transparent; this puts the rule back. */
+[data-theme='marry-monday'] .btn {
+  border-bottom: 2px solid var(--ink);
+  padding-inline: 0;
+  padding-bottom: 0.35em;
+  min-height: 44px;
+}
+
+[data-theme='marry-monday'] .btn:hover {
+  border-bottom-color: var(--ink);
+  opacity: 0.62;
+}
+
+[data-theme='marry-monday'] .footer-rail {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem var(--gutter);
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+}
+
+[data-theme='marry-monday'] .site-footer {
+  padding-bottom: 6rem;
+}
+
+/* ---------------------------------------------------------------------------
+   2. ALESSIA  <-  myblissandbone.com/alessia
+
+   Marker-pen display face on cream, crimson as the only colour, and a peach wash
+   behind the attire block. The original is one long scroll with no card
+   containers anywhere.
+   --------------------------------------------------------------------------- */
+
+[data-theme='alessia'] .hero-inner,
+[data-theme='avril'] .hero-inner,
+[data-theme='aspen'] .hero-inner,
+[data-theme='kelsey'] .hero-inner,
+[data-theme='anvaya'] .hero-inner {
+  text-align: center;
+}
+
+[data-theme='alessia'] .hero-names,
+[data-theme='alessia'] .hero-eyebrow,
+[data-theme='alessia'] .hero-tagline,
+[data-theme='alessia'] .hero-cta,
+[data-theme='avril'] .hero-names,
+[data-theme='avril'] .hero-eyebrow,
+[data-theme='avril'] .hero-tagline,
+[data-theme='avril'] .hero-cta,
+[data-theme='aspen'] .hero-names,
+[data-theme='aspen'] .hero-eyebrow,
+[data-theme='aspen'] .hero-tagline,
+[data-theme='aspen'] .hero-cta,
+[data-theme='kelsey'] .hero-names,
+[data-theme='kelsey'] .hero-eyebrow,
+[data-theme='kelsey'] .hero-tagline,
+[data-theme='kelsey'] .hero-cta,
+[data-theme='anvaya'] .hero-names,
+[data-theme='anvaya'] .hero-eyebrow,
+[data-theme='anvaya'] .hero-tagline,
+[data-theme='anvaya'] .hero-cta {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+[data-theme='alessia'] .hero-names {
+  color: var(--accent);
+  font-size: clamp(2.4rem, 8.5vw, 6rem);
+}
+
+/* NO card containers — that is the documented signature, and a filled peach panel was it inverted.
+   Peach survives as a swatch and a rule; the scroll stays uninterrupted. */
+[data-theme='alessia'] .dresscode {
+  background: transparent;
+  padding: 0.9rem 0 0;
+  border-top: 2px solid var(--accent-soft);
+  margin-top: 1.2rem;
+}
+
+[data-theme='alessia'] .dresscode-label {
+  color: var(--accent);
+}
+
+[data-theme='alessia'] .schedule-name {
+  color: var(--accent);
+}
+
+/* The script face, used once, for the joining word. The source sets its whole hero — names and the
+   joining word alike — in one crimson, so this takes the accent rather than the ink: a near-black
+   ampersand is a colour the source never puts on that screen. */
+[data-theme='alessia'] .amp {
+  font-family: var(--font-script);
+  font-style: normal;
+  color: var(--accent);
+}
+
+/* ---------------------------------------------------------------------------
+   3. AVRIL  <-  myblissandbone.com/avril
+
+   Electric blue on cream. Names in a script, everything else in a light
+   grotesque. The original colour-blocks whole sections in the blue, so the
+   attire block is inverted here rather than merely tinted.
+   --------------------------------------------------------------------------- */
+
+[data-theme='avril'] .hero-names {
+  font-size: clamp(3rem, 12vw, 9rem);
+  line-height: 1.05;
+}
+
+[data-theme='avril'] .schedule-name,
+[data-theme='avril'] .section-title,
+[data-theme='avril'] .schedule-day-header,
+[data-theme='avril'] .faq-q {
+  font-family: var(--font-alt);
+  font-weight: 300;
+  letter-spacing: 0.02em;
+}
+
+/* The source alternates cream sections with whole sections blocked edge to edge in #013AB2 and the
+   cream type reversed out of them — "The Weekend", "Travel Tips", "Reply Now". Blocking the SECTION
+   is both more faithful and structurally simpler than blocking the attire panel inside it: a
+   top-level section is already the full width of the page, so there is no bleed to fake.
+
+   The previous attempt bled the attire block itself with a negative inline margin. That only lands
+   flush if the element is centred in the window, and `.dresscode` sits inside a schedule item whose
+   `50%` resolves against a narrow ancestor — the block started 20px in, stopped at 67% of the
+   window, and collapsed its content column to about 90px, wrapping the attire note one word per
+   line. Fixing it by overshooting and clipping worked in Chromium and broke `position: sticky` in
+   WebKit, where a clipped ancestor pulls the sticky day headers off the viewport. Blocking the
+   section needs neither trick. */
+[data-theme='avril'] main > section.section:nth-of-type(even) {
+  --bg: #013ab2;
+  --surface: #0a44bd;
+  --ink: #fffaf1;
+  --muted: #dfe6f5;
+  --accent: #fffaf1;
+  --accent-text: #fffaf1;
+  --accent-soft: #4f7ccb;
+  --border: #4f7ccb;
+  --btn-ink: #fffaf1;
+  --btn-border: #fffaf1;
+  --btn-bg-hover: #fffaf1;
+  --btn-ink-hover: #013ab2;
+  --btn-border-hover: #fffaf1;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+/* The section rule is a hairline ON the blue, not the divider between two cream bands. */
+[data-theme='avril'] main > section.section:nth-of-type(even) .rule {
+  border-top-color: var(--border);
+}
+
+/* The attire block is a plain block again — its own paint moved up to the section. */
+[data-theme='avril'] .dresscode {
+  border-top: 2px solid var(--accent);
+}
+
+/* ---------------------------------------------------------------------------
+   4. ASPEN  <-  myblissandbone.com/aspen
+
+   One extra-light sans, no serif anywhere, taupe on white. The original opens on
+   a full-screen splash gate carrying only the names, then reveals the site —
+   reproduced as a near-full-viewport hero with the names centred in it.
+   --------------------------------------------------------------------------- */
+
+[data-theme='aspen'] .hero {
+  min-height: 84vh;
+  display: flex;
+  align-items: center;
+}
+
+[data-theme='aspen'] .hero-inner {
+  width: 100%;
+}
+
+[data-theme='aspen'] .hero-names {
+  font-size: clamp(2.2rem, 6.5vw, 4.75rem);
+  font-weight: 200;
+  /* `letter-spacing: 0px` on every rule the source writes. A later block used to re-zero this,
+     leaving two rules in one stylesheet contradicting each other. */
+  letter-spacing: 0;
+}
+
+/* With no serif at all, hierarchy has to come from weight and tracking alone. */
+[data-theme='aspen'] .section-title,
+[data-theme='aspen'] .schedule-name,
+[data-theme='aspen'] .faq-q,
+[data-theme='aspen'] .schedule-day-header {
+  /* Weight alone. `letter-spacing: 0px` is on every rule the source writes, and a 0.04em here
+     contradicted the token block that says so two files away. */
+  font-weight: 300;
+  letter-spacing: 0em;
+}
+
+[data-theme='aspen'] .amp {
+  font-family: var(--font-body);
+  font-style: normal;
+  font-weight: 200;
+}
+
+/* ---------------------------------------------------------------------------
+   5. KELSEY  <-  myblissandbone.com/kelsey
+
+   Inverted: a RUST page with tan type on it, where every other wedding site is
+   dark ink on pale paper. Light blocks in three colours are set into the rust as
+   the page goes down. One typeface throughout, no sans at all.
+   --------------------------------------------------------------------------- */
+
+/* A full-screen cover with the name set left at the PAGE gutter, as the source sets it — not left
+   inside a narrow centred column, which starts at ~410px on a 1440 window instead of ~40. */
+[data-theme='kelsey'] .hero {
+  min-height: calc(100vh - var(--stick-top, 0px));
+  display: flex;
+  align-items: center;
+}
+
+[data-theme='kelsey'] .hero .shell {
+  max-width: none;
+  width: 100%;
+  margin-inline: 0;
+  padding-inline: var(--gutter);
+}
+
+[data-theme='kelsey'] .hero-inner {
+  width: 100%;
+  text-align: left;
+}
+
+[data-theme='kelsey'] .hero-names,
+[data-theme='kelsey'] .hero-eyebrow,
+[data-theme='kelsey'] .hero-tagline,
+[data-theme='kelsey'] .hero-cta {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+[data-theme='kelsey'] .hero-names {
+  font-size: clamp(2.8rem, 9.5vw, 7rem);
+}
+
+/* Labels are set in the same serif — the original has no second typeface. */
+[data-theme='kelsey'] .label,
+[data-theme='kelsey'] .btn {
+  font-family: var(--font-display);
+  font-weight: 500;
+}
+
+[data-theme='kelsey'] .amp {
+  font-style: italic;
+}
+
+/* ---------------------------------------------------------------------------
+   6. ANVAYA  <-  anvaya.love
+
+   Burgundy and metallic gold on cream, with a Devanagari serif beside the Latin.
+   Gold is a HAIRLINE and an ornament only — never a fill, never a gradient. Real
+   foil is flat with a hard specular edge.
+   --------------------------------------------------------------------------- */
+
+[data-theme='anvaya'] .hero-names {
+  font-size: clamp(2.8rem, 9vw, 6.5rem);
+  font-weight: 300;
+}
+
+/* One of the fold's two gold moments in the source — the tracked eyebrow above the headline.
+   Set in the deeper antique gold that can actually carry text; see the token comment. */
+[data-theme='anvaya'] .hero-eyebrow,
+[data-theme='anvaya'] .section-num {
+  color: var(--metal-text);
+}
+
+/* The source's headline device: one phrase inside the line set in oxblood italic while the rest
+   stays near-black. The section titles are where that lands here. */
+[data-theme='anvaya'] .section-title em,
+[data-theme='anvaya'] .hero-tagline em {
+  font-style: italic;
+  color: var(--accent-text);
+}
+
+[data-theme='anvaya'] .amp {
+  /* The deeper antique gold, not the #d4af37 hairline: at 2.00:1 on this cream the bright gold
+     washes out to almost nothing at display size. */
+  color: var(--metal-text);
+  font-style: italic;
+}
+
+/* --- anvaya's own structural signature ------------------------------------
+   The source scatters rounded photo cards down the page with a small italic gold caption under
+   each ('— The mehndi —'). It is the only source in the set with any rounded geometry at all, and
+   round 2 was right that none of it had landed: the theme was well-tokened and structurally
+   identical to the other five. Each event becomes a soft-cornered panel with a gold hairline, and
+   the blurb becomes that caption. Alternating panels step off the axis so the column reads as a
+   scatter rather than a stack. */
+
+[data-theme='anvaya'] .schedule-item {
+  background: var(--surface);
+  border: 1px solid color-mix(in srgb, var(--metal) 40%, transparent);
+  border-radius: 18px;
+  padding: 1.4rem 1.5rem 1.5rem;
+  margin-bottom: 1.4rem;
+}
+
+[data-theme='anvaya'] .schedule-blurb {
+  font-style: italic;
+  color: var(--metal-text);
+  text-align: center;
+}
+
+[data-theme='anvaya'] .schedule-blurb::before {
+  content: '— ';
+}
+[data-theme='anvaya'] .schedule-blurb::after {
+  content: ' —';
+}
+
+@media (min-width: 900px) {
+  [data-theme='anvaya'] .schedule-item:nth-child(even) {
+    margin-left: 3.5rem;
+  }
+  [data-theme='anvaya'] .schedule-item:nth-child(odd) {
+    margin-right: 3.5rem;
+  }
+}
+
+[data-theme='anvaya'] .field,
+[data-theme='anvaya'] .choice {
+  border-radius: 12px;
+}
+
+[data-theme='anvaya'] .rule {
+  border-top: 1px solid color-mix(in srgb, var(--metal) 45%, transparent);
+  box-shadow: none;
+  position: relative;
+}
+
+[data-theme='anvaya'] .rule::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -3px;
+  width: 6px;
+  height: 6px;
+  transform: translateX(-50%) rotate(45deg);
+  background: var(--metal);
+}
+
+/* Burgundy, not gold. Gold measured 1.99:1 on this cream ground — fine as the foil hairline and
+   the diamond, which is exactly what anvaya.love uses it for, but unreadable as type. */
+[data-theme='anvaya'] .section-num {
+  color: var(--accent-text);
+}
+
+/* The Devanagari line above the names — the thing that makes this theme itself. */
+[data-theme='anvaya'] .hero-indic {
+  display: block;
+  font-family: var(--font-indic);
+  /* Set at display size and marked decorative, so this is the one place the TRUE #d4af37 can be
+     used as a mark rather than as body copy — the audit was right that gold appearing only as
+     three 6px diamonds leaves the source's second colour effectively absent. Everything a reader
+     must actually read stays on the darker antique gold. */
+  font-size: clamp(1.35rem, 3.2vw, 2.4rem);
+  color: var(--metal);
+  letter-spacing: 0.02em;
+  margin-bottom: 0.9rem;
+}
+
+/* ---------------------------------------------------------------------------
+   THE CENTRE COMPOSITION
+
+   Seventeen of the eighteen sources are centre-composed. Only veleyross is
+   left-set, and it is left-set on an absolute twelve-column grid rather than in
+   a document column — so the rule is stated as "everything except that one"
+   rather than as a list of seventeen theme names that has to be edited every
+   time a template is added.
+
+   Three audit rounds named the same defect: one page skeleton wearing every
+   palette. This is the structural half of the answer. The other half — display
+   type that survives past the fold, bands, and a drawn device where the source
+   has one — is below.
+   --------------------------------------------------------------------------- */
+
+html:not([data-theme='marry-monday']) .schedule-day {
+  display: block;
+  margin-left: 0;
+}
+
+html:not([data-theme='marry-monday']) .schedule-day-header {
+  position: static;
+  text-align: center;
+  border-bottom: 0;
+  background: transparent;
+  margin: 2.5rem 0 1.25rem;
+  padding: 0;
+}
+
+/* No rail, no node: the timeline is a device none of these sources uses. */
+html:not([data-theme='marry-monday']) .schedule-list::before,
+html:not([data-theme='marry-monday']) .schedule-node {
+  display: none;
+}
+
+html:not([data-theme='marry-monday']) .schedule-item {
+  padding-left: 0;
+}
+
+html:not([data-theme='marry-monday']) .hero-inner,
+html:not([data-theme='marry-monday']) .schedule-body,
+html:not([data-theme='marry-monday']) .section-title,
+html:not([data-theme='marry-monday']) .section-num,
+html:not([data-theme='marry-monday']) .section-lede,
+html:not([data-theme='marry-monday']) .welcome-note,
+html:not([data-theme='marry-monday']) .blocks,
+html:not([data-theme='marry-monday']) .faq {
+  text-align: center;
+}
+
+html:not([data-theme='marry-monday']) .section-title,
+html:not([data-theme='marry-monday']) .section-num,
+html:not([data-theme='marry-monday']) .section-lede,
+html:not([data-theme='marry-monday']) .welcome-note,
+html:not([data-theme='marry-monday']) .faq-item,
+html:not([data-theme='marry-monday']) .dresscode {
+  margin-inline: auto;
+}
+
+html:not([data-theme='marry-monday']) .swatches,
+html:not([data-theme='marry-monday']) .schedule-actions,
+html:not([data-theme='marry-monday']) .dresscode-head {
+  justify-content: center;
+}
+
+/* ---------------------------------------------------------------------------
+   DISPLAY SCALE PAST THE FOLD
+
+   Every source keeps its display face large the whole way down — veleyross's
+   section heads run 2.67vw+, kelsey's and avril's section titles 40-60px. All
+   six copies dropped to ~28px after the hero, which is what made them read as
+   "an invitation with a big cover" rather than as the templates.
+   --------------------------------------------------------------------------- */
+
+[data-theme='marry-monday'] .section-title {
+  font-size: clamp(2.6rem, 5.4vw, 5rem);
+}
+
+[data-theme='alessia'] .section-title,
+[data-theme='aspen'] .section-title {
+  font-size: clamp(2rem, 4.2vw, 3.6rem);
+}
+
+[data-theme='avril'] .section-title,
+[data-theme='kelsey'] .section-title,
+[data-theme='anvaya'] .section-title {
+  font-size: clamp(2.4rem, 4.8vw, 4.2rem);
+}
+
+[data-theme='marry-monday'] .schedule-name,
+[data-theme='kelsey'] .schedule-name,
+[data-theme='anvaya'] .schedule-name {
+  font-size: clamp(1.7rem, 3vw, 2.6rem);
+}
+
+/* ---------------------------------------------------------------------------
+   BANDS
+
+   Three of the sources build their page out of alternating full-bleed bands, and
+   the band colour is the theme colour carrying real proportional weight rather
+   than sitting on one button. A top-level <section> is already the full width of
+   the page, so this needs no bleed trick — the band simply re-binds the tokens
+   and everything inside it follows.
+   --------------------------------------------------------------------------- */
+
+/* kelsey: a RUST page with LIGHT blocks set into it — the direction the source actually runs, and
+   in its three block colours rather than one. Round 4 had this exactly inverted. */
+[data-theme='kelsey'] main > section.section:nth-of-type(2),
+[data-theme='kelsey'] main > section.section:nth-of-type(5) {
+  --bg: #e0d8cb;
+  --surface: #d7cec0;
+  --ink: #7f4928;
+  --muted: #665346;
+  --accent: #7f4928;
+  --accent-text: #6d3d20;
+  --border: #c3b7a6;
+  --btn-ink: #7f4928;
+  --btn-border: #a97a5c;
+  --btn-bg-hover: #7f4928;
+  --btn-ink-hover: #e0d8cb;
+  --btn-border-hover: #7f4928;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+[data-theme='kelsey'] main > section.section:nth-of-type(6) {
+  --bg: #a27a65;
+  --surface: #96705c;
+  --ink: #fdf6ee;
+  --muted: #f3e6da;
+  --accent: #fdf6ee;
+  --accent-text: #fdf6ee;
+  --border: #b89380;
+  --btn-ink: #fdf6ee;
+  --btn-border: #d8bdab;
+  --btn-bg-hover: #fdf6ee;
+  --btn-ink-hover: #a27a65;
+  --btn-border-hover: #fdf6ee;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+[data-theme='kelsey'] main > section.section:nth-of-type(4) {
+  --bg: #c5ad9f;
+  --surface: #bba394;
+  --ink: #5c3520;
+  --muted: #5c3520;
+  --accent: #5c3520;
+  --accent-text: #5c3520;
+  --border: #a98d7c;
+  --btn-ink: #5c3520;
+  --btn-border: #8d6c58;
+  --btn-bg-hover: #5c3520;
+  --btn-ink-hover: #c5ad9f;
+  --btn-border-hover: #5c3520;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+/* alessia: the source's own block colours, read out of its page.html rather than its stylesheet —
+   which is where all four Bliss & Bone templates keep them, and why two rounds of "harvested"
+   band colours (#a20d13, #fbd8cb) were fabricated: neither appears anywhere in the source. What
+   does appear is `#ffd8c7` x5 and `#9c0a0d` x7. Five peach blocks to one crimson, so the peach
+   carries two bands and the crimson one. */
+[data-theme='alessia'] main > section.section:nth-of-type(2),
+[data-theme='alessia'] main > section.section:nth-of-type(4) {
+  --bg: #ffd8c7;
+  --surface: #f7cdbe;
+  --muted: #8a4a4c;
+  --border: #edb9a6;
+  background: var(--bg);
+}
+
+[data-theme='alessia'] main > section.section:nth-of-type(6) {
+  --bg: #9c0a0d;
+  --surface: #8e0b10;
+  --ink: #fffaf1;
+  --muted: #ffd8c7;
+  --accent: #fffaf1;
+  --accent-text: #fffaf1;
+  --accent-soft: #c4353a;
+  --border: #c4353a;
+  --btn-ink: #fffaf1;
+  --btn-border: #fffaf1;
+  --btn-bg-hover: #fffaf1;
+  --btn-ink-hover: #9c0a0d;
+  --btn-border-hover: #fffaf1;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+/* anvaya: the source blocks whole sections edge to edge in the deep maroon with cream Cormorant
+   headings and a GOLD eyebrow reversed out. Gold finally gets to be gold here: #d4af37 measures
+   7.06:1 on #570013, where on the cream page it was 2.00:1. */
+[data-theme='anvaya'] main > section.section:nth-of-type(even) {
+  --bg: #570013;
+  --surface: #6b0a20;
+  --ink: #fbf9f5;
+  --muted: #e0d0d0;
+  --accent: #fbf9f5;
+  --accent-text: #fbf9f5;
+  --accent-soft: #8a2036;
+  --border: #8a2036;
+  --metal: #d4af37;
+  --metal-text: #d4af37;
+  --btn-bg: #fbf9f5;
+  --btn-border: #fbf9f5;
+  --btn-ink: #570013;
+  --btn-bg-hover: #e0d0d0;
+  --btn-border-hover: #e0d0d0;
+  --btn-ink-hover: #570013;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+[data-theme='anvaya'] main > section.section:nth-of-type(even) .schedule-item {
+  background: var(--surface);
+  border-color: color-mix(in srgb, var(--metal) 55%, transparent);
+}
+
+/* ---------------------------------------------------------------------------
+   HEADING FACES
+
+   avril and alessia both loaded their signature face, used it once on the cover
+   and then set every heading below in the body sans. In both originals that face
+   runs at every heading level.
+   --------------------------------------------------------------------------- */
+
+/* THREE voices, which is what the source has and what round 4 collapsed to two.
+     h1/h2  SaintAmour script  (-> Allura)      The Ceremony, The Reception, The Weekend
+     h3     OlivieSans caps, SEVEN PIXELS of tracking on 17px — the widest tracking in the whole
+            Bliss & Bone set, and this template's second-most recognisable feature
+     body   Inter Light 13px
+   Round 4 put the script on h3 as well, which killed the tracked-caps register entirely and left
+   35px of connecting script on the FAQ questions. */
+[data-theme='avril'] .section-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+[data-theme='avril'] .schedule-name,
+[data-theme='avril'] .block-title,
+[data-theme='avril'] .faq-q,
+[data-theme='avril'] .schedule-day-header {
+  font-family: var(--font-alt);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.41em;   /* 7px on 17px */
+  font-size: clamp(0.95rem, 1.3vw, 1.15rem);
+  line-height: 1.6;
+}
+
+/* Tracking that wide leaves a hole at the end of the line unless the trailing space is taken back. */
+[data-theme='avril'] .schedule-name,
+[data-theme='avril'] .block-title,
+[data-theme='avril'] .faq-q,
+[data-theme='avril'] .schedule-day-header {
+  padding-right: 0.41em;
+}
+
+/* alessia: heavy geometric caps for the headings, and the marker face demoted to the caption slot
+   the source actually uses it in ("Pool Chic"). */
+/* h1 and h2 are the OlivieSans slot — a wide geometric sans at NORMAL weight, title-case in the
+   source's own DOM ("The night before", "Travel Details", "Our Registry"). Only its h3s are caps,
+   and those carry 3px of tracking. Round 4 shipped 800-weight forced uppercase, which is heavier
+   and louder than anything the template contains. */
+[data-theme='alessia'] .section-title,
+[data-theme='alessia'] .splash-names {
+  font-family: var(--font-display);
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: -0.01em;
+}
+
+/* The h3 slot: caps, tracked. */
+[data-theme='alessia'] .label,
+[data-theme='alessia'] .schedule-day-header,
+[data-theme='alessia'] .block-title {
+  font-family: var(--font-alt);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+}
+
+/* Everything the source sets in PermanentMarker: body, paragraphs, h4-level detail. */
+[data-theme='alessia'] .schedule-name,
+[data-theme='alessia'] .faq-q,
+[data-theme='alessia'] .dresscode-label,
+[data-theme='alessia'] .schedule-blurb {
+  font-family: var(--font-body);
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0.01em;
+  color: var(--accent);
+}
+
+/* The one deliberate legibility departure, and the only place this theme leaves its source:
+   the source sets `input { font: 18px/44px "PermanentMarker-Regular" }`. A wedding invitation can
+   carry a handwritten face through its prose; a forty-field RSVP form with medical dietary notes
+   in it cannot. Form CONTROLS use the sans. Everything a guest reads is the marker. */
+[data-theme='alessia'] .field,
+[data-theme='alessia'] select,
+[data-theme='alessia'] textarea,
+[data-theme='alessia'] .choice,
+[data-theme='alessia'] .person-name {
+  font-family: var(--font-alt);
+  letter-spacing: 0;
+}
+
+/* ---------------------------------------------------------------------------
+   ASPEN's alternating alignment
+
+   The source staggers: "Welcome Cocktails" computes text-align:left, "The
+   Rehearsal Dinner" text-align:right, with the detail stacks centred under both.
+   That stagger is the only layout signature aspen has.
+   --------------------------------------------------------------------------- */
+
+/* Round 4 staggered the TITLES left and right over centred body copy. With nothing for them to sit
+   against that reads as a defect rather than a rhythm, and the audit said so. What the source
+   actually does is `.section.stagger_l` / `.stagger_r`: a photograph held to one edge with a
+   narrow LEFT-SET text column offset against it, alternating down the page. It is the only Bliss &
+   Bone layout that breaks the base sheet's centring.
+
+   The photograph is the one thing this project will not ship — a template that arrives with
+   somebody else's wedding in it is not a template a couple can use — so the field stands in for it,
+   flat, in the source's own two block colours. The structure is the source's; the fill is honest
+   about being a substitute. */
+
+@media (min-width: 720px) {
+  [data-theme='aspen'] main > section.section:nth-of-type(n + 4) {
+    position: relative;
+    isolation: isolate;
+  }
+
+  [data-theme='aspen'] main > section.section:nth-of-type(n + 4)::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: -1;
+    width: 34vw;
+    background: var(--field, #cfc7c1);
+  }
+
+  [data-theme='aspen'] main > section.section:nth-of-type(2n)::before {
+    right: 0;
+    /* The source's page.html sets exactly two block colours inline: #cfc7c1 x4 and #595141 x5.
+       A second pale grey was invented here, which made the alternation the stagger exists to
+       create almost invisible. Pale stone against dark taupe is the real pair. */
+    --field: #595141;
+  }
+
+  [data-theme='aspen'] main > section.section:nth-of-type(2n + 1)::before {
+    left: 0;
+  }
+
+  [data-theme='aspen'] main > section.section:nth-of-type(2n) .shell {
+    margin-left: 0;
+    margin-right: auto;
+    max-width: min(520px, 44vw);
+  }
+
+  [data-theme='aspen'] main > section.section:nth-of-type(2n + 1) .shell {
+    margin-left: auto;
+    margin-right: 0;
+    max-width: min(520px, 44vw);
+  }
+
+  /* Left-set inside the column, as the source sets its stagger text. */
+  [data-theme='aspen'] main > section.section:nth-of-type(n + 4) .section-title,
+  [data-theme='aspen'] main > section.section:nth-of-type(n + 4) .section-num,
+  [data-theme='aspen'] main > section.section:nth-of-type(n + 4) .block,
+  [data-theme='aspen'] main > section.section:nth-of-type(n + 4) .faq-item {
+    text-align: left;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   MARRY MONDAY's label rule
+
+   `.entitled` followed by `.line` — a 24 x 3px #c3c2c0 rule directly under the
+   micro-label — repeats about a dozen times down the source page.
+   --------------------------------------------------------------------------- */
+
+[data-theme='marry-monday'] body {
+  font-weight: 300;
+}
+
+[data-theme='marry-monday'] .section-num::after,
+[data-theme='marry-monday'] .hero-eyebrow::after {
+  content: '';
+  display: block;
+  width: 24px;
+  height: 3px;
+  margin-top: 0.7rem;
+  background: var(--border);
+}
+
+/* ---------------------------------------------------------------------------
+   MARRY MONDAY's asymmetric grid
+
+   veleyross positions its blocks absolutely across a twelve-column vw grid —
+   items pinned at 20.83 / 41.67 / 62.5vw with large, irregular vertical gaps. A
+   uniform two-up card grid is the opposite of that, and it is the last place
+   this theme still reads as a document rather than as a layout.
+   --------------------------------------------------------------------------- */
+
+@media (min-width: 1100px) {
+  [data-theme='marry-monday'] .blocks {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    column-gap: 2rem;
+    row-gap: clamp(3rem, 7vw, 7rem);
+  }
+
+  [data-theme='marry-monday'] .block:nth-child(3n + 1) {
+    grid-column: 1 / span 5;
+  }
+
+  [data-theme='marry-monday'] .block:nth-child(3n + 2) {
+    grid-column: 8 / span 5;
+    margin-top: clamp(2rem, 5vw, 5rem);
+  }
+
+  [data-theme='marry-monday'] .block:nth-child(3n + 3) {
+    grid-column: 4 / span 5;
+  }
+
+  [data-theme='marry-monday'] .section {
+    padding-block: clamp(5rem, 13vw, 12rem);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   THE GRAPHIC DEVICE
+
+   Five of the six sources lean on one drawn thing — veleyross's pencil line-art
+   landscape behind the display line, kelsey's tone-on-tone leaf filling the
+   cover, avril's and alessia's small line icons heading every section. Three
+   audit rounds called their absence "the largest single source of gestalt loss",
+   and they were right: type on flat colour, six times, is what made the set read
+   as one family.
+
+   All of it is drawn here rather than fetched — flat strokes in inline SVG, no
+   raster, no request, no gradient. The section icons are painted through a MASK
+   so they take `currentColor` and stay correct when a section inverts into a
+   band.
+   --------------------------------------------------------------------------- */
+
+[data-theme='marry-monday'] .hero {
+  position: relative;
+  isolation: isolate;
+}
+
+[data-theme='marry-monday'] .hero::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 46%;
+  background: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 260' fill='none' stroke='%23c3c2c0' stroke-width='1.1'%3E%3Cpath d='M0 258 L170 96 L250 168 L372 54 L520 210 L618 130 L764 34 L900 194 L1012 128 L1200 258'/%3E%3Cpath d='M0 258 L142 190 L300 238 L452 168 L600 250 L760 182 L920 246 L1080 196 L1200 244'/%3E%3Cpath d='M372 54 L410 96 L344 96 Z'/%3E%3Cpath d='M764 34 L806 82 L724 82 Z'/%3E%3C/svg%3E") center bottom / 100% auto no-repeat;
+}
+
+/* kelsey gets NO drawn device, deliberately. It and aspen are the two sources that ship no
+   decorative graphics at all — their visual interest is photographs and colour blocks. Round 4
+   gave kelsey a leaf silhouette; nothing in the source supports it, so it is gone. Inventing
+   ornament to satisfy "a device per theme" is the same error as inventing a stripe. */
+
+/* --- the section marks ---------------------------------------------------- */
+
+[data-theme='avril'] .section-num::before,
+[data-theme='alessia'] .section-num::before {
+  content: '';
+  display: block;
+  width: 58px;
+  height: 40px;
+  margin: 0 auto 0.9rem;
+  background: currentColor;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+[data-theme='avril'] main > section:nth-of-type(3) .section-num::before {
+  -webkit-mask-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 44' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='25' cy='23' r='13'/%3E%3Ccircle cx='40' cy='23' r='13'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 44' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='25' cy='23' r='13'/%3E%3Ccircle cx='40' cy='23' r='13'/%3E%3C/svg%3E");
+}
+[data-theme='avril'] main > section:nth-of-type(4) .section-num::before {
+  -webkit-mask-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 44' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 25 L59 8 L46 26 L48 39 L37 29 L20 37 Z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 44' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 25 L59 8 L46 26 L48 39 L37 29 L20 37 Z'/%3E%3C/svg%3E");
+}
+[data-theme='avril'] main > section:nth-of-type(5) .section-num::before {
+  -webkit-mask-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 44' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='32' cy='22' r='16'/%3E%3Cpath d='M27 17 a5 5 0 1 1 6 6 v3'/%3E%3Cpath d='M33 31 v1'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 44' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='32' cy='22' r='16'/%3E%3Cpath d='M27 17 a5 5 0 1 1 6 6 v3'/%3E%3Cpath d='M33 31 v1'/%3E%3C/svg%3E");
+}
+[data-theme='avril'] main > section:nth-of-type(6) .section-num::before {
+  -webkit-mask-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 44' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='12' y='18' width='40' height='20'/%3E%3Cpath d='M12 25 h40 M32 18 v20'/%3E%3Cpath d='M32 18 c-7-11-18-2-9 5 M32 18 c7-11 18-2 9 5'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 44' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='12' y='18' width='40' height='20'/%3E%3Cpath d='M12 25 h40 M32 18 v20'/%3E%3Cpath d='M32 18 c-7-11-18-2-9 5 M32 18 c7-11 18-2 9 5'/%3E%3C/svg%3E");
+}
+
+[data-theme='alessia'] main > section:nth-of-type(3) .section-num::before {
+  -webkit-mask-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 44' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 10 h36 L32 28 Z M32 28 v10 M22 39 h20'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 44' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 10 h36 L32 28 Z M32 28 v10 M22 39 h20'/%3E%3C/svg%3E");
+}
+[data-theme='alessia'] main > section:nth-of-type(4) .section-num::before {
+  -webkit-mask-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 44' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M32 39 V20'/%3E%3Cpath d='M8 20 a24 13 0 0 1 48 0 z'/%3E%3Cpath d='M32 7 v-3'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 44' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M32 39 V20'/%3E%3Cpath d='M8 20 a24 13 0 0 1 48 0 z'/%3E%3Cpath d='M32 7 v-3'/%3E%3C/svg%3E");
+}
+[data-theme='alessia'] main > section:nth-of-type(5) .section-num::before {
+  -webkit-mask-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 44' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='32' cy='22' r='16'/%3E%3Cpath d='M27 17 a5 5 0 1 1 6 6 v3'/%3E%3Cpath d='M33 31 v1'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 44' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='32' cy='22' r='16'/%3E%3Cpath d='M27 17 a5 5 0 1 1 6 6 v3'/%3E%3Cpath d='M33 31 v1'/%3E%3C/svg%3E");
+}
+[data-theme='alessia'] main > section:nth-of-type(6) .section-num::before {
+  -webkit-mask-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 44' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='12' y='18' width='40' height='20'/%3E%3Cpath d='M12 25 h40 M32 18 v20'/%3E%3Cpath d='M32 18 c-7-11-18-2-9 5 M32 18 c7-11 18-2 9 5'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 44' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='12' y='18' width='40' height='20'/%3E%3Cpath d='M12 25 h40 M32 18 v20'/%3E%3Cpath d='M32 18 c-7-11-18-2-9 5 M32 18 c7-11 18-2 9 5'/%3E%3C/svg%3E");
+}
+
+/* ===========================================================================
+   ZOLA COMPOSITIONS
+
+   Every Zola template is centre-composed, so all six join the centre block
+   above. What differs between them is the BAND: Zola's home page puts a
+   full-bleed photo strip between the nav and the names, and the number and
+   proportion of panes in that strip is what tells its templates apart at a
+   glance — Abbey splits 69/31, Goundry 67/33, Galata into three equal thirds,
+   Morrison runs one band and then floats an inset white column beneath it.
+
+   We do not ship photographs, so the band is a flat field with the seams drawn
+   as hairlines. That keeps the geometry, which is the identifying part, and is
+   honest about not being a photograph. Two of these templates — Buxton and
+   Malina — carry no photography at all in the original, and those two are
+   copied with no substitution at all.
+
+   The seams are inline SVG rather than a linear-gradient on purpose: the
+   no-gradient rule in design-integrity.spec.ts is worth keeping absolute, and a
+   1px rule is flat ink anyway.
+   =========================================================================== */
+
+/* --- the band ------------------------------------------------------------- */
+
+[data-theme='abbey'] .hero,
+[data-theme='goundry'] .hero,
+[data-theme='galata'] .hero,
+[data-theme='morrison'] .hero {
+  padding-top: 0;
+}
+
+[data-theme='abbey'] .hero::before,
+[data-theme='goundry'] .hero::before,
+[data-theme='galata'] .hero::before,
+[data-theme='morrison'] .hero::before {
+  content: '';
+  display: block;
+  width: 100vw;
+  margin-inline: calc(50% - 50vw);
+  margin-bottom: clamp(2rem, 5vw, 3.5rem);
+  background-color: var(--surface);
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Abbey: a 701px band with one seam at 69%. */
+[data-theme='abbey'] .hero::before {
+  height: clamp(220px, 48vw, 701px);
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none' viewBox='0 0 100 10'%3E%3Crect x='69' y='0' width='0.08' height='10' fill='%23ded9d2'/%3E%3C/svg%3E");
+}
+
+/* Goundry: 564px, one seam at 67%. */
+[data-theme='goundry'] .hero::before {
+  height: clamp(200px, 39vw, 564px);
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none' viewBox='0 0 100 10'%3E%3Crect x='67' y='0' width='0.08' height='10' fill='%23a67f87'/%3E%3C/svg%3E");
+}
+
+/* Galata: 563px, three equal thirds. */
+[data-theme='galata'] .hero::before {
+  height: clamp(200px, 39vw, 563px);
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none' viewBox='0 0 100 10'%3E%3Crect x='33.33' y='0' width='0.08' height='10' fill='%23cfd8d8'/%3E%3Crect x='66.66' y='0' width='0.08' height='10' fill='%23cfd8d8'/%3E%3C/svg%3E");
+}
+
+/* Morrison: a single 501px band, and then the column below it. */
+[data-theme='morrison'] .hero::before {
+  height: clamp(180px, 35vw, 501px);
+}
+
+/* --- morrison's inset column --------------------------------------------- */
+
+/* The signature: an 850px WHITE column floating on the #F8F8F8 page, beginning under
+   the band. Measured on the source at x=175..1025 of a 1200px frame. */
+@media (min-width: 900px) {
+  [data-theme='morrison'] main {
+    background: var(--surface);
+    width: min(850px, 92vw);
+    margin-inline: auto;
+    border: 1px solid var(--border);
+  }
+
+  [data-theme='morrison'] .hero::before {
+    width: auto;
+    margin-inline: 0;
+  }
+}
+
+/* --- buxton's greenery arch, and malina's floral -------------------------- */
+
+/* Buxton ships NO photographs at all — its artwork is a watercolour greenery arch
+   bleeding in from both top corners. Drawn here in flat strokes rather than fetched. */
+[data-theme='buxton'] .hero,
+[data-theme='malina'] .hero {
+  position: relative;
+  isolation: isolate;
+}
+
+[data-theme='buxton'] .hero::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: clamp(160px, 22vw, 300px);
+  background: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 260' fill='none' stroke='%23364153' stroke-opacity='0.45' stroke-width='1.4' stroke-linecap='round'%3E%3Cpath d='M40 6 C180 40 300 120 360 254 M40 6 C90 70 120 150 128 254'/%3E%3Cpath d='M120 30 l40 26 M96 74 l44 20 M92 124 l46 14 M104 176 l44 10 M150 60 l34 -22 M172 108 l38 -16 M196 156 l40 -12'/%3E%3Cpath d='M1160 6 C1020 40 900 120 840 254 M1160 6 C1110 70 1080 150 1072 254'/%3E%3Cpath d='M1080 30 l-40 26 M1104 74 l-44 20 M1108 124 l-46 14 M1096 176 l-44 10 M1050 60 l-34 -22 M1028 108 l-38 -16 M1004 156 l-40 -12'/%3E%3C/svg%3E") center top / 100% auto no-repeat;
+}
+
+/* Malina's original carries a full-page painterly dark floral behind everything. At a
+   low opacity in the ink colour it does what the original does at a glance: the dark
+   is not flat. */
+[data-theme='malina'] .hero::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 600' fill='none' stroke='%23f5efe8' stroke-opacity='0.14' stroke-width='1.6' stroke-linecap='round'%3E%3Cpath d='M300 580 C300 420 240 320 150 250 M300 520 C300 400 360 320 452 258'/%3E%3Cpath d='M300 470 C250 430 200 430 168 452 C210 486 262 492 300 470 Z'/%3E%3Cpath d='M300 400 C350 360 400 360 432 382 C390 416 338 422 300 400 Z'/%3E%3Cpath d='M300 330 C250 290 200 290 168 312 C210 346 262 352 300 330 Z'/%3E%3Ccircle cx='150' cy='232' r='26'/%3E%3Ccircle cx='452' cy='240' r='20'/%3E%3Cpath d='M150 206 v-34 M452 220 v-30'/%3E%3Ccircle cx='150' cy='150' r='16'/%3E%3Ccircle cx='452' cy='176' r='12'/%3E%3C/svg%3E") center bottom / auto 92% no-repeat;
+}
+
+/* --- type scale, from Zola's own public_theme_v2 -------------------------- */
+
+[data-theme='malina'] .hero-names {
+  font-size: clamp(2.1rem, 5.9vw, 5.3rem);   /* 85px in Zola's 1440 frame */
+  line-height: 1.6;                          /* Zola really does set 1.6 on the display line */
+}
+
+[data-theme='buxton'] .hero-names {
+  font-size: clamp(2rem, 3.9vw, 3.5rem);     /* 56px */
+  line-height: 1.6;
+}
+
+[data-theme='goundry'] .hero-names,
+[data-theme='galata'] .hero-names,
+[data-theme='morrison'] .hero-names {
+  font-size: clamp(2rem, 3.9vw, 3.5rem);
+}
+
+/* Pinyon's x-height is tiny against Libre Baskerville, so 56px of Pinyon needs more
+   than 56px to sit at the same optical size the source shows. */
+[data-theme='abbey'] .hero-names {
+  font-size: clamp(2.6rem, 5.6vw, 5rem);
+}
+
+[data-theme='malina'] .section-title,
+[data-theme='buxton'] .section-title {
+  font-size: clamp(1.5rem, 2.4vw, 2.1rem);   /* Zola: 30px and 36px */
+}
+
+[data-theme='morrison'] .section-title,
+[data-theme='galata'] .section-title,
+[data-theme='abbey'] .section-title {
+  font-size: clamp(1.8rem, 3vw, 2.8rem);     /* Zola: 40px */
+}
+
+[data-theme='goundry'] .section-title {
+  font-size: clamp(2rem, 3.4vw, 3rem);       /* Zola: 48px */
+}
+
+[data-theme='abbey'] .amp,
+[data-theme='morrison'] .amp {
+  font-style: italic;
+}
+
+[data-theme='malina'] .amp,
+[data-theme='buxton'] .amp,
+[data-theme='galata'] .amp,
+[data-theme='goundry'] .amp {
+  font-style: normal;
+  font-size: 0.42em;
+}
+
+/* ===========================================================================
+   THE KNOT COMPOSITIONS
+
+   The Knot's own layout is the same centred document for every theme — its
+   templates are distinguished almost entirely by type and colour, which is why
+   its theme object is a token bundle and not a stylesheet. So there is less
+   structure to copy here than for Zola or Bliss & Bone, and the differences
+   below are the ones its tokens actually encode: case, tracking, the third
+   face, and the accent that is not the ink.
+   =========================================================================== */
+
+/* Vintage Hollywood: gold rules, and the names tracked to six pixels. A gold
+   hairline frame around the fold is the one piece of furniture the original has
+   that is not type — and gold can be a rule here because it is also the ink. */
+[data-theme='hollywood'] .hero {
+  position: relative;
+}
+
+[data-theme='hollywood'] .hero-inner {
+  border-top: 1px solid var(--metal);
+  border-bottom: 1px solid var(--metal);
+  padding-block: clamp(2rem, 5vw, 4rem);
+}
+
+[data-theme='hollywood'] .rule,
+[data-theme='lucky'] .rule {
+  border-top-color: var(--border);
+}
+
+[data-theme='hollywood'] .hero-names {
+  font-size: clamp(1.9rem, 3.9vw, 3.5rem);   /* 56px in The Knot's frame */
+}
+
+/* Lucky Circle: the whole page is the red. Its button reverses to white, which
+   is the only high-contrast surface available on that ground. */
+[data-theme='lucky'] .hero-names {
+  font-size: clamp(2rem, 4.2vw, 3.75rem);    /* 60px */
+}
+
+/* Surround: three faces. Bellefair names, Montserrat sub-headings, EB Garamond
+   running text — most templates here have two, and the third voice is what the
+   original is recognised by. */
+[data-theme='surround'] .section-title,
+[data-theme='surround'] .schedule-day-header,
+[data-theme='surround'] .block-title {
+  font-family: var(--font-alt);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.107em;
+  font-size: clamp(1.1rem, 1.9vw, 1.75rem);  /* 28px */
+}
+
+[data-theme='surround'] .hero-names {
+  font-size: clamp(1.9rem, 3.9vw, 3.5rem);
+}
+
+/* Marrakesh Tile: sub-headings set LOWERCASE, which no other template in the set
+   does, and a fine handwriting face at 65px for the names. */
+[data-theme='marrakesh'] .section-title,
+[data-theme='marrakesh'] .schedule-day-header {
+  text-transform: lowercase;
+}
+
+[data-theme='marrakesh'] .hero-names {
+  font-size: clamp(2.4rem, 4.5vw, 4.1rem);   /* 65px, and La Belle Aurore runs small */
+}
+
+[data-theme='marrakesh'] .amp {
+  font-style: normal;
+}
+
+/* Officially Official: a monospace body under a condensed-caps display. The mono
+   is the whole character of it, so the schedule times and codes lean into it. */
+[data-theme='official'] .hero-names {
+  font-size: clamp(1.9rem, 4vw, 3.6rem);     /* 58px */
+}
+
+[data-theme='official'] .schedule-time,
+[data-theme='official'] .label {
+  font-family: var(--font-body);
+  font-variant-numeric: tabular-nums;
+}
+
+[data-theme='official'] .section-title,
+[data-theme='official'] .schedule-day-header,
+[data-theme='official'] .schedule-name {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.125em;
+}
+
+/* Elegant Industrial: an extra-condensed display over a grotesque, and the one
+   theme whose ACCENT is a different colour from its ink — so links and the
+   attire rule take the rust while the running text stays grey-green. */
+[data-theme='industrial'] .hero-names {
+  font-size: clamp(2.1rem, 4.6vw, 3.75rem);  /* 60px — the token, not a nudge for Saira's width */
+}
+
+[data-theme='industrial'] .section-title,
+[data-theme='industrial'] .schedule-name,
+[data-theme='industrial'] .schedule-day-header {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.067em;
+}
+
+[data-theme='industrial'] .block-link,
+[data-theme='industrial'] .dresscode-label,
+[data-theme='industrial'] .schedule-blurb {
+  color: var(--accent-text);
+}
+
+[data-theme='industrial'] .dresscode {
+  border-top-color: var(--accent);
+}
+
+/* Darker Grotesque is drawn small on the body — it needs a step up to read at the
+   same size as the others. */
+[data-theme='industrial'] .prose,
+[data-theme='industrial'] .schedule-desc,
+[data-theme='industrial'] .faq-a,
+[data-theme='industrial'] .block-body {
+  font-size: 1.12em;
+}
+
+/* ---------------------------------------------------------------------------
+   ZOLA / THE KNOT — round 2 corrections
+
+   Both platforms hold letter-spacing constant in PIXELS across their whole
+   scale. Malina sets 3px at 85px, at 45px, at 30px and at 25px alike. Deriving
+   one em value from the names' tracking and inheriting it everywhere makes
+   every other heading wrong by the ratio of its size to the names' — Malina's
+   section heads came out 2.9x too tight that way. So section sizes and tracking
+   are authored in px per theme, as the token objects state them.
+   --------------------------------------------------------------------------- */
+
+/* Both platforms drop the names' tracking on a phone — 6px to 3px on Hollywood and Lucky, 8px to
+   4px on Officially Official. An em value cannot do that, because it scales with the type. */
+@media (max-width: 768px) {
+  [data-theme='hollywood'] .hero-names,
+  [data-theme='lucky'] .hero-names {
+    letter-spacing: 3px;
+  }
+
+  [data-theme='official'] .hero-names {
+    letter-spacing: 4px;
+  }
+}
+
+/* Abbey's names are 56px in the token. The 80px here was argued from Pinyon's small x-height, but
+   in the source render the script occupies about 20% of the frame and at 80px it took 30%. */
+[data-theme='abbey'] .hero-names {
+  font-size: clamp(2.1rem, 4.2vw, 3.5rem);   /* 56px, the token's own value */
+}
+
+[data-theme='abbey'] .section-title,
+[data-theme='abbey'] .schedule-day-header {
+  text-transform: capitalize;
+}
+
+/* Morrison is the one Zola theme whose nav ground differs from its page ground. */
+[data-theme='morrison'] .viewing-bar {
+  background: #ffffff;
+}
+
+/* Surround's `.s1` is 56px on a 44px line — a deliberately compressed stack, and the thing that
+   makes the lockup read as one mark rather than three lines. */
+[data-theme='surround'] .hero-names {
+  line-height: 0.79;
+}
+
+/* Industrial's body is uppercase in the token; its own explicit prose bump fought that. */
+[data-theme='industrial'] .prose,
+[data-theme='industrial'] .schedule-desc,
+[data-theme='industrial'] .faq-a,
+[data-theme='industrial'] .block-body {
+  font-size: 1em;
+}
+
+/* ---------------------------------------------------------------------------
+   THE BANDS, made visible
+
+   Painting the band `var(--surface)` put it 2-6% off the page ground — and on
+   Morrison, #ffffff on #ffffff, which is to say nothing at all. Combined with
+   band heights of 561-691px plus the chrome bar, the desktop fold of four
+   themes was a blank rectangle with the names pushed below it.
+
+   Two corrections: a tone that actually reads, and a height that leaves the
+   fold to the names. The source bands are 47-58% of their frame height; these
+   are sized so the eyebrow and names clear a 900px viewport.
+   --------------------------------------------------------------------------- */
+
+[data-theme='abbey'] .hero::before {
+  height: clamp(150px, 24vw, 340px);
+  background-color: #e6e1d8;
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none' viewBox='0 0 100 10'%3E%3Crect x='69' y='0' width='0.09' height='10' fill='%23c9c2b6'/%3E%3C/svg%3E");
+}
+
+[data-theme='goundry'] .hero::before {
+  height: clamp(140px, 22vw, 320px);
+  background-color: #a67f87;
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none' viewBox='0 0 100 10'%3E%3Crect x='67' y='0' width='0.09' height='10' fill='%238d666e'/%3E%3C/svg%3E");
+}
+
+/* Galata's panes are NOT three equal thirds. Measured on the source render the seams fall at
+   33.3% and 88.1% — a 33/55/12 split with a narrow sliver on the right. */
+[data-theme='galata'] .hero::before {
+  height: clamp(140px, 22vw, 320px);
+  background-color: #e4eaea;
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none' viewBox='0 0 100 10'%3E%3Crect x='33.3' y='0' width='0.09' height='10' fill='%23b9c7c7'/%3E%3Crect x='88.1' y='0' width='0.09' height='10' fill='%23b9c7c7'/%3E%3C/svg%3E");
+}
+
+/* Morrison's band runs the full frame width ABOVE the column — the column starts under it. The
+   previous rule constrained it inside the column and painted it white on white. */
+[data-theme='morrison'] .hero::before {
+  height: clamp(140px, 22vw, 320px);
+  background-color: #e9e9e9;
+}
+
+@media (min-width: 900px) {
+  [data-theme='morrison'] .hero::before {
+    width: 100vw;
+    margin-inline: calc(50% - 50vw);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   THE DECORATIVE ART
+
+   Round 1 of this loop judged The Knot's templates as "one centred document,
+   differing only by type and colour". Their own theme objects say otherwise:
+   every one carries `styles.images.top` (Hollywood and Industrial carry
+   `.bottom` too), and fetching those assets shows FLAT VECTOR OR TYPE ART — a
+   Moroccan tile border, a gold deco corner frame, rust brush bands, a ghosted
+   OFFICIAL lockup, a double-line oval around the ampersand.
+
+   None of that is photography, so the no-photograph constraint does not cover
+   it, and leaving it out was a real fidelity cost rather than a stated
+   compromise. Three of these themes are literally NAMED for the asset that was
+   missing: Marrakesh Tile, Lucky Circle, Officially Official.
+
+   All of it is drawn here in flat strokes and fills — no raster, no request.
+   --------------------------------------------------------------------------- */
+
+/* --- Marrakesh Tile: the border band the theme is named for ---------------- */
+
+[data-theme='marrakesh'] .hero {
+  padding-top: 0;
+}
+
+[data-theme='marrakesh'] .hero::before {
+  content: '';
+  display: block;
+  width: 100vw;
+  margin-inline: calc(50% - 50vw);
+  margin-bottom: clamp(1.75rem, 4vw, 3rem);
+  height: clamp(64px, 7vw, 92px);
+  background: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 92' fill='none' stroke='%232d808b' stroke-width='1.5'%3E%3Cpath d='M0 68 h120' stroke-width='2'/%3E%3Cpath d='M0 76 q10 16 20 0 q10 16 20 0 q10 16 20 0 q10 16 20 0 q10 16 20 0 q10 16 20 0' /%3E%3Ccircle cx='30' cy='34' r='17'/%3E%3Ccircle cx='90' cy='34' r='17'/%3E%3Ccircle cx='0' cy='34' r='17'/%3E%3Ccircle cx='60' cy='34' r='17'/%3E%3Ccircle cx='120' cy='34' r='17'/%3E%3Cpath d='M30 17 v34 M13 34 h34 M18 22 l24 24 M42 22 l-24 24'/%3E%3Cpath d='M90 17 v34 M73 34 h34 M78 22 l24 24 M102 22 l-24 24'/%3E%3Cpath d='M60 17 v34 M43 34 h34 M48 22 l24 24 M72 22 l-24 24'/%3E%3Cpath d='M0 8 h120'/%3E%3C/svg%3E") repeat-x center top / 120px 92px;
+}
+
+/* --- Officially Official: the ghosted type lockup -------------------------- */
+
+/* The source's images.top IS the joke the theme is named for — an enormous pale
+   OFFICIAL in condensed caps with a red script "officially" laid over it. It is
+   type, so it is set in type here rather than traced. */
+[data-theme='official'] .hero-eyebrow {
+  position: relative;
+}
+
+[data-theme='official'] .hero-eyebrow::before {
+  content: 'OFFICIAL';
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -46%);
+  font-family: var(--font-display);
+  font-size: clamp(4rem, 13vw, 11.5rem);
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: #f2d5ae;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+[data-theme='official'] .hero {
+  position: relative;
+  isolation: isolate;
+}
+
+/* --- Surround: the double-line oval the theme is named for ----------------- */
+
+[data-theme='surround'] .amp {
+  /* `flex`, not `inline-flex`: the base `.amp` is a block so the ampersand takes its own line
+     between the two names, and inline-flex pulled the oval up alongside "Ayesha" where it
+     overlapped the last letter. */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 190px;
+  height: 190px;
+  max-width: 42vw;
+  max-height: 42vw;
+  margin-inline: auto;
+  background: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 190 190' fill='none' stroke='%2367471e' stroke-width='1.4'%3E%3Cellipse cx='95' cy='95' rx='92' ry='72'/%3E%3Cellipse cx='95' cy='95' rx='86' ry='66'/%3E%3C/svg%3E") center / contain no-repeat;
+  font-size: 0.34em;
+}
+
+/* --- Vintage Hollywood: the stepped deco corner frame ---------------------- */
+
+[data-theme='hollywood'] .hero-inner {
+  border: 0;
+  padding: clamp(2.5rem, 6vw, 4.5rem) clamp(1.5rem, 4vw, 3.5rem);
+  background: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none' viewBox='0 0 400 300' fill='none' stroke='%23e9b970' stroke-width='1.4'%3E%3Cpath d='M28 2 H372 M28 298 H372 M2 28 V272 M398 28 V272'/%3E%3Cpath d='M2 28 L14 28 L14 16 L28 16 L28 2'/%3E%3Cpath d='M398 28 L386 28 L386 16 L372 16 L372 2'/%3E%3Cpath d='M2 272 L14 272 L14 284 L28 284 L28 298'/%3E%3Cpath d='M398 272 L386 272 L386 284 L372 284 L372 298'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+}
+
+/* --- Lucky Circle: the circle ---------------------------------------------- */
+
+[data-theme='lucky'] .hero {
+  position: relative;
+  isolation: isolate;
+}
+
+[data-theme='lucky'] .hero::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  top: clamp(2rem, 6vw, 5rem);
+  transform: translateX(-50%);
+  width: min(560px, 74vw);
+  aspect-ratio: 1;
+  background: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200' fill='none' stroke='%23ffffff' stroke-opacity='0.42' stroke-width='0.9'%3E%3Ccircle cx='100' cy='100' r='97'/%3E%3Ccircle cx='100' cy='100' r='91'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* --- Elegant Industrial: the rust brush bands, top and bottom -------------- */
+
+[data-theme='industrial'] .hero {
+  padding-top: 0;
+}
+
+[data-theme='industrial'] .hero::before,
+[data-theme='industrial'] .site-footer::before {
+  content: '';
+  display: block;
+  width: 100vw;
+  margin-inline: calc(50% - 50vw);
+  height: clamp(26px, 3.2vw, 44px);
+  background: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none' viewBox='0 0 400 40'%3E%3Cpath d='M0 12 C60 4 110 20 168 11 C228 2 286 19 344 10 C368 6 386 12 400 9 L400 30 C384 33 366 27 344 31 C286 40 228 23 168 32 C110 41 60 25 0 33 Z' fill='%239b5a44'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+}
+
+[data-theme='industrial'] .hero::before {
+  margin-bottom: clamp(2rem, 5vw, 3.5rem);
+}
+
+[data-theme='industrial'] .site-footer::before {
+  margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
+}
+
+/* --- Goundry: the flanking botanical stems -------------------------------- */
+
+[data-theme='goundry'] .hero-names {
+  position: relative;
+}
+
+[data-theme='goundry'] .hero-names::before,
+[data-theme='goundry'] .hero-names::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: clamp(38px, 6vw, 84px);
+  height: clamp(120px, 17vw, 230px);
+  background: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 90 240' fill='none' stroke='%2349323c' stroke-width='1.5' stroke-linecap='round'%3E%3Cpath d='M62 236 C58 180 50 120 30 72 C22 52 14 34 8 18'/%3E%3Cpath d='M40 196 C22 186 12 168 12 150 C32 152 44 170 46 190 Z'/%3E%3Cpath d='M50 154 C68 146 78 128 78 110 C58 112 46 130 44 150 Z'/%3E%3Cpath d='M34 122 C16 114 6 96 6 78 C26 80 38 98 40 118 Z'/%3E%3Cpath d='M28 84 C46 76 56 58 56 40 C36 42 24 60 22 80 Z'/%3E%3Ccircle cx='8' cy='14' r='6'/%3E%3Ccircle cx='24' cy='30' r='4'/%3E%3C/svg%3E") center / contain no-repeat;
+  pointer-events: none;
+}
+
+[data-theme='goundry'] .hero-names::before {
+  right: calc(100% - 4vw);
+}
+
+[data-theme='goundry'] .hero-names::after {
+  left: calc(100% - 4vw);
+  transform: translateY(-50%) scaleX(-1);
+}
+
+@media (max-width: 700px) {
+  [data-theme='goundry'] .hero-names::before,
+  [data-theme='goundry'] .hero-names::after {
+    display: none;
+  }
+}
+
+/* --- Buxton: a denser arch ------------------------------------------------- */
+
+/* Four hairline arcs read as scratches. The source is a watercolour greenery mass
+   filling roughly the top of the page, so this is layered filled leaf shapes at
+   several opacity stops rather than outlines, and it runs deeper. */
+[data-theme='buxton'] .hero::before {
+  height: clamp(210px, 30vw, 430px);
+  background: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 420' fill='%23364153'%3E%3Cg fill-opacity='0.22'%3E%3Cpath d='M20 0 C150 60 250 170 300 330 C270 210 190 96 60 24 Z'/%3E%3Cpath d='M1180 0 C1050 60 950 170 900 330 C930 210 1010 96 1140 24 Z'/%3E%3C/g%3E%3Cg fill-opacity='0.30'%3E%3Cpath d='M74 32 C118 40 150 74 156 118 C112 112 80 76 74 32 Z'/%3E%3Cpath d='M120 100 C164 108 196 142 202 186 C158 180 126 144 120 100 Z'/%3E%3Cpath d='M170 178 C214 186 246 220 252 264 C208 258 176 222 170 178 Z'/%3E%3Cpath d='M126 24 C160 -4 206 -6 240 12 C210 44 162 50 126 24 Z'/%3E%3Cpath d='M188 92 C222 64 268 62 302 80 C272 112 224 118 188 92 Z'/%3E%3Cpath d='M1126 32 C1082 40 1050 74 1044 118 C1088 112 1120 76 1126 32 Z'/%3E%3Cpath d='M1080 100 C1036 108 1004 142 998 186 C1042 180 1074 144 1080 100 Z'/%3E%3Cpath d='M1030 178 C986 186 954 220 948 264 C992 258 1024 222 1030 178 Z'/%3E%3Cpath d='M1074 24 C1040 -4 994 -6 960 12 C990 44 1038 50 1074 24 Z'/%3E%3Cpath d='M1012 92 C978 64 932 62 898 80 C928 112 976 118 1012 92 Z'/%3E%3C/g%3E%3Cg fill-opacity='0.16'%3E%3Ccircle cx='262' cy='60' r='9'/%3E%3Ccircle cx='300' cy='140' r='7'/%3E%3Ccircle cx='938' cy='60' r='9'/%3E%3Ccircle cx='900' cy='140' r='7'/%3E%3C/g%3E%3C/svg%3E") center top / 100% auto no-repeat;
+}
+
+/* --- Malina: the floral, at the coverage the source gives it --------------- */
+
+[data-theme='malina'] .hero::before {
+  inset: 0;
+  background:
+    url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 600' fill='none' stroke='%23f5efe8' stroke-opacity='0.20' stroke-width='1.5' stroke-linecap='round'%3E%3Cpath d='M300 596 C300 430 246 330 156 258 M300 540 C300 410 356 326 452 262'/%3E%3Cpath d='M300 486 C250 446 200 446 168 468 C210 502 262 508 300 486 Z'/%3E%3Cpath d='M300 414 C350 374 400 374 432 396 C390 430 338 436 300 414 Z'/%3E%3Cpath d='M300 342 C250 302 200 302 168 324 C210 358 262 364 300 342 Z'/%3E%3Cpath d='M300 270 C350 230 400 230 432 252 C390 286 338 292 300 270 Z'/%3E%3Ccircle cx='156' cy='240' r='30'/%3E%3Ccircle cx='452' cy='244' r='24'/%3E%3Cpath d='M156 210 v-40 M452 220 v-36'/%3E%3Ccircle cx='156' cy='152' r='18'/%3E%3Ccircle cx='452' cy='170' r='14'/%3E%3Cpath d='M120 300 q-40 -60 -20 -120 M480 300 q40 -60 20 -120'/%3E%3C/svg%3E") left 6% bottom / auto 96% no-repeat,
+    url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 600' fill='none' stroke='%23f5efe8' stroke-opacity='0.14' stroke-width='1.5' stroke-linecap='round'%3E%3Cpath d='M300 596 C300 430 246 330 156 258 M300 540 C300 410 356 326 452 262'/%3E%3Cpath d='M300 486 C250 446 200 446 168 468 C210 502 262 508 300 486 Z'/%3E%3Cpath d='M300 414 C350 374 400 374 432 396 C390 430 338 436 300 414 Z'/%3E%3Ccircle cx='156' cy='240' r='30'/%3E%3Ccircle cx='452' cy='244' r='24'/%3E%3C/svg%3E") right 6% bottom / auto 82% no-repeat;
+}
+
+/* ---------------------------------------------------------------------------
+   ZOLA / THE KNOT — round 3
+
+   Round 2 authored section sizes in px, which was right, but wrapped them in
+   `clamp(1.35rem, 3.2vw, var(--section-size))`. Two consequences the audit
+   caught: the vw term capped Goundry's 48px token at 46.08px on a 1440 window,
+   and at 390px every one of the twelve bottomed out on the same 1.35rem floor —
+   so on the width most guests actually read at, twelve different tokens ranging
+   from 28px to 64px all rendered as 21.6px.
+
+   The floor is now proportional to the token instead of a shared constant, so a
+   narrow screen keeps each theme's relative scale.
+   --------------------------------------------------------------------------- */
+
+[data-theme='malina'] .section-title,
+[data-theme='morrison'] .section-title,
+[data-theme='goundry'] .section-title,
+[data-theme='buxton'] .section-title,
+[data-theme='galata'] .section-title,
+[data-theme='abbey'] .section-title,
+[data-theme='hollywood'] .section-title,
+[data-theme='lucky'] .section-title,
+[data-theme='surround'] .section-title,
+[data-theme='marrakesh'] .section-title,
+[data-theme='official'] .section-title,
+[data-theme='industrial'] .section-title {
+  /* The Knot's `s2` names a different family from `s1` on four of six themes — the section head is
+     the BODY face, not the display one. Marrakesh was setting its section heads in a handwriting
+     script at 42px caps, which its source never does anywhere. */
+  font-family: var(--head-font, var(--font-display));
+  /* The lower bound is proportional to the token AND floored, so a small token (Surround's 28px)
+     still outranks body copy on a phone while a large one (Goundry's 48px) keeps its scale. */
+  font-size: clamp(max(calc(var(--body-size, 17px) * 1.3), calc(var(--section-size) * 0.62)), 4.6vw, var(--section-size));
+  letter-spacing: var(--section-tracking);
+  text-transform: var(--section-case, none);
+}
+
+/* The sub-headline step drives event names, day headers, travel titles and FAQ questions on BOTH
+   platforms. Round 2 applied it to five of the six Knot themes — Surround was missing, so its
+   event names rendered in Bellefair at 38.4px instead of Montserrat at 28px — and to none of
+   Zola's, where FAQ questions were landing on an invented 23.2px. Case was not applied at all, so
+   Marrakesh's lowercase reached two of its four s3 elements. */
+/* Event names take the EVENT component (Zola CMS_EVENT, The Knot s3). */
+[data-theme='malina'] .schedule-name,
+[data-theme='morrison'] .schedule-name,
+[data-theme='goundry'] .schedule-name,
+[data-theme='buxton'] .schedule-name,
+[data-theme='galata'] .schedule-name,
+[data-theme='abbey'] .schedule-name,
+[data-theme='hollywood'] .schedule-name,
+[data-theme='lucky'] .schedule-name,
+[data-theme='surround'] .schedule-name,
+[data-theme='marrakesh'] .schedule-name,
+[data-theme='official'] .schedule-name,
+[data-theme='industrial'] .schedule-name {
+  font-family: var(--sub-font, var(--font-display));
+  font-size: clamp(calc(var(--event-size) * 0.56), 4.6vw, var(--event-size));
+  letter-spacing: var(--event-tracking);
+  text-transform: var(--event-case, var(--section-case, none));
+  font-weight: 400;
+  color: var(--ink);
+}
+
+/* Day headers and travel titles take the ITEM component (Zola CMS_ENTITY, The Knot s4) — the level
+   below an event name, which is what they are. Round 3 had all four heading slots on one size, so
+   a reviewer reported them reading as a single level, and on Abbey the event name came out SMALLER
+   than the day header above it. */
+[data-theme='malina'] .schedule-day-header,
+[data-theme='morrison'] .schedule-day-header,
+[data-theme='goundry'] .schedule-day-header,
+[data-theme='buxton'] .schedule-day-header,
+[data-theme='galata'] .schedule-day-header,
+[data-theme='abbey'] .schedule-day-header,
+[data-theme='hollywood'] .schedule-day-header,
+[data-theme='lucky'] .schedule-day-header,
+[data-theme='surround'] .schedule-day-header,
+[data-theme='marrakesh'] .schedule-day-header,
+[data-theme='official'] .schedule-day-header,
+[data-theme='industrial'] .schedule-day-header,
+[data-theme='malina'] .block-title,
+[data-theme='morrison'] .block-title,
+[data-theme='goundry'] .block-title,
+[data-theme='buxton'] .block-title,
+[data-theme='galata'] .block-title,
+[data-theme='abbey'] .block-title,
+[data-theme='hollywood'] .block-title,
+[data-theme='lucky'] .block-title,
+[data-theme='surround'] .block-title,
+[data-theme='marrakesh'] .block-title,
+[data-theme='official'] .block-title,
+[data-theme='industrial'] .block-title {
+  font-family: var(--item-font, var(--sub-font, var(--font-display)));
+  /* Floored at just over body size and ordered BELOW the event floor. The previous multipliers ran
+     0.58 / 0.6 / 0.66 for section / event / item, which inverted the ladder at 390px on the three
+     themes whose components are all one size, and pushed the day header under the body copy it
+     heads on five others. */
+  font-size: clamp(max(calc(var(--body-size, 17px) * 1.06), calc(var(--item-size) * 0.5)), 3.5vw, var(--item-size));
+  letter-spacing: var(--item-tracking);
+  text-transform: var(--item-case, var(--section-case, none));
+  font-weight: 400;
+  color: var(--ink);
+}
+
+/* A FAQ QUESTION is body text in both platforms. CMS_FAQ .heading — 64px on Goundry — is the
+   heading of the FAQ SECTION, not of each question; CMS_FAQ .body is 16px, like every other body
+   step. Reading the section heading onto each question inverted the page: Goundry's dietary
+   question ran to five lines at 46px and made it the tallest page in the set. It also produced
+   Abbey's incorrect Title Case, since CSS capitalize capitalises every word including articles —
+   fine on a short section title, wrong on a sentence. Questions are distinguished from answers by
+   weight, which is what the source does. */
+[data-theme='malina'] .faq-q,
+[data-theme='morrison'] .faq-q,
+[data-theme='goundry'] .faq-q,
+[data-theme='buxton'] .faq-q,
+[data-theme='galata'] .faq-q,
+[data-theme='abbey'] .faq-q,
+[data-theme='hollywood'] .faq-q,
+[data-theme='lucky'] .faq-q,
+[data-theme='surround'] .faq-q,
+[data-theme='marrakesh'] .faq-q,
+[data-theme='official'] .faq-q,
+[data-theme='industrial'] .faq-q {
+  font-family: var(--font-body);
+  font-size: var(--body-size, 17px);
+  letter-spacing: var(--body-tracking, normal);
+  text-transform: none;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+/* The FAQ section's own heading is where CMS_FAQ .heading belongs. */
+[data-theme='malina'] #faq .section-title,
+[data-theme='morrison'] #faq .section-title,
+[data-theme='goundry'] #faq .section-title,
+[data-theme='buxton'] #faq .section-title,
+[data-theme='galata'] #faq .section-title,
+[data-theme='abbey'] #faq .section-title,
+[data-theme='hollywood'] #faq .section-title,
+[data-theme='lucky'] #faq .section-title,
+[data-theme='surround'] #faq .section-title,
+[data-theme='marrakesh'] #faq .section-title,
+[data-theme='official'] #faq .section-title,
+[data-theme='industrial'] #faq .section-title {
+  font-size: clamp(max(1.15rem, calc(var(--faq-size) * 0.5)), 4.6vw, var(--faq-size));
+  letter-spacing: var(--faq-tracking, var(--section-tracking));
+  text-transform: var(--faq-case, var(--section-case, none));
+}
+
+/* Surround's sub-headline face is Montserrat, not its display Bellefair — it is the only theme of
+   the eighteen with a third face in that slot. */
+[data-theme='surround'] {
+  --sub-font: var(--font-alt), 'Montserrat', sans-serif;
+}
+
+/* Surround's `.s1` has no mobile query — it holds 6px at every width, unlike Hollywood, Lucky and
+   Officially Official, which each declare a 768px step-down. */
+@media (max-width: 768px) {
+  [data-theme='surround'] .hero-names {
+    letter-spacing: 5.992px;
+  }
+}
+
+/* Buxton sets COUPLES_NAMES .body at 56px UPPERCASE — the date line under the names is at display
+   size, and it is the most distinctive thing the template does. It was rendering as an eyebrow. */
+/* Buxton sets COUPLES_NAMES .body at 56px uppercase — its date line is at display size, and that
+   is the template's most distinctive move. But the source's string is a short date; ours is
+   "SATURDAY, FEBRUARY TWENTY SEVENTH TWO THOUSAND TWENTY SEVEN", written longhand because that is
+   the convention this project copies elsewhere. At 56px it wrapped to five lines, became the
+   largest mass on the fold and pushed the names below it — inverting the hierarchy in order to
+   honour a number. It stays raised above an eyebrow and below the names, which is the proportion
+   the source render actually shows. */
+[data-theme='buxton'] .hero-eyebrow {
+  font-family: var(--font-display);
+  font-size: clamp(0.95rem, 1.5vw, 1.25rem);
+  letter-spacing: 0.089em;
+  color: var(--ink);
+  margin-bottom: clamp(1rem, 2.5vw, 1.75rem);
+}
+
+/* ---------------------------------------------------------------------------
+   THE BANDS, given something to hold
+
+   Round 1 painted them so close to the ground that they vanished. Round 2 gave
+   them a tone that reads — and four themes then opened on a 430px empty
+   rectangle that scans as a failed image load, which is worse. A photograph is
+   not coming, so the band carries a drawn mark and is sized to be a band rather
+   than a screen.
+   --------------------------------------------------------------------------- */
+
+[data-theme='abbey'] .hero::before,
+[data-theme='goundry'] .hero::before,
+[data-theme='galata'] .hero::before,
+[data-theme='morrison'] .hero::before {
+  height: clamp(104px, 13vw, 190px);
+  background-position: center;
+  background-size: cover;
+}
+
+[data-theme='abbey'] .hero::before {
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none' viewBox='0 0 1200 190' fill='none' stroke='%23c9c2b6'%3E%3Crect x='828' y='0' width='1.1' height='190' fill='%23c9c2b6' stroke='none'/%3E%3Cpath d='M300 96 h180 M720 96 h180' stroke-width='1'/%3E%3Ccircle cx='560' cy='96' r='34' stroke-width='1'/%3E%3Ccircle cx='640' cy='96' r='34' stroke-width='1'/%3E%3C/svg%3E");
+}
+
+[data-theme='goundry'] .hero::before {
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none' viewBox='0 0 1200 190' fill='none' stroke='%238d666e'%3E%3Crect x='804' y='0' width='1.1' height='190' fill='%238d666e' stroke='none'/%3E%3Cpath d='M340 95 C400 60 460 60 520 95 C460 130 400 130 340 95 Z' stroke-width='1'/%3E%3Cpath d='M680 95 C740 60 800 60 860 95 C800 130 740 130 680 95 Z' stroke-width='1'/%3E%3Ccircle cx='600' cy='95' r='9' stroke-width='1'/%3E%3C/svg%3E");
+}
+
+[data-theme='galata'] .hero::before {
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none' viewBox='0 0 1200 190' fill='none' stroke='%23b9c7c7'%3E%3Crect x='400' y='0' width='1.1' height='190' fill='%23b9c7c7' stroke='none'/%3E%3Crect x='1057' y='0' width='1.1' height='190' fill='%23b9c7c7' stroke='none'/%3E%3Cpath d='M150 60 h100 M150 95 h140 M150 130 h80' stroke-width='1'/%3E%3Cpath d='M560 52 v86 M620 52 v86 M680 52 v86 M740 52 v86 M800 52 v86' stroke-width='1'/%3E%3Cpath d='M1100 74 h34 M1100 116 h34' stroke-width='1'/%3E%3C/svg%3E");
+}
+
+[data-theme='morrison'] .hero::before {
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none' viewBox='0 0 1200 190' fill='none' stroke='%23cccccc'%3E%3Cpath d='M100 95 h420 M680 95 h420' stroke-width='1'/%3E%3Crect x='556' y='61' width='88' height='68' stroke-width='1'/%3E%3Cpath d='M556 95 h88 M600 61 v68' stroke-width='1'/%3E%3C/svg%3E");
+}
+
+/* ---------------------------------------------------------------------------
+   Officially Official's lockup, re-anchored
+
+   It was centred on `.hero-eyebrow`, so it sat on the date line rather than on
+   the names. It belongs behind the whole lockup — and the source lays a red
+   script word across it, which is the half of the joke the theme is named for.
+   --------------------------------------------------------------------------- */
+
+[data-theme='official'] .hero-eyebrow {
+  position: static;
+}
+
+[data-theme='official'] .hero-eyebrow::before {
+  content: none;
+}
+
+[data-theme='official'] .hero-inner {
+  position: relative;
+}
+
+/* The ghosted OFFICIAL wordmark and the script overlay that used to sit here are gone. Neither
+   derived from a token — the source's `images.top` is a PNG — so they were invented decoration,
+   and they collided with the date line and the names. An invented mark that damages legibility is
+   worse than an absent one. */
+
+
+
+
+/* ---------------------------------------------------------------------------
+   Elegant Industrial's second band
+
+   The token carries `images.bottom` as well as `images.top`. The footer rule was
+   written but `.site-footer::before` sits inside a centred shell, so it never
+   bled. Moved onto the footer element itself.
+   --------------------------------------------------------------------------- */
+
+[data-theme='industrial'] .site-footer {
+  position: relative;
+  padding-top: clamp(3rem, 6vw, 5rem);
+}
+
+[data-theme='industrial'] .site-footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100vw;
+  margin-inline: 0;
+  height: clamp(26px, 3.2vw, 44px);
+  background: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none' viewBox='0 0 400 40'%3E%3Cpath d='M0 9 C58 17 116 1 174 10 C232 19 290 3 348 11 C370 14 386 9 400 12 L400 31 C384 28 368 33 348 30 C290 21 232 38 174 29 C116 20 58 36 0 28 Z' fill='%239b5a44'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+}
+
+/* ---------------------------------------------------------------------------
+   Shared refinements
+   --------------------------------------------------------------------------- */
+
+.hero-indic,
+.hero-numeric,
+.footer-rail,
+.edge-rail,
+.corner-mark,
+.splash {
+  display: none;
+}
+
+/* ---------------------------------------------------------------------------
+   THE COVER
+
+   Three of the six sources open on a full-viewport cover carrying nothing but
+   the names, with the site beginning underneath it. They are not the same cover,
+   and that difference is most of what tells the three templates apart at a
+   glance:
+
+     aspen   `main section.coverpage.cover` — a white field, the name set LEFT
+             against the page edge and vertically centred, small. The source
+             emits its h1 twice, cover and header, which is why the names appear
+             twice here too.
+     avril   `coverpage cover square colorOnly` — a solid #013AB2 field filling
+             the viewport with the names reversed out of it in white script, on
+             ONE line. Blue script on cream — which this used to do — is the
+             inverse of the template's single most recognisable screen.
+     alessia a full-bleed cabana-striped field with one enormous cream line in a
+             heavy geometric sans over it.
+
+   Everything else keeps `.splash` hidden.
+   --------------------------------------------------------------------------- */
+
+[data-theme='aspen'] .splash,
+[data-theme='avril'] .splash {
+  display: flex;
+  align-items: center;
+  min-height: calc(100vh - var(--stick-top, 0px));
+  padding-inline: var(--gutter);
+}
+
+.splash-names {
+  margin: 0;
+  font-family: var(--font-display);
+  color: var(--ink);
+  line-height: 1.24;
+  /* The cover had NO font-size, so on any theme that does not set its own the couple's names
+     rendered at the inherited 16px in the middle of a full viewport. Four templates opened on what
+     was effectively a blank page, and their folds measured within 0.2% of each other — which is how
+     an earlier audit's "byte-identical screenshots" finding survived in all but the literal sense.
+     Themes that copy a source WITH a cover still override this. */
+  font-size: clamp(2rem, 7vw, 5rem);
+}
+
+.splash-amp {
+  font-size: 0.62em;
+  padding-inline: 0.16em;
+}
+
+/* --- aspen: left-set at the gutter, no fill ------------------------------- */
+
+[data-theme='aspen'] .splash {
+  justify-content: flex-start;
+  border-bottom: 1px solid var(--border);
+}
+
+[data-theme='aspen'] .splash-names {
+  text-align: left;
+  font-weight: 200;
+  font-size: clamp(1.9rem, 4vw, 3.1rem);
+  letter-spacing: 0;
+}
+
+[data-theme='aspen'] .splash-amp {
+  display: block;
+  font-weight: 200;
+  font-size: 0.5em;
+  margin: 0.35em 0 0.25em;
+  padding-inline: 0;
+  color: var(--muted);
+}
+
+/* --- avril: the whole screen in the blue, names reversed out in white ----- */
+
+[data-theme='avril'] .splash {
+  justify-content: center;
+  background: var(--ink);
+}
+
+[data-theme='avril'] .splash-names {
+  text-align: center;
+  white-space: nowrap;
+  color: var(--bg);
+  font-size: clamp(2.6rem, 10vw, 9rem);
+  line-height: 1.1;
+}
+
+/* alessia has NO cover. Its source's fold is a photograph, and this project ships none — but the
+   two substitutes tried here were both worse than nothing. A cabana stripe invented a pattern the
+   template does not contain; a flat crimson field put 98% of the fold in a colour the source uses
+   only as INK (all 61 of its declarations are `color:`, on an #FFFAF1 ground). Inverting a
+   palette's roles on the most important screen is a bigger error than declining to fill it, so the
+   hero — cream, with the names in crimson — is the fold. */
+
+/* With the gate above it, the hero itself no longer needs to fill the screen. */
+[data-theme='aspen'] .hero {
+  min-height: 0;
+  display: block;
+}
+
+[data-theme='anvaya'] .hero-indic,
+[data-theme='marry-monday'] .hero-numeric {
+  display: block;
+}
+
+.section-title,
+.schedule-name,
+.faq-q,
+.hero-tagline,
+.schedule-blurb {
+  text-wrap: balance;
+}
+
+.prose p,
+.schedule-desc,
+.dresscode-note,
+.faq-a {
+  text-wrap: pretty;
+}
+
+/* Longhand dates and times, as the Bliss & Bone templates set them. */
+.longhand {
+  font-variant-numeric: normal;
+  letter-spacing: 0.01em;
+}
+
+.swatches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.5rem 0.9rem;
+}
+
+.swatch {
+  display: grid;
+  grid-template-columns: 14px 1fr;
+  gap: 0.55rem;
+  align-items: start;
+}
+
+.swatch-dot {
+  margin-top: 0.2em;
+}
+
+.swatch-label {
+  line-height: 1.35;
+}
+
+.swatch-why {
+  display: block;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.section-num {
+  font-size: 12.5px;
+  letter-spacing: 0.24em;
+  font-weight: 500;
+}
+
+/* Tracked caps add a trailing space after the final letter, so optical right padding reads tighter
+   than left. Compensate by the tracking amount. */
+.btn {
+  padding-right: calc(1.6em + var(--label-tracking));
+}
+
+.btn-sm {
+  padding-right: calc(1.05em + var(--label-tracking));
+}
+
+.faq-item {
+  max-width: 62ch;
+}
+
+.faq-a {
+  max-width: none;
+}
+
+@media (max-width: 560px) {
+  .welcome-note {
+    /* Was a flat 17px, which re-imposed a house value on a phone after the desktop rule had been
+       moved onto each theme's own body token. */
+    font-size: var(--body-size, 17px);
+    line-height: 1.62;
+  }
+
+  .hero-eyebrow {
+    letter-spacing: 0.12em;
+    /* Was 10.5px. The eyebrow carries the date on every fold in the set, and 10.5px is smaller
+       than the 11px this project had already established appears in no source token object. */
+    font-size: var(--label-size, 11px);
+  }
+}
+
+
+/* ---------------------------------------------------------------------------
+   Post-audit corrections.
+   --------------------------------------------------------------------------- */
+
+/* No shared button paint. Round 2's audit found every theme shipping the same solid rectangle over
+   six different source treatments — four of the sources draw an outline (`background: none`) and
+   veleyross puts no filled surface on its page at all. The fill, the radius, the face and the
+   tracking are per-theme tokens now; see the --btn-* block in each theme. */
+.btn-ghost {
+  background: transparent;
+  /* `--border` is invisible against several of the eighteen grounds — Buxton's and Industrial's
+     outline variants had effectively vanished. The outline is the theme's own button border. */
+  border-color: var(--btn-border, var(--border));
+  /* NOT --btn-ink: that is the label colour for the FILLED button, so on a theme with a filled CTA
+     it is the light one — cream on cream, 1.05:1. A ghost button sits on the page ground and takes
+     the page ink. */
+  color: var(--ink);
+}
+
+/* The chrome bar was inventing a tone that appears in no source stylesheet — Kelsey's #d7cec0 and
+   Aspen's #f7f5f3 were both guessed rather than lifted. It now uses the theme's own ground. */
+.viewing-bar {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+
+/* The eyebrow carries COUPLES_NAMES .body, which states a case on three Zola themes. */
+[data-theme='morrison'] .hero-eyebrow,
+[data-theme='abbey'] .hero-eyebrow,
+[data-theme='buxton'] .hero-eyebrow {
+  text-transform: var(--eyebrow-case, uppercase);
+}
