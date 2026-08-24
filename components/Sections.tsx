@@ -19,6 +19,8 @@ interface SectionProps {
   template: Template;
   num?: string;
   title: string;
+  /** Which ground this section sits on. Decided by the template, not by the section's DOM index. */
+  band?: string;
 }
 
 /** A section's eyebrow: the number, if this template numbers its sections. */
@@ -29,10 +31,10 @@ function Eyebrow({ num, template }: { num?: string; template: Template }) {
 
 /* -------------------------------------------------------------------- Story */
 
-export function StorySection({ blocks, template, num, title }: SectionProps) {
+export function StorySection({ blocks, template, num, title, band }: SectionProps) {
   if (!blocks.length) return null;
   return (
-    <section className="section section-story" aria-labelledby="story-h" id="story">
+    <section className="section section-story" data-band={band} aria-labelledby="story-h" id="story">
       <div className="shell">
         <hr className="rule" />
         <Eyebrow num={num} template={template} />
@@ -56,10 +58,10 @@ export function StorySection({ blocks, template, num, title }: SectionProps) {
 
 /* -------------------------------------------------------------- Wedding party */
 
-export function PartySection({ blocks, template, num, title }: SectionProps) {
+export function PartySection({ blocks, template, num, title, band }: SectionProps) {
   if (!blocks.length) return null;
   return (
-    <section className="section section-party" aria-labelledby="party-h" id="party">
+    <section className="section section-party" data-band={band} aria-labelledby="party-h" id="party">
       <div className="shell">
         <hr className="rule" />
         <Eyebrow num={num} template={template} />
@@ -83,17 +85,17 @@ export function PartySection({ blocks, template, num, title }: SectionProps) {
 
 /* ------------------------------------------------------------- Things to do */
 
-export function ThingsSection({ blocks, template, num, title }: SectionProps) {
+export function ThingsSection({ blocks, template, num, title, band }: SectionProps) {
   if (!blocks.length) return null;
   return (
-    <section className="section section-things" aria-labelledby="things-h" id="things">
+    <section className="section section-things" data-band={band} aria-labelledby="things-h" id="things">
       <div className="shell">
         <hr className="rule" />
         <Eyebrow num={num} template={template} />
         <h2 id="things-h" className="display display-lg section-title">
           {title}
         </h2>
-        <div className="blocks things">
+        <div className={`blocks blocks-${template.blocks} things`}>
           {blocks.map((b) => (
             <article key={b.id} className="block">
               {b.meta ? <p className="label">{b.meta}</p> : null}
@@ -116,17 +118,17 @@ export function ThingsSection({ blocks, template, num, title }: SectionProps) {
 
 /* ------------------------------------------------------------------- Travel */
 
-export function TravelSection({ blocks, template, num, title }: SectionProps) {
+export function TravelSection({ blocks, template, num, title, band }: SectionProps) {
   if (!blocks.length) return null;
   return (
-    <section className="section" aria-labelledby="travel-h" id="travel">
+    <section className="section section-travel" data-band={band} aria-labelledby="travel-h" id="travel">
       <div className="shell">
         <hr className="rule" />
         <Eyebrow num={num} template={template} />
         <h2 id="travel-h" className="display display-lg section-title">
           {title}
         </h2>
-        <div className="blocks">
+        <div className={`blocks blocks-${template.blocks}`}>
           {blocks.map((b) => (
             <article key={b.id} className="block">
               <h3 className="block-title">{b.title}</h3>
@@ -148,17 +150,17 @@ export function TravelSection({ blocks, template, num, title }: SectionProps) {
 
 /* ---------------------------------------------------------------------- FAQ */
 
-export function FaqSection({ blocks, template, num, title }: SectionProps) {
+export function FaqSection({ blocks, template, num, title, band }: SectionProps) {
   if (!blocks.length) return null;
   return (
-    <section className="section" aria-labelledby="faq-h" id="faq">
+    <section className="section section-faq" data-band={band} aria-labelledby="faq-h" id="faq">
       <div className="shell">
         <hr className="rule" />
         <Eyebrow num={num} template={template} />
         <h2 id="faq-h" className="display display-lg section-title">
           {title}
         </h2>
-        <dl className="faq">
+        <dl className={`faq faq-${template.faq}`}>
           {blocks.map((f) => (
             <div key={f.id} className="faq-item">
               <dt className="faq-q">{f.title}</dt>

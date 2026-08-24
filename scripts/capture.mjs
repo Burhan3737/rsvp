@@ -17,7 +17,7 @@ const arg = (name, fallback) => {
 const base = arg('base', 'http://127.0.0.1:3100').replace(/\/$/, '');
 const outDir = arg('out', 'screenshots/latest');
 const routes = arg('routes', '/').split(',').map((r) => r.trim()).filter(Boolean);
-// Optional theme override, applied via the same preview cookie the /themes picker uses.
+// Optional theme override, applied via the same preview cookie the /admin/themes picker uses.
 const theme = arg('theme', '');
 
 // Never put the token in a filename: it changes on every reseed and silently breaks every

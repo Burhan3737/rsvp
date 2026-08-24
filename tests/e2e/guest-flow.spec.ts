@@ -44,7 +44,11 @@ test.describe('the public front door', () => {
 
   test('offers a way in for somebody who has only the printed card', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('link', { name: /Open your invitation/i }).click();
+    // By destination, not by wording. The call to action now speaks in the active template's own
+    // voice — "Kindly find your invitation" on the stationery card, "Find your invitation" on the
+    // side rail — so a matcher on one phrasing only passes for whichever template happens to be
+    // live. What must be true is that the front page offers a way to the code form.
+    await page.locator('.hero-cta a[href="/find"]').click();
     await expect(page).toHaveURL(/\/find/);
     await expect(page.getByLabel(/Invitation code/i)).toBeVisible();
   });

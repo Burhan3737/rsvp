@@ -22,13 +22,26 @@
   display: none;
 }
 
-/* A bar across the top, for the templates whose source has one. */
-html[data-template='timeline'] .anchor-nav-anchors,
-html[data-template='boxed'] .anchor-nav-anchors {
+/* timeline: a bar across the top that stays, because a timeline is a thing you
+   move up and down and the nav is how you do it. */
+html[data-template='timeline'] .anchor-nav-anchors {
   display: block;
   position: sticky;
   top: var(--stick-top, 0px);
   z-index: 20;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+/* boxed: a contents page at the front of the panel, and it scrolls away.
+   It used to share the rule above, which made it timeline's component with a
+   counter added. Worse, once stacked it measured 338px tall and stayed pinned
+   for the whole document — 38% of a 900px window, permanently, with the page
+   text running underneath it. A table of contents belongs at the front of the
+   set of pages, not welded across the top of every one of them. */
+html[data-template='boxed'] .anchor-nav-anchors {
+  display: block;
+  position: static;
   background: var(--bg);
   border-bottom: 1px solid var(--border);
 }
@@ -133,10 +146,11 @@ html[data-template='boxed'] .schedule-day-header {
     max-width: min(1000px, 88%);
   }
 
-  /* Zebra bands are the only separator between sections in the source. */
-  html[data-template='rail'] main > section.section:nth-of-type(odd) {
-    background: var(--surface);
-  }
+  /* The zebra bands used to be `:nth-of-type(odd)` here, which is the same
+     index-keyed paint the theme layer was just taken off — and being one point
+     more specific, it overrode the theme's own band colour on a desktop and not
+     on a phone, so rail's sections were two different colours at two widths.
+     The bands now come from `Template.band`, which names them. */
 
   html[data-template='rail'] .section-title {
     margin-block: 1.5em 0.5em;
@@ -161,11 +175,11 @@ html[data-template='boxed'] .schedule-day-header {
    =========================================================================== */
 
 @media (min-width: 900px) {
-  .schedule-timeline .schedule-list {
+  html[data-template='timeline'] .schedule-timeline .schedule-list {
     position: relative;
   }
 
-  .schedule-timeline .schedule-list::before {
+  html[data-template='timeline'] .schedule-timeline .schedule-list::before {
     content: '';
     display: block;
     position: absolute;
@@ -177,24 +191,24 @@ html[data-template='boxed'] .schedule-day-header {
     background: var(--border);
   }
 
-  .schedule-timeline .schedule-item {
+  html[data-template='timeline'] .schedule-timeline .schedule-item {
     width: 46%;
     padding-left: 0;
     text-align: right;
   }
 
-  .schedule-timeline .schedule-item:nth-child(even) {
+  html[data-template='timeline'] .schedule-timeline .schedule-item:nth-child(even) {
     margin-left: 54%;
     text-align: left;
     /* The stagger. Without it the two columns pair up and it reads as a table. */
     margin-top: -110px;
   }
 
-  .schedule-timeline .schedule-item:nth-child(even):first-child {
+  html[data-template='timeline'] .schedule-timeline .schedule-item:nth-child(even):first-child {
     margin-top: 0;
   }
 
-  .schedule-timeline .schedule-node {
+  html[data-template='timeline'] .schedule-timeline .schedule-node {
     display: block;
     width: 30px;
     height: 30px;
@@ -203,24 +217,24 @@ html[data-template='boxed'] .schedule-day-header {
     top: 1.4rem;
   }
 
-  .schedule-timeline .schedule-item:nth-child(even) .schedule-node {
+  html[data-template='timeline'] .schedule-timeline .schedule-item:nth-child(even) .schedule-node {
     right: auto;
     left: -8.7%;
   }
 
-  .schedule-timeline .swatches,
-  .schedule-timeline .schedule-actions,
-  .schedule-timeline .dresscode-head {
+  html[data-template='timeline'] .schedule-timeline .swatches,
+  html[data-template='timeline'] .schedule-timeline .schedule-actions,
+  html[data-template='timeline'] .schedule-timeline .dresscode-head {
     justify-content: flex-end;
   }
 
-  .schedule-timeline .schedule-item:nth-child(even) .swatches,
-  .schedule-timeline .schedule-item:nth-child(even) .schedule-actions,
-  .schedule-timeline .schedule-item:nth-child(even) .dresscode-head {
+  html[data-template='timeline'] .schedule-timeline .schedule-item:nth-child(even) .swatches,
+  html[data-template='timeline'] .schedule-timeline .schedule-item:nth-child(even) .schedule-actions,
+  html[data-template='timeline'] .schedule-timeline .schedule-item:nth-child(even) .dresscode-head {
     justify-content: flex-start;
   }
 
-  .schedule-timeline .dresscode {
+  html[data-template='timeline'] .schedule-timeline .dresscode {
     margin-inline: 0;
   }
 }
@@ -422,52 +436,58 @@ html[data-template='gate'] .splash {
 /* --- AGENDA (card) — a condensed row, the way stationery sets a running order.
    Time and name lead; the long-form detail is present but visibly secondary. */
 
-.schedule-agenda .schedule-item {
+html[data-template='card'] .schedule-agenda .schedule-item {
   border-bottom: 1px solid var(--border);
   padding-bottom: clamp(1rem, 2.5vw, 1.5rem);
   margin-bottom: clamp(1rem, 2.5vw, 1.5rem);
 }
 
-.schedule-agenda .schedule-item:last-child {
+html[data-template='card'] .schedule-agenda .schedule-item:last-child {
   border-bottom: 0;
 }
 
-.schedule-agenda .schedule-name {
+html[data-template='card'] .schedule-agenda .schedule-name {
   margin-bottom: 0.15rem;
 }
 
-.schedule-agenda .schedule-blurb {
+html[data-template='card'] .schedule-agenda .schedule-blurb {
   margin-top: 0;
 }
 
-/* The detail below the venue is set smaller and quieter — an agenda lists, it
-   does not explain. */
-.schedule-agenda .schedule-desc,
-.schedule-agenda .dresscode,
-.schedule-agenda .schedule-unplugged {
+/* The detail below the venue is set smaller — an agenda lists, it does not explain.
+   NOT quieter by `opacity`. Opacity composites whatever is underneath, so it lowers
+   contrast by an amount that depends on the ground it happens to land on, and the
+   ground here is a theme decision. On `goundry` — a mid-tone dusty rose, the one
+   theme in the set with a COLOURED page — `opacity: 0.86` dragged the muted ink from
+   5.60:1 down to 4.12:1 and put twenty-seven WCAG AA failures on the attire block,
+   which is the single most-read thing in the schedule. A quiet tone has to come from
+   a colour that was checked against its own ground, not from a transparency applied
+   over an unknown one. */
+html[data-template='card'] .schedule-agenda .schedule-desc,
+html[data-template='card'] .schedule-agenda .dresscode,
+html[data-template='card'] .schedule-agenda .schedule-unplugged {
   font-size: 0.92em;
-  opacity: 0.86;
 }
 
-.schedule-agenda .swatches {
+html[data-template='card'] .schedule-agenda .swatches {
   gap: 0.4rem;
 }
 
 @media (min-width: 640px) {
-  .schedule-agenda .schedule-item {
+  html[data-template='card'] .schedule-agenda .schedule-item {
     display: grid;
     grid-template-columns: 8.5rem 1fr;
     column-gap: clamp(1rem, 2.5vw, 2rem);
     align-items: baseline;
   }
 
-  .schedule-agenda .schedule-time {
+  html[data-template='card'] .schedule-agenda .schedule-time {
     grid-column: 1;
     text-align: right;
     margin: 0;
   }
 
-  .schedule-agenda .schedule-body {
+  html[data-template='card'] .schedule-agenda .schedule-body {
     grid-column: 2;
     text-align: left;
   }
@@ -478,30 +498,30 @@ html[data-template='gate'] .splash {
    a card a card is that it is a TILE in a grid, not a row in a stack. */
 
 @media (min-width: 800px) {
-  .schedule-cards .schedule-list {
+  html[data-template='boxed'] .schedule-cards .schedule-list {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: clamp(1rem, 2.5vw, 1.75rem);
     align-items: start;
   }
 
-  .schedule-cards .schedule-list::before {
+  html[data-template='boxed'] .schedule-cards .schedule-list::before {
     display: none;
   }
 }
 
-.schedule-cards .schedule-item {
+html[data-template='boxed'] .schedule-cards .schedule-item {
   padding: clamp(1.25rem, 3vw, 2rem);
   border: 1px solid var(--border);
   background: var(--surface);
   margin-bottom: clamp(1rem, 2.5vw, 1.5rem);
 }
 
-.schedule-cards .schedule-node {
+html[data-template='boxed'] .schedule-cards .schedule-node {
   display: none;
 }
 
-.schedule-cards .schedule-item {
+html[data-template='boxed'] .schedule-cards .schedule-item {
   padding-left: clamp(1.25rem, 3vw, 2rem);
 }
 
@@ -510,19 +530,19 @@ html[data-template='gate'] .splash {
    and measured identical to classic. */
 
 @media (min-width: 900px) {
-  .schedule-columns {
+  html[data-template='split'] .schedule-columns {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
     gap: clamp(1rem, 2.5vw, 2rem);
     align-items: start;
   }
 
-  .schedule-columns .schedule-day {
+  html[data-template='split'] .schedule-columns .schedule-day {
     display: block;
     margin: 0;
   }
 
-  .schedule-columns .schedule-day-header {
+  html[data-template='split'] .schedule-columns .schedule-day-header {
     position: static;
     margin: 0 0 0.75rem;
     padding-bottom: 0.4rem;
@@ -530,30 +550,42 @@ html[data-template='gate'] .splash {
     text-align: left;
   }
 
-  .schedule-columns .schedule-list::before,
-  .schedule-columns .schedule-node {
+  html[data-template='split'] .schedule-columns .schedule-list::before,
+  html[data-template='split'] .schedule-columns .schedule-node {
     display: none;
   }
 
-  .schedule-columns .schedule-item {
+  html[data-template='split'] .schedule-columns .schedule-item {
     padding-left: 0;
     padding-bottom: 0;
   }
 
-  .schedule-columns .schedule-body {
+  html[data-template='split'] .schedule-columns .schedule-body {
     text-align: left;
   }
 
   /* A column is narrow, so the long-form detail is dropped rather than squeezed
-     to three words a line. The event, its time and its place are what a column
-     is for. */
-  .schedule-columns .schedule-desc,
-  .schedule-columns .schedule-blurb,
-  .schedule-columns .dresscode {
+     to three words a line — but the blurb and the attire line stay. See the note
+     on compaction above the ledger rules. */
+  html[data-template='split'] .schedule-columns .schedule-desc,
+  html[data-template='split'] .schedule-columns .dresscode-note,
+  html[data-template='split'] .schedule-columns .swatches,
+  html[data-template='split'] .schedule-columns .dresscode-modesty,
+  html[data-template='split'] .schedule-columns .dresscode-permission {
     display: none;
   }
 
-  .schedule-columns .schedule-actions {
+  html[data-template='split'] .schedule-columns .schedule-blurb {
+    font-size: 0.92em;
+  }
+
+  html[data-template='split'] .schedule-columns .dresscode {
+    margin-top: 0.5rem;
+    padding-top: 0.4rem;
+    border-top: 0;
+  }
+
+  html[data-template='split'] .schedule-columns .schedule-actions {
     justify-content: flex-start;
   }
 }
@@ -683,7 +715,8 @@ html[data-template='gate'] .splash {
      existed and none did, which left a seven-section page with no navigation at
      all on a phone. */
   html[data-template='rail'] .anchor-nav-rail {
-    display: block;
+    display: flex;
+    align-items: center;
     position: sticky;
     top: var(--stick-top, 0px);
     z-index: 20;
@@ -691,8 +724,41 @@ html[data-template='gate'] .splash {
     border-bottom: 1px solid var(--border);
   }
 
+  /* The monogram is rail's signature and it used to be switched off entirely
+     below 1024px, which left the template with nothing of its own on a phone. */
   html[data-template='rail'] .anchor-nav-rail .rail-monogram {
-    display: none;
+    display: block;
+    flex: none;
+    margin: 0;
+    padding-inline: var(--gutter) 0.75rem;
+    font-size: 1rem;
+    white-space: nowrap;
+  }
+
+  /* The list is wider than the window — measured at 651px in a 390px box — and it
+     scrolled with nothing to say so, leaving the last two sections off-screen and
+     unannounced.
+
+     The conventional answer is a fade at the right edge, and the first attempt was
+     exactly that: `linear-gradient(to right, transparent, var(--surface))`. This
+     project bans gradients outright — rule one of its own design checklist, enforced
+     by a test — because real stationery has none, and a rule you exempt yourself from
+     the moment it is inconvenient is not a rule. So the affordance is a mark instead
+     of a fade: a solid cap carrying an arrow, which also says which way. */
+  html[data-template='rail'] .anchor-nav-rail::after {
+    content: '\2192';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    padding-inline: 0.6rem 0.75rem;
+    pointer-events: none;
+    background: var(--surface);
+    border-left: var(--rule) solid var(--border);
+    color: var(--muted);
+    font-size: 13px;
   }
 
   html[data-template='rail'] .anchor-nav-rail ul {
@@ -700,7 +766,8 @@ html[data-template='gate'] .splash {
     overflow-x: auto;
     flex-wrap: nowrap;
     gap: 1.25rem;
-    padding: 0.7rem var(--gutter);
+    padding: 0.7rem 2.5rem 0.7rem 0.25rem;
+    margin: 0;
   }
 
   html[data-template='rail'] .anchor-nav-rail li + li {
@@ -811,10 +878,41 @@ html[data-template='boxed'] .splash-names {
     border-right: 1px solid var(--border);
   }
 
-  html[data-template='split'] .splash-names {
+  html[data-template='split'] .splash-names,
+  html[data-template='split'] .splash-date {
+    grid-column: 2;
     padding-inline: clamp(2rem, 6vw, 5rem);
     text-align: left;
   }
+
+  /* Two children in a two-track grid would otherwise put the date in the empty
+     tinted half rather than under the names. */
+  html[data-template='split'] .splash {
+    grid-template-rows: auto auto;
+  }
+
+  html[data-template='split'] .splash::before {
+    grid-row: 1 / -1;
+    grid-column: 1;
+  }
+
+  html[data-template='split'] .splash-names {
+    grid-row: 1;
+    align-self: end;
+  }
+
+  html[data-template='split'] .splash-date {
+    grid-row: 2;
+    align-self: start;
+  }
+}
+
+/* The cover is a flex row by default, so the date would sit beside the names.
+   card and split stack theirs; boxed sets them across the panel head. */
+html[data-template='card'] .splash,
+html[data-template='split'] .splash {
+  flex-direction: column;
+  gap: 0;
 }
 
 /* gate shows the DATE and both doors on the first screen — that is the whole
@@ -846,7 +944,7 @@ html[data-template='gate'] .hero {
 
 /* The plain stack — no offset, no spine. The default, and what `classic` and `gate` would use if
    they carried a story at all. Named so the class is not a no-op that only looks configured. */
-.story-stack .story-beat + .story-beat {
+html[data-template='rail'] .story-stack .story-beat + .story-beat {
   border-top: 1px solid var(--border);
   padding-top: clamp(1.75rem, 4vw, 2.75rem);
 }
@@ -933,34 +1031,72 @@ html[data-template='card'] .shell {
    withholds: its schedule is a ruled ledger of time, name and place, with the
    long-form detail left for the reply page. It matches what the template is for. */
 
-.schedule-ledger .schedule-item {
+html[data-template='gate'] .schedule-ledger .schedule-item {
   padding-left: 0;
   padding-bottom: 0;
   border-bottom: 1px solid var(--border);
 }
 
-.schedule-ledger .schedule-body {
+html[data-template='gate'] .schedule-ledger .schedule-body {
   padding-block: clamp(0.85rem, 2vw, 1.25rem);
 }
 
-.schedule-ledger .schedule-node,
-.schedule-ledger .schedule-list::before {
+html[data-template='gate'] .schedule-ledger .schedule-node,
+html[data-template='gate'] .schedule-ledger .schedule-list::before {
   display: none;
 }
 
-.schedule-ledger .schedule-desc,
-.schedule-ledger .schedule-blurb,
-.schedule-ledger .dresscode,
-.schedule-ledger .schedule-unplugged,
-.schedule-ledger .schedule-arrive {
+/* ===========================================================================
+   COMPACT MEANS SHORTER, NOT ABSENT
+
+   split, gate and boxed each reached "compact" by `display: none` on the event
+   blurb, the description and the WHOLE attire block. Round 7 measured the
+   consequence: on split and gate a guest could not learn what to wear —
+   `innerText.match(/Wear/g)` returned 0 against 3 on every other template — and
+   could not learn what any event actually was.
+
+   That is not a layout preference. `components/Schedule.tsx` opens with the
+   research finding this project was built on: dress code is the single
+   most-asked guest question, mainstream guides currently tell guests to text the
+   couple about it, and every one of those texts is a website failure. A template
+   choice must not be able to delete the answer.
+
+   So the compact templates keep the event's one-line blurb and the "Wear …"
+   line, and drop only what is genuinely supplementary: the long description, the
+   attire note, the colour swatches, and the modesty and permission lines.
+   =========================================================================== */
+
+html[data-template='gate'] .schedule-ledger .schedule-desc,
+html[data-template='gate'] .schedule-ledger .dresscode-note,
+html[data-template='gate'] .schedule-ledger .swatches,
+html[data-template='gate'] .schedule-ledger .dresscode-modesty,
+html[data-template='gate'] .schedule-ledger .dresscode-permission,
+html[data-template='gate'] .schedule-ledger .schedule-unplugged {
   display: none;
 }
 
-.schedule-ledger .schedule-name {
+/* The blurb, the attire line and the arrival time are what a ledger row is FOR;
+   they were being deleted along with the prose. */
+html[data-template='gate'] .schedule-ledger .schedule-blurb {
+  margin: 0.1rem 0 0;
+  font-size: 0.94em;
+}
+
+html[data-template='gate'] .schedule-ledger .dresscode {
+  margin-top: 0.35rem;
+  padding-top: 0;
+  border-top: 0;
+}
+
+html[data-template='gate'] .schedule-ledger .dresscode-head {
+  margin: 0;
+}
+
+html[data-template='gate'] .schedule-ledger .schedule-name {
   margin-bottom: 0.15rem;
 }
 
-.schedule-ledger .schedule-time {
+html[data-template='gate'] .schedule-ledger .schedule-time {
   margin-bottom: 0.1rem;
 }
 
@@ -975,13 +1111,15 @@ html[data-template='boxed'] .splash-names {
 /* --- gate repeated itself one screen down ----------------------------------
    Its `min-height: 0; display: block` was a no-op, because classic's hero is
    already both. With the cover carrying the names, the date and both doors, the
-   hero below it was showing all three again at full size. */
+   hero below it was showing all three again at full size.
 
-html[data-template='gate'] .hero-names,
-html[data-template='gate'] .hero-eyebrow,
-html[data-template='gate'] .hero-cta,
-html[data-template='gate'] .hero-indic,
-html[data-template='gate'] .hero-numeric {
+   The names, eyebrow, script line and numeral are no longer RENDERED for any
+   cover template — hiding an `h1` in CSS left the document with no accessible
+   heading, so the cover now carries the `h1` itself. Only the reply button is
+   still suppressed here, because gate's cover already has two doors and a third
+   copy of the same call one screen down is what the template exists not to do. */
+
+html[data-template='gate'] .hero-cta {
   display: none;
 }
 
@@ -1002,53 +1140,87 @@ html[data-template='gate'] .hero {
   gap: clamp(1.5rem, 4vw, 2.75rem);
 }
 
-.party-list {
+html[data-template='split'] .party-list {
   display: block;
 }
 
-.party-list .party-member + .party-member {
+html[data-template='split'] .party-list .party-member + .party-member {
   border-top: 1px solid var(--border);
   padding-top: clamp(1rem, 2.5vw, 1.5rem);
   margin-top: clamp(1rem, 2.5vw, 1.5rem);
 }
 
-/* One member per band, alternating. */
-.party-bands {
+/* rail: full-width rows, role held in the same 220px left column its travel
+   blocks and FAQ use. It shared `party: 'grid'` with classic — identical value,
+   identical class, identical CSS, and at 390px both computed to a single track. */
+
+html[data-template='rail'] .party-rows {
   display: block;
 }
 
-.party-bands .party-member {
+html[data-template='rail'] .party-rows .party-member {
+  padding-block: clamp(1rem, 2.4vw, 1.5rem);
+  border-bottom: var(--rule) solid var(--border);
+}
+
+html[data-template='rail'] main > section.section:nth-of-type(n) .party-rows .party-member {
+  text-align: left;
+}
+
+@media (min-width: 900px) {
+  html[data-template='rail'] .party-rows .party-member {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: 2rem;
+    align-items: baseline;
+  }
+
+  html[data-template='rail'] .party-rows .party-role {
+    margin: 0;
+  }
+
+  html[data-template='rail'] .party-rows .party-name {
+    margin: 0 0 0.2rem;
+  }
+}
+
+/* One member per band, alternating. */
+html[data-template='boxed'] .party-bands {
+  display: block;
+}
+
+html[data-template='boxed'] .party-bands .party-member {
   padding-block: clamp(1.5rem, 4vw, 2.5rem);
   border-bottom: 1px solid var(--border);
 }
 
 @media (min-width: 820px) {
-  .party-bands .party-member {
+  html[data-template='boxed'] .party-bands .party-member {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
     column-gap: clamp(2rem, 5vw, 4rem);
     align-items: baseline;
   }
 
-  .party-bands .party-member:nth-child(even) {
+  html[data-template='boxed'] .party-bands .party-member:nth-child(even) {
     direction: rtl;
   }
 
-  .party-bands .party-member:nth-child(even) > * {
+  html[data-template='boxed'] .party-bands .party-member:nth-child(even) > * {
     direction: ltr;
   }
 
-  .party-bands .party-role,
-  .party-bands .party-name {
+  html[data-template='boxed'] .party-bands .party-role,
+  html[data-template='boxed'] .party-bands .party-name {
     grid-column: 1;
     text-align: left;
   }
 
-  .party-bands .party-name {
+  html[data-template='boxed'] .party-bands .party-name {
     grid-row: 2;
   }
 
-  .party-bands .party-bio {
+  html[data-template='boxed'] .party-bands .party-bio {
     grid-column: 2;
     grid-row: 1 / span 2;
     text-align: left;
@@ -1061,26 +1233,43 @@ html[data-template='gate'] .hero {
    with three values and one implementation is the pattern the first audit was
    scored down for, and it survived into the second. */
 
+/* boxed's beats are bordered panels, the same vocabulary as its schedule cards,
+   its travel tiles and its FAQ. The previous treatment set beat A at 58% width
+   on the left and beat B at 58% on the right — which is `story-timeline` with
+   the sides swapped and the centre rule removed. Two names, one idea; the audit
+   measured them at x=320/656 against x=220/780 and called it a mirror image. */
+html[data-template='boxed'] .story-panels {
+  display: grid;
+  gap: clamp(0.8rem, 1.8vw, 1.15rem);
+}
+
+html[data-template='boxed'] .story-panels .story-beat {
+  padding: clamp(1rem, 2.4vw, 1.5rem);
+  border: var(--rule) solid var(--border);
+  background: var(--surface);
+}
+
+html[data-template='boxed'] main > section.section:nth-of-type(n) .story-panels .story-beat {
+  text-align: left;
+}
+
 @media (min-width: 860px) {
-  .story-alternating .story-beat {
-    width: 58%;
+  html[data-template='boxed'] .story-panels {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .story-alternating .story-beat[data-beat='b'] {
-    margin-left: 42%;
-    text-align: right;
+  /* The first beat runs the full width of the panel — it is where the story
+     starts, and a set of equal tiles has no opening. */
+  html[data-template='boxed'] .story-panels .story-beat:first-child {
+    grid-column: 1 / -1;
   }
 
-  .story-alternating .story-beat[data-beat='b'] .story-body {
-    margin-left: auto;
-  }
-
-  .story-timeline {
+  html[data-template='timeline'] .story-timeline {
     position: relative;
     padding-block: 1rem;
   }
 
-  .story-timeline::before {
+  html[data-template='timeline'] .story-timeline::before {
     content: '';
     position: absolute;
     left: 50%;
@@ -1090,39 +1279,34 @@ html[data-template='gate'] .hero {
     background: var(--border);
   }
 
-  .story-timeline .story-beat {
+  html[data-template='timeline'] .story-timeline .story-beat {
     width: 44%;
     text-align: right;
   }
 
-  .story-timeline .story-beat[data-beat='b'] {
+  html[data-template='timeline'] .story-timeline .story-beat[data-beat='b'] {
     margin-left: 56%;
     text-align: left;
   }
 
-  .story-timeline .story-body {
+  html[data-template='timeline'] .story-timeline .story-body {
     margin-left: auto;
   }
 
-  .story-timeline .story-beat[data-beat='b'] .story-body {
+  html[data-template='timeline'] .story-timeline .story-beat[data-beat='b'] .story-body {
     margin-left: 0;
   }
 }
 
 /* --- split's welcome section had an empty heading column -------------------
-   Its h2 is `visually-hidden`, so column 1 was blank beside the note. */
+   It was collapsed to one column because its h2 was `visually-hidden` and
+   column 1 was therefore blank. The heading renders now, so the section goes
+   back to the two-column shell every other split section uses — otherwise
+   split's welcome was the one section on the template that was not paired. */
 
 @media (min-width: 940px) {
-  html[data-template='split'] main > section.section:has(.welcome-note) > .shell {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
   html[data-template='split'] .welcome-note {
-    grid-column: 1;
-  }
-
-  html[data-template='split'] main > section.section:has(.welcome-note) > .shell::before {
-    display: none;
+    grid-column: 2;
   }
 }
 
@@ -1293,8 +1477,7 @@ html[data-template='gate'] .schedule-day-header .day-date {
     padding: 0.9rem 1rem;
   }
 
-  html[data-template='boxed'] .schedule-cards .schedule-desc,
-  html[data-template='boxed'] .schedule-cards .schedule-blurb {
+  html[data-template='boxed'] .schedule-cards .schedule-desc {
     display: none;
   }
 }
@@ -1304,8 +1487,10 @@ html[data-template='gate'] .schedule-day-header .day-date {
      template that says less rather than becoming the template that says
      everything in a narrower measure. */
   html[data-template='split'] .schedule-desc,
-  html[data-template='split'] .schedule-blurb,
-  html[data-template='split'] .dresscode {
+  html[data-template='split'] .dresscode-note,
+  html[data-template='split'] .swatches,
+  html[data-template='split'] .dresscode-modesty,
+  html[data-template='split'] .dresscode-permission {
     display: none;
   }
 
@@ -1357,10 +1542,7 @@ html[data-template='gate'] .schedule-day-header .day-date {
     background: var(--border);
   }
 
-  html[data-template='boxed'] .story-alternating .story-beat[data-beat='b'] {
-    padding-left: 1.5rem;
-    border-left: 2px solid var(--border);
-  }
+
 }
 
 /* --- Three templates burned their entire mobile fold -----------------------
@@ -1368,12 +1550,58 @@ html[data-template='gate'] .schedule-day-header .day-date {
    date, no reply button — and then repeated those names in the hero one screen
    below. On a phone the cover earns its place only if it says something. */
 
+/* Collapsing all three to one short band left them the same object again, and
+   removed the cover/hero distinction on a phone entirely — which is the main
+   first-screen difference between these seven. Each keeps a cover; each keeps a
+   different one; none of them keeps a full screen of names alone. */
 @media (max-width: 719px) {
-  html[data-template='card'] .splash,
-  html[data-template='boxed'] .splash,
+  html[data-template='card'] .splash {
+    min-height: 46vh;
+    padding-block: clamp(2rem, 8vw, 3rem);
+  }
+
+  html[data-template='boxed'] .splash {
+    min-height: 32vh;
+    padding-block: clamp(1.5rem, 6vw, 2.5rem);
+  }
+
   html[data-template='split'] .splash {
-    min-height: 0;
-    padding-block: clamp(2.5rem, 9vw, 4rem);
+    min-height: 40vh;
+    padding-block: clamp(1.75rem, 7vw, 2.75rem);
+  }
+}
+
+/* --- The date on the cover -------------------------------------------------
+   Set differently by each template that has one, so the covers differ in what
+   they say and not only in how tall they are. */
+
+html[data-template='card'] .splash-date {
+  margin-top: clamp(0.9rem, 2.5vw, 1.4rem);
+  padding-top: clamp(0.9rem, 2.5vw, 1.4rem);
+  border-top: var(--rule) solid var(--border);
+}
+
+html[data-template='split'] .splash-date {
+  margin-top: clamp(0.7rem, 2vw, 1.1rem);
+}
+
+html[data-template='boxed'] .splash-date {
+  margin-top: 0.6rem;
+}
+
+@media (min-width: 940px) {
+  /* boxed sets the date beside the names rather than under them — the panel's
+     header is a two-part line, not a stack. */
+  html[data-template='boxed'] .splash {
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+    column-gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  html[data-template='boxed'] .splash-date {
+    margin-top: 0;
   }
 }
 
@@ -1424,7 +1652,11 @@ html[data-template='gate'] .schedule-day-header .day-date {
   }
 }
 
-/* card: compressed inside the card — the names cannot shout in a 670px frame. */
+/* card: compressed inside the card — the names cannot shout in a 670px frame.
+   Beyond size, this is set the way a printed invitation is set: the eyebrow in
+   tracked caps between two hairlines, the names under them, the tagline held to
+   a short measure. Without that, what remains once the cover collapses on a
+   phone is classic's hero inside a border, which is what round 5 measured. */
 html[data-template='card'] .hero-names {
   font-size: clamp(1.9rem, 5.5vw, 3.2rem);
 }
@@ -1433,18 +1665,22 @@ html[data-template='card'] .hero {
   padding-block: clamp(1.5rem, 4vw, 2.5rem);
 }
 
-/* boxed: left-set inside the panel, agreeing with its numbered nav. */
-@media (min-width: 900px) {
-  html[data-template='boxed'] .hero-inner {
-    text-align: left;
-  }
+html[data-template='card'] .hero-eyebrow {
+  padding-block: 0.6rem;
+  border-top: var(--rule) solid var(--border);
+  border-bottom: var(--rule) solid var(--border);
+}
 
-  html[data-template='boxed'] .hero-names,
-  html[data-template='boxed'] .hero-eyebrow,
-  html[data-template='boxed'] .hero-tagline,
-  html[data-template='boxed'] .hero-cta {
-    margin-inline: 0;
-  }
+html[data-template='card'] .hero-tagline {
+  margin-inline: auto;
+  max-width: 34ch;
+  font-style: italic;
+}
+
+html[data-template='card'] .hero-cta {
+  margin-top: clamp(1.1rem, 3vw, 1.6rem);
+  padding-top: clamp(1.1rem, 3vw, 1.6rem);
+  border-top: var(--rule) solid var(--border);
 }
 
 /* timeline: the hero sits on the spine's axis rather than the page's. */
@@ -1470,7 +1706,17 @@ html[data-template='rail'] .schedule-banded .schedule-item {
   margin: 0;
 }
 
-html[data-template='rail'] .schedule-banded .schedule-item:nth-child(odd) {
+/* The band alternates by DAY, not by position within a day's list.
+   `:nth-child(odd)` on `.schedule-item` was the third appearance of one defect in
+   this file: the markup opens a fresh `<ol>` per day, and with one event on most
+   days every item is its list's first child, so `odd` matched 100% of them and
+   nothing alternated — one continuous field, the exact opposite of the claim.
+   `timeline` and `cards` were flattened to escape this; `banded` does not need
+   to be, because a band is properly a day, and days ARE siblings.
+
+   The theme paints `.schedule-item` at (0,4,2) and rail's own reset above wins
+   at (0,4,3), so this has to clear both. */
+html[data-template='rail'] main > section.section:nth-of-type(n) .schedule-banded .schedule-day:nth-of-type(odd) .schedule-item {
   background: var(--surface);
 }
 
@@ -1664,15 +1910,30 @@ html[data-template='card'] .schedule-day-header .day-date {
    at (0,2,1) by matching it and coming later.
    =========================================================================== */
 
-html[data-template='rail'] .hero-inner,
-html[data-template='boxed'] .hero-inner {
+/* rail and boxed were one grouped selector — literally the same declaration,
+   two templates — so "left-set hero" was one treatment counted twice. They are
+   separated here, and boxed's is a different shape rather than the same shape
+   under a different name. */
+
+html[data-template='rail'] .hero-inner {
   text-align: left;
 }
 
 html[data-template='rail'] .hero-names,
 html[data-template='rail'] .hero-eyebrow,
 html[data-template='rail'] .hero-tagline,
-html[data-template='rail'] .hero-cta,
+html[data-template='rail'] .hero-cta {
+  margin-inline: 0;
+}
+
+/* boxed: the hero is the panel's opening spread — eyebrow and names left, the
+   tagline and the reply set against them across a rule. */
+html[data-template='boxed'] .hero-inner {
+  text-align: left;
+  border-top: var(--rule) solid var(--border);
+  padding-top: clamp(1.25rem, 3vw, 2rem);
+}
+
 html[data-template='boxed'] .hero-names,
 html[data-template='boxed'] .hero-eyebrow,
 html[data-template='boxed'] .hero-tagline,
@@ -1680,14 +1941,84 @@ html[data-template='boxed'] .hero-cta {
   margin-inline: 0;
 }
 
-/* timeline: the names sit on the spine's axis, over a rule, at their own size. */
+html[data-template='boxed'] .hero-cta {
+  margin-top: clamp(1.1rem, 3vw, 1.75rem);
+  padding-top: clamp(1.1rem, 3vw, 1.75rem);
+  border-top: var(--rule) solid var(--border);
+}
+
+@media (min-width: 940px) {
+  html[data-template='boxed'] .hero-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    column-gap: clamp(2rem, 5vw, 4rem);
+    align-items: end;
+  }
+
+  html[data-template='boxed'] .hero-eyebrow,
+  html[data-template='boxed'] .hero-names {
+    grid-column: 1;
+  }
+
+  html[data-template='boxed'] .hero-tagline,
+  html[data-template='boxed'] .hero-cta {
+    grid-column: 2;
+  }
+
+  html[data-template='boxed'] .hero-cta {
+    border-top: 0;
+    padding-top: 0;
+  }
+}
+
+/* timeline: the hero is the first node on the spine, not a centred block with a
+   rule under it. Measured against classic, "same hero plus a nav bar and a
+   hairline" was the closest pair in the set at both widths; opening the spine in
+   the hero is what makes the first screen say which document this is. */
 html[data-template='timeline'] .hero-names {
   font-size: clamp(2.4rem, 9vw, 6.5rem);
 }
 
 html[data-template='timeline'] .hero-inner {
-  border-bottom: 2px solid var(--border);
-  padding-bottom: clamp(1.5rem, 4vw, 2.5rem);
+  position: relative;
+  text-align: left;
+  padding-left: 2.6rem;
+  padding-bottom: clamp(2rem, 5vw, 3.5rem);
+}
+
+html[data-template='timeline'] .hero-names,
+html[data-template='timeline'] .hero-eyebrow,
+html[data-template='timeline'] .hero-tagline,
+html[data-template='timeline'] .hero-cta {
+  margin-inline: 0;
+}
+
+/* The rule runs from the eyebrow down and off the bottom of the hero, into the
+   story and the schedule below it. */
+html[data-template='timeline'] .hero-inner::before {
+  content: '';
+  position: absolute;
+  top: 0.6em;
+  bottom: 0;
+  left: 7px;
+  width: var(--rule);
+  background: var(--border);
+}
+
+html[data-template='timeline'] .hero-eyebrow {
+  position: relative;
+}
+
+html[data-template='timeline'] .hero-eyebrow::before {
+  content: '';
+  position: absolute;
+  top: 0.15em;
+  left: -2.6rem;
+  width: 15px;
+  height: 15px;
+  border: var(--rule) solid var(--accent);
+  border-radius: 50%;
+  background: var(--bg);
 }
 
 /* split: a two-row division on a phone — names above a rule, date and reply
@@ -1717,8 +2048,9 @@ html[data-template='timeline'] .hero-inner {
    =========================================================================== */
 
 @media (min-width: 1100px) {
-  /* A stacked index down the inside of the panel, which is what "a table of
-     contents for a set of pages" should look like. */
+  /* A stacked index at the head of the panel, which is what "a table of
+     contents for a set of pages" should look like. It is not sticky — see the
+     note on the display rule above. */
   html[data-template='boxed'] .anchor-nav-anchors ul {
     flex-direction: column;
     align-items: flex-start;
@@ -1740,4 +2072,960 @@ html[data-template='timeline'] .hero-inner {
 /* The ground is genuinely pinned now, rather than being a second body colour. */
 html[data-template='boxed'] body::before {
   background: var(--surface);
+}
+
+/* ===========================================================================
+   THE SECONDARY SECTIONS — travel, things to do, and the FAQ
+
+   Round 5 of the distinctness audit measured these and found one object across
+   all seven templates: `.blocks` resolved to a single full-width grid track
+   everywhere, `.faq` to `display: block` everywhere, and in 1743 lines of
+   template CSS there was not one rule for `.faq-item`, `.faq-q`, `.faq-a`,
+   `.block`, `.block-title` or the `.blocks` grid.
+
+   That is not a detail. These sections are 5,945px of classic's 14,099px
+   document (42%), 4,736 of gate's 8,287 (57%) and 3,434 of card's 11,390 (30%).
+   A guest who scrolled past the schedule was looking at the same page whichever
+   template they had been sent.
+
+   Seven treatments, one per template, on both axes. The variant class comes from
+   the registry (`Template.blocks`, `Template.faq`), so a template that claims a
+   treatment renders it.
+
+   SPECIFICITY: `html[data-template='x'] .blocks-y` is (0,3,0). The theme layer's
+   competing rules here reach (0,4,2) — `[data-theme='aspen'] main >
+   section.section[data-band] .block` — so anything that fights a theme
+   declaration (text-align, colour) is scoped through
+   `main > section.section:nth-of-type(n)` to reach (0,4,3). Layout properties no
+   theme sets are left at the shorter form. This file exists because the same
+   mistake has now been made three times in this project.
+   =========================================================================== */
+
+/* --- stack — classic -------------------------------------------------------
+   Zola's default: one column, centred, a hairline between entries. The base
+   everything else is measured against. */
+
+html[data-template='classic'] .blocks-stack {
+  gap: 0;
+}
+
+html[data-template='classic'] .blocks-stack .block + .block {
+  margin-top: clamp(1.75rem, 4vw, 2.5rem);
+  padding-top: clamp(1.75rem, 4vw, 2.5rem);
+  border-top: var(--rule) solid var(--border);
+}
+
+html[data-template='classic'] main > section.section:nth-of-type(n) .blocks-stack .block-body {
+  margin-inline: auto;
+  max-width: 54ch;
+}
+
+/* --- banded — rail ---------------------------------------------------------
+   Eternity sets its content as full-width rows with the label held in a fixed
+   left column, which is the same rhythm as its schedule. Nothing is centred and
+   nothing is boxed; the rule under each row is the only division. */
+
+html[data-template='rail'] .blocks-banded {
+  gap: 0;
+}
+
+html[data-template='rail'] .blocks-banded .block {
+  padding-block: clamp(1.1rem, 2.6vw, 1.6rem);
+  border-bottom: var(--rule) solid var(--border);
+}
+
+html[data-template='rail'] main > section.section:nth-of-type(n) .blocks-banded .block {
+  text-align: left;
+}
+
+@media (min-width: 900px) {
+  html[data-template='rail'] .blocks-banded .block {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: 2rem;
+    align-items: start;
+  }
+
+  html[data-template='rail'] .blocks-banded .block-title {
+    margin: 0;
+  }
+}
+
+/* --- spine — timeline ------------------------------------------------------
+   Travel and things-to-do hang off the same rule the schedule runs down, so the
+   document has one continuous spine from the first event to the last hotel
+   rather than a timeline followed by a stack. */
+
+html[data-template='timeline'] .blocks-spine {
+  position: relative;
+  gap: 0;
+  padding-left: 2.6rem;
+}
+
+html[data-template='timeline'] .blocks-spine::before {
+  content: '';
+  position: absolute;
+  inset-block: 0.6rem;
+  left: 7px;
+  width: var(--rule);
+  background: var(--border);
+}
+
+html[data-template='timeline'] .blocks-spine .block {
+  position: relative;
+  padding-block: clamp(0.9rem, 2.2vw, 1.4rem);
+}
+
+html[data-template='timeline'] .blocks-spine .block::before {
+  content: '';
+  position: absolute;
+  top: calc(clamp(0.9rem, 2.2vw, 1.4rem) + 0.4em);
+  left: -2.6rem;
+  width: 15px;
+  height: 15px;
+  border: var(--rule) solid var(--accent);
+  border-radius: 50%;
+  background: var(--bg);
+}
+
+html[data-template='timeline'] main > section.section:nth-of-type(n) .blocks-spine .block {
+  text-align: left;
+}
+
+/* --- twoUp — split ---------------------------------------------------------
+   The only template with a two-column section shell already; the blocks follow
+   it into two columns rather than running one narrow ribbon down the right. */
+
+html[data-template='split'] .blocks-twoUp {
+  gap: clamp(1.4rem, 3vw, 2.2rem) clamp(1.6rem, 3.5vw, 2.75rem);
+}
+
+html[data-template='split'] main > section.section:nth-of-type(n) .blocks-twoUp .block {
+  text-align: left;
+}
+
+html[data-template='split'] .blocks-twoUp .block {
+  padding-left: clamp(0.9rem, 2vw, 1.25rem);
+  border-left: 2px solid var(--accent-soft, var(--border));
+}
+
+@media (min-width: 640px) {
+  html[data-template='split'] .blocks-twoUp {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* --- framed — card ---------------------------------------------------------
+   Stationery: each entry ruled top and bottom inside the card, centred, and held
+   to a printed measure. Nothing runs wider than the card, which is the whole
+   constraint the template is built on. */
+
+html[data-template='card'] .blocks-framed {
+  gap: 0;
+}
+
+html[data-template='card'] .blocks-framed .block {
+  padding-block: clamp(1rem, 2.4vw, 1.5rem);
+  border-top: var(--rule) solid var(--border);
+}
+
+html[data-template='card'] .blocks-framed .block:last-child {
+  border-bottom: var(--rule) solid var(--border);
+}
+
+html[data-template='card'] main > section.section:nth-of-type(n) .blocks-framed .block {
+  text-align: center;
+}
+
+html[data-template='card'] main > section.section:nth-of-type(n) .blocks-framed .block-body {
+  margin-inline: auto;
+  max-width: 42ch;
+}
+
+/* --- tiles — boxed ---------------------------------------------------------
+   Bordered tiles inside the panel, matching its schedule cards. Two up on a
+   desktop, and still tiles on a phone — the border is what makes the panel read
+   as a set of pages, so it is not a min-width flourish. */
+
+html[data-template='boxed'] .blocks-tiles {
+  gap: clamp(0.9rem, 2vw, 1.25rem);
+}
+
+html[data-template='boxed'] .blocks-tiles .block {
+  padding: clamp(1rem, 2.4vw, 1.5rem);
+  border: var(--rule) solid var(--border);
+  background: var(--surface);
+}
+
+html[data-template='boxed'] main > section.section:nth-of-type(n) .blocks-tiles .block {
+  text-align: left;
+}
+
+@media (min-width: 900px) {
+  html[data-template='boxed'] .blocks-tiles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* --- gutter — gate ---------------------------------------------------------
+   The ledger continues: a narrow right-set label column against the body, rows
+   of a uniform depth, borders and nothing else. */
+
+html[data-template='gate'] .blocks-gutter {
+  gap: 0;
+}
+
+html[data-template='gate'] main > section.section:nth-of-type(n) .blocks-gutter .block {
+  text-align: left;
+}
+
+html[data-template='gate'] .blocks-gutter .block {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr);
+  gap: 0 1.25rem;
+  padding-block: clamp(0.85rem, 2vw, 1.2rem);
+  border-top: var(--rule) solid var(--border);
+}
+
+html[data-template='gate'] .blocks-gutter .block:last-child {
+  border-bottom: var(--rule) solid var(--border);
+}
+
+html[data-template='gate'] main > section.section:nth-of-type(n) .blocks-gutter .block-title {
+  grid-column: 1;
+  margin: 0;
+  text-align: right;
+}
+
+html[data-template='gate'] .blocks-gutter .block-body,
+html[data-template='gate'] .blocks-gutter .block > p {
+  grid-column: 2;
+}
+
+html[data-template='gate'] main > section.section:nth-of-type(n) .blocks-gutter .block-body {
+  text-align: left;
+}
+
+/* ===========================================================================
+   THE FAQ
+
+   Same finding, same fix. `.faq-item` computed `display: block, border: 0` and
+   `.faq-q` `23.2px` centred in all seven.
+   =========================================================================== */
+
+/* --- rows — classic --------------------------------------------------------
+   The base: question over answer, a rule between. Left as the plain one on
+   purpose — classic is the template the others are read against. */
+
+html[data-template='classic'] main > section.section:nth-of-type(n) .faq-rows .faq-item {
+  margin-inline: auto;
+}
+
+/* --- gutter — rail ---------------------------------------------------------
+   Question held in the same 220px left column the travel rows use. */
+
+html[data-template='rail'] .faq-gutter .faq-item {
+  max-width: none;
+}
+
+/* Below the two-column gate, the questions keep rail's row rhythm rather than
+   reverting to the base stack — measured at 390px, rail's FAQ item was
+   `block,none,0px,0px,0px,350,199`, byte-identical to classic's. */
+html[data-template='rail'] .faq-gutter .faq-item {
+  padding-bottom: clamp(1rem, 3vw, 1.4rem);
+  border-bottom: var(--rule) solid var(--border);
+}
+
+html[data-template='rail'] .faq-gutter .faq-item + .faq-item {
+  margin-top: clamp(1rem, 3vw, 1.4rem);
+  padding-top: 0;
+  border-top: 0;
+}
+
+html[data-template='rail'] main > section.section:nth-of-type(n) .faq-gutter .faq-item {
+  text-align: left;
+}
+
+@media (min-width: 900px) {
+  html[data-template='rail'] .faq-gutter .faq-item {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: 2rem;
+    align-items: baseline;
+  }
+
+  html[data-template='rail'] .faq-gutter .faq-q {
+    margin: 0;
+    font-size: clamp(1rem, 2vw, 1.15rem);
+  }
+}
+
+/* --- numbered — timeline ---------------------------------------------------
+   A counter down the left, indented from it, so the questions read as the last
+   leg of the same sequence. */
+
+html[data-template='timeline'] .faq-numbered {
+  counter-reset: faq;
+}
+
+html[data-template='timeline'] .faq-numbered .faq-item {
+  counter-increment: faq;
+  position: relative;
+  padding-left: 3.25rem;
+  max-width: none;
+}
+
+html[data-template='timeline'] .faq-numbered .faq-q::before {
+  content: counter(faq, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  letter-spacing: 0.24em;
+  color: var(--accent-text);
+}
+
+html[data-template='timeline'] main > section.section:nth-of-type(n) .faq-numbered .faq-item {
+  text-align: left;
+}
+
+/* --- twoUp — split ---------------------------------------------------------
+   Two columns, each question ruled on its left edge like the travel blocks. */
+
+html[data-template='split'] .faq-twoUp {
+  display: grid;
+  gap: clamp(1.25rem, 3vw, 2rem) clamp(1.6rem, 3.5vw, 2.75rem);
+}
+
+html[data-template='split'] .faq-twoUp .faq-item {
+  max-width: none;
+  padding-left: clamp(0.9rem, 2vw, 1.25rem);
+  border-left: 2px solid var(--accent-soft, var(--border));
+}
+
+/* The base rule puts a top border and 1.5rem of padding between consecutive
+   items. In a grid that draws a stray rule across the top of the second column. */
+html[data-template='split'] .faq-twoUp .faq-item + .faq-item {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+html[data-template='split'] main > section.section:nth-of-type(n) .faq-twoUp .faq-item {
+  text-align: left;
+}
+
+@media (min-width: 640px) {
+  html[data-template='split'] .faq-twoUp {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* --- inline — card ---------------------------------------------------------
+   Question and answer share a line, the way a printed card sets its particulars:
+   the question in small caps, the answer running on after it. */
+
+html[data-template='card'] .faq-inline .faq-item {
+  max-width: none;
+  padding-block: 0.75rem;
+  border-top: var(--rule) solid var(--border);
+}
+
+html[data-template='card'] .faq-inline .faq-item + .faq-item {
+  margin-top: 0;
+  padding-top: 0.75rem;
+}
+
+html[data-template='card'] .faq-inline .faq-item:last-child {
+  border-bottom: var(--rule) solid var(--border);
+}
+
+html[data-template='card'] main > section.section:nth-of-type(n) .faq-inline .faq-q {
+  display: inline;
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: var(--label-tracking);
+  color: var(--accent-text);
+}
+
+html[data-template='card'] main > section.section:nth-of-type(n) .faq-inline .faq-q::after {
+  content: ' — ';
+}
+
+html[data-template='card'] main > section.section:nth-of-type(n) .faq-inline .faq-a {
+  display: inline;
+  max-width: none;
+}
+
+/* --- panels — boxed --------------------------------------------------------
+   Each question a bordered panel, matching the tiles and the schedule cards. */
+
+html[data-template='boxed'] .faq-panels {
+  display: grid;
+  gap: clamp(0.7rem, 1.6vw, 1rem);
+}
+
+html[data-template='boxed'] .faq-panels .faq-item {
+  max-width: none;
+  padding: clamp(0.9rem, 2.2vw, 1.35rem);
+  border: var(--rule) solid var(--border);
+  background: var(--surface);
+}
+
+html[data-template='boxed'] .faq-panels .faq-item + .faq-item {
+  margin-top: 0;
+  padding-top: clamp(0.9rem, 2.2vw, 1.35rem);
+  border-top: var(--rule) solid var(--border);
+}
+
+html[data-template='boxed'] main > section.section:nth-of-type(n) .faq-panels .faq-item {
+  text-align: left;
+}
+
+/* --- ledger — gate ---------------------------------------------------------
+   The same ledger the schedule uses: the question right-set against the answer,
+   uniform rows, hairlines and nothing else. */
+
+html[data-template='gate'] .faq-ledger .faq-item {
+  max-width: none;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.35rem;
+  padding-block: clamp(0.85rem, 2vw, 1.2rem);
+  border-top: var(--rule) solid var(--border);
+}
+
+html[data-template='gate'] .faq-ledger .faq-item + .faq-item {
+  margin-top: 0;
+  padding-top: clamp(0.85rem, 2vw, 1.2rem);
+}
+
+html[data-template='gate'] .faq-ledger .faq-item:last-child {
+  border-bottom: var(--rule) solid var(--border);
+}
+
+html[data-template='gate'] main > section.section:nth-of-type(n) .faq-ledger .faq-a,
+html[data-template='gate'] main > section.section:nth-of-type(n) .faq-ledger .faq-q {
+  max-width: none;
+  text-align: left;
+}
+
+@media (min-width: 900px) {
+  html[data-template='gate'] .faq-ledger .faq-item {
+    grid-template-columns: minmax(0, 15rem) minmax(0, 1fr);
+    gap: 0 2rem;
+    align-items: baseline;
+  }
+
+  html[data-template='gate'] main > section.section:nth-of-type(n) .faq-ledger .faq-q {
+    margin: 0;
+    text-align: right;
+    font-size: clamp(1rem, 2vw, 1.15rem);
+  }
+}
+
+/* ===========================================================================
+   ROUND 6
+
+   The axis was real at 1440 and about four documents at 390, and three whole
+   sections had never been on it at all: gifts (a heading and a paragraph, seven
+   times), welcome (whose per-template heading was `visually-hidden`, so six
+   registry strings rendered zero pixels) and the footer (283px, `display:block`,
+   `text-align:start`, identical under seven structures that agree about nothing
+   else).
+
+   Same specificity discipline as the rest of this file: `html[data-template=…]`
+   always, and `main > section.section:nth-of-type(n)` when a theme declaration
+   has to be beaten.
+   =========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   THE CLOSING FOOTER — the largest shared surface left in the set
+   --------------------------------------------------------------------------- */
+
+/* classic: centred, the plain one everything else is read against. */
+html[data-template='classic'] .footer-set-centred .footer-inner {
+  text-align: center;
+}
+
+html[data-template='classic'] .footer-set-centred .footer-contact {
+  margin-inline: auto;
+}
+
+/* split: names one side, contact the other, across the rule — the page divides
+   down the middle and its footer does too. */
+html[data-template='split'] .footer-set-split .footer-inner {
+  display: grid;
+  gap: 0.75rem 2rem;
+}
+
+html[data-template='split'] main ~ .site-footer .footer-contact,
+html[data-template='split'] .footer-set-split .footer-contact {
+  margin-top: 0;
+  max-width: none;
+}
+
+@media (min-width: 720px) {
+  html[data-template='split'] .footer-set-split .footer-inner {
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    align-items: start;
+  }
+}
+
+/* rail: a left label column against the contact, the same 220px gutter its
+   travel rows, party rows and FAQ use. */
+html[data-template='rail'] .footer-set-rail .footer-inner {
+  display: grid;
+  gap: 0.6rem;
+}
+
+@media (min-width: 900px) {
+  html[data-template='rail'] .footer-set-rail .footer-inner {
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: 2rem;
+    align-items: baseline;
+  }
+
+  html[data-template='rail'] .footer-set-rail .footer-contact {
+    margin-top: 0;
+  }
+}
+
+/* card: a ruled plate, centred, held to the card's measure — stationery closes
+   the way it opens. */
+html[data-template='card'] .footer-set-plate .shell {
+  max-width: 668px;
+}
+
+html[data-template='card'] .footer-set-plate .footer-inner {
+  padding: clamp(1rem, 2.5vw, 1.5rem);
+  border: var(--rule) solid var(--border);
+  text-align: center;
+}
+
+html[data-template='card'] .footer-set-plate .footer-contact {
+  margin-inline: auto;
+  max-width: 40ch;
+}
+
+/* gate: hairline rows, right-set label, same ledger as everything above it. */
+html[data-template='gate'] .footer-set-ledger .footer-inner {
+  display: grid;
+  gap: 0;
+}
+
+html[data-template='gate'] .footer-set-ledger .footer-inner > * {
+  padding-block: 0.75rem;
+  border-top: var(--rule) solid var(--border);
+  margin-top: 0;
+}
+
+@media (min-width: 900px) {
+  /* `15rem` against `1fr` inside gate's 440px measure resolved to 240px of label
+     and 168px of contact — the identical defect the FAQ was fixed for one round
+     earlier, in a different rule. Fractions of the measure, not absolutes. */
+  html[data-template='gate'] .footer-set-ledger .footer-inner {
+    grid-template-columns: minmax(0, 0.32fr) minmax(0, 0.68fr);
+    column-gap: 2rem;
+  }
+
+  html[data-template='gate'] .footer-set-ledger .footer-inner > .label {
+    text-align: right;
+  }
+}
+
+/* timeline: the spine reaches the bottom of the page. The rule that starts in
+   the hero and runs through the schedule ends here, with a final node. */
+html[data-template='timeline'] .footer-set-spine .footer-inner {
+  position: relative;
+  padding-left: 2.6rem;
+}
+
+html[data-template='timeline'] .footer-set-spine .footer-inner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 7px;
+  width: 15px;
+  height: 15px;
+  border: var(--rule) solid var(--accent);
+  border-radius: 50%;
+  background: var(--bg);
+}
+
+/* boxed: the footer used to run the full 1440 while every section of the
+   document was inset to the panel — the panel did not enclose its own ending. */
+html[data-template='boxed'] .footer-set-panel .shell {
+  max-width: min(1170px, 94vw);
+}
+
+html[data-template='boxed'] .footer-set-panel .footer-inner {
+  padding: clamp(1rem, 2.4vw, 1.5rem);
+  border: var(--rule) solid var(--border);
+  background: var(--surface);
+}
+
+/* Below the two-column gates, rail, split and gate all resolved to one 350px
+   grid track — three identical footers again, one breakpoint down. Each keeps
+   the motif it uses everywhere else on its own page. */
+@media (max-width: 899px) {
+  html[data-template='rail'] .footer-set-rail .footer-inner {
+    padding-top: clamp(1rem, 3vw, 1.4rem);
+    border-top: var(--rule) solid var(--border);
+  }
+
+  html[data-template='split'] .footer-set-split .footer-inner {
+    padding-left: clamp(0.9rem, 3vw, 1.25rem);
+    border-left: 2px solid var(--accent-soft, var(--border));
+  }
+
+  html[data-template='gate'] .footer-set-ledger .footer-inner {
+    border-bottom: var(--rule) solid var(--border);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   GIFTS — the last thing every guest reads, and it was one object seven times
+   --------------------------------------------------------------------------- */
+
+html[data-template='classic'] .gifts-stack .gifts-body {
+  margin-inline: auto;
+  max-width: 54ch;
+}
+
+/* rail: the note in the content column with the link held in the label gutter,
+   matching every other row on the page. */
+html[data-template='rail'] main > section.section:nth-of-type(n) .gifts-banded .gifts-body {
+  text-align: left;
+}
+
+html[data-template='rail'] .gifts-banded .gifts-body {
+  padding-block: clamp(1.1rem, 2.6vw, 1.6rem);
+  border-top: var(--rule) solid var(--border);
+  border-bottom: var(--rule) solid var(--border);
+}
+
+@media (min-width: 900px) {
+  html[data-template='rail'] .gifts-banded .gifts-paired {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: 2rem;
+    align-items: start;
+  }
+
+  html[data-template='rail'] .gifts-banded .gifts-paired .gifts-link {
+    grid-column: 1;
+    grid-row: 1;
+    margin: 0;
+  }
+
+  html[data-template='rail'] .gifts-banded .gifts-paired .gifts-note {
+    grid-column: 2;
+    grid-row: 1;
+    margin: 0;
+  }
+}
+
+/* timeline: the last node on the spine. */
+html[data-template='timeline'] .gifts-spine .gifts-body {
+  position: relative;
+  padding-left: 2.6rem;
+}
+
+html[data-template='timeline'] main > section.section:nth-of-type(n) .gifts-spine .gifts-body {
+  text-align: left;
+}
+
+html[data-template='timeline'] .gifts-spine .gifts-body::before {
+  content: '';
+  position: absolute;
+  top: 0.4em;
+  left: 0;
+  width: 15px;
+  height: 15px;
+  border: var(--rule) solid var(--accent);
+  border-radius: 50%;
+  background: var(--bg);
+}
+
+/* split: note and link paired, as everything on this template is paired. */
+html[data-template='split'] .gifts-twoUp .gifts-body {
+  display: grid;
+  gap: 0.75rem clamp(1.6rem, 3.5vw, 2.75rem);
+  padding-left: clamp(0.9rem, 2vw, 1.25rem);
+  border-left: 2px solid var(--accent-soft, var(--border));
+}
+
+html[data-template='split'] main > section.section:nth-of-type(n) .gifts-twoUp .gifts-body {
+  text-align: left;
+}
+
+@media (min-width: 640px) {
+  html[data-template='split'] .gifts-twoUp .gifts-body {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+
+  html[data-template='split'] .gifts-twoUp .gifts-note,
+  html[data-template='split'] .gifts-twoUp .gifts-paired .gifts-link {
+    margin: 0;
+  }
+}
+
+/* card: ruled above and below, centred, short measure — a printed line about
+   gifts, which is exactly how stationery says it. */
+html[data-template='card'] .gifts-framed .gifts-body {
+  padding-block: clamp(1rem, 2.4vw, 1.5rem);
+  border-block: var(--rule) solid var(--border);
+}
+
+html[data-template='card'] main > section.section:nth-of-type(n) .gifts-framed .gifts-note {
+  margin-inline: auto;
+  max-width: 42ch;
+  text-align: center;
+  font-style: italic;
+}
+
+/* boxed: a bordered tile like everything else inside the panel. */
+html[data-template='boxed'] .gifts-tiles .gifts-body {
+  padding: clamp(1rem, 2.4vw, 1.5rem);
+  border: var(--rule) solid var(--border);
+  background: var(--surface);
+}
+
+html[data-template='boxed'] main > section.section:nth-of-type(n) .gifts-tiles .gifts-body {
+  text-align: left;
+}
+
+/* gate: one more ledger row. */
+/* The hanging indent is what makes this a ledger row rather than a bordered
+   paragraph. Without it gate's gifts and rail's were the same object at 390 —
+   `block|none|start|1px|0px|0px|350` for both. */
+html[data-template='gate'] .gifts-gutter .gifts-body {
+  gap: 0.5rem 1.25rem;
+  padding-block: clamp(0.85rem, 2vw, 1.2rem);
+  padding-left: clamp(2.5rem, 12vw, 5.5rem);
+  border-block: var(--rule) solid var(--border);
+}
+
+html[data-template='gate'] main > section.section:nth-of-type(n) .gifts-gutter .gifts-body {
+  text-align: left;
+}
+
+@media (min-width: 900px) {
+  html[data-template='gate'] .gifts-gutter .gifts-body {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+
+  html[data-template='gate'] .gifts-gutter .gifts-note,
+  html[data-template='gate'] .gifts-gutter .gifts-paired .gifts-link {
+    margin: 0;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   WELCOME — the heading is visible now, so it needs setting
+   --------------------------------------------------------------------------- */
+
+html[data-template='rail'] main > section.section.welcome-banded:nth-of-type(n) .welcome-note,
+html[data-template='boxed'] main > section.section.welcome-tiles:nth-of-type(n) .welcome-note,
+html[data-template='timeline'] main > section.section.welcome-spine:nth-of-type(n) .welcome-note,
+html[data-template='split'] main > section.section.welcome-twoUp:nth-of-type(n) .welcome-note {
+  text-align: left;
+  margin-inline: 0;
+}
+
+html[data-template='timeline'] .welcome-spine .welcome-note {
+  padding-left: 2.6rem;
+  border-left: var(--rule) solid var(--border);
+}
+
+html[data-template='boxed'] .welcome-tiles .welcome-note {
+  padding: clamp(1rem, 2.4vw, 1.5rem);
+  border: var(--rule) solid var(--border);
+  background: var(--surface);
+}
+
+html[data-template='split'] .welcome-twoUp .welcome-note {
+  padding-left: clamp(0.9rem, 2vw, 1.25rem);
+  border-left: 2px solid var(--accent-soft, var(--border));
+}
+
+html[data-template='rail'] .welcome-banded .welcome-note {
+  padding-block: clamp(1.1rem, 2.6vw, 1.6rem);
+  border-block: var(--rule) solid var(--border);
+}
+
+html[data-template='card'] main > section.section.welcome-framed:nth-of-type(n) .welcome-note {
+  margin-inline: auto;
+  max-width: 44ch;
+  font-style: italic;
+  text-align: center;
+}
+
+html[data-template='gate'] .welcome-gutter .welcome-note {
+  padding-block: clamp(0.85rem, 2vw, 1.2rem);
+  border-block: var(--rule) solid var(--border);
+}
+
+/* ---------------------------------------------------------------------------
+   THE FIRST SCREEN AT 390
+
+   Measured in round 6: classic, rail and split rendered the SAME hero at
+   390 — inner 390x360, children 350 wide, names 44.8px, button 259x48 — with
+   `text-align` the only difference, and boxed was that object at 324. Four
+   objects across seven templates, on the width most guests use.
+   --------------------------------------------------------------------------- */
+
+@media (max-width: 719px) {
+  /* rail: a persistent monogram row above the names, so the template's one
+     fixed idea survives the loss of its rail. */
+  html[data-template='rail'] .hero-eyebrow {
+    padding-bottom: 0.75rem;
+    border-bottom: var(--rule) solid var(--border);
+  }
+
+  html[data-template='rail'] .hero-names {
+    font-size: clamp(2rem, 11vw, 2.6rem);
+    line-height: 1.05;
+  }
+
+  html[data-template='rail'] .hero-cta .btn {
+    display: block;
+    width: 100%;
+    text-align: center;
+  }
+
+  /* timeline: the spine reaches the screen edge and the names step down, so the
+     sequence starts at the top of the page rather than under a centred block. */
+  html[data-template='timeline'] .hero-inner {
+    padding-left: 1.9rem;
+  }
+
+  html[data-template='timeline'] .hero-inner::before {
+    left: 4px;
+  }
+
+  html[data-template='timeline'] .hero-eyebrow::before {
+    left: -1.9rem;
+    width: 11px;
+    height: 11px;
+  }
+
+  html[data-template='timeline'] .hero-names {
+    font-size: clamp(1.9rem, 10vw, 2.4rem);
+  }
+
+  /* split: two rows rather than one stack — eyebrow and names above the rule,
+     tagline and reply below it, which is the page's own division at phone size. */
+  html[data-template='split'] .hero-tagline {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 2px solid var(--border);
+  }
+
+  html[data-template='split'] .hero-names {
+    font-size: clamp(2.2rem, 13vw, 3rem);
+  }
+
+  html[data-template='split'] .hero-cta .btn {
+    display: block;
+    width: 100%;
+    text-align: center;
+  }
+
+  /* card: already the one template that changes the type scale; the plate keeps
+     its rules tight so it does not read as classic in a border. */
+  html[data-template='card'] .hero-names {
+    font-size: clamp(1.5rem, 8vw, 1.9rem);
+    letter-spacing: 0.02em;
+  }
+
+  /* boxed: the panel head stacks. At 390 the names ended at x=211 and the date
+     began at x=211 — a gap of zero, with the glyphs touching. */
+  html[data-template='boxed'] .splash {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    row-gap: 0.75rem;
+  }
+
+  html[data-template='boxed'] .hero-names {
+    font-size: clamp(1.8rem, 9.5vw, 2.3rem);
+  }
+
+  html[data-template='boxed'] .hero-eyebrow {
+    order: -1;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   THE WEDDING PARTY AT 390
+
+   Four registry values resolved to three identical 350px stacks, because every
+   party treatment sat inside a min-width gate. Only `bands` survived.
+   --------------------------------------------------------------------------- */
+
+@media (max-width: 899px) {
+  /* classic: a real two-up, which is what a grid of people is. */
+  html[data-template='classic'] .party-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem 1rem;
+  }
+
+  html[data-template='classic'] .party-grid .party-bio {
+    font-size: calc(var(--body-size, 17px) * 0.88);
+  }
+
+  /* rail: the role stays in its own column, narrower. */
+  html[data-template='rail'] .party-rows .party-member {
+    display: grid;
+    grid-template-columns: 6.5rem minmax(0, 1fr);
+    gap: 0 1rem;
+  }
+
+  html[data-template='rail'] .party-rows .party-role {
+    grid-row: 1 / span 3;
+    margin: 0;
+    align-self: start;
+  }
+
+  /* split: the pair rule, as everywhere else on this template. */
+  html[data-template='split'] .party-list .party-member {
+    padding-left: clamp(0.9rem, 3vw, 1.25rem);
+    border-left: 2px solid var(--accent-soft, var(--border));
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   TWO SECTIONS THAT BROKE AT 390
+   --------------------------------------------------------------------------- */
+
+@media (max-width: 719px) {
+  /* card's agenda gutter was 88px holding "EIGHT IN THE EVENING · 8:00 PM
+     KARACHI TIME" — six wrapped lines beside a two-line event. The time goes
+     back above the event, still right-set, so the agenda still reads as an
+     agenda without turning into a column of single words. */
+  html[data-template='card'] .schedule-agenda .schedule-body {
+    display: block;
+  }
+
+  html[data-template='card'] main > section.section:nth-of-type(n) .schedule-agenda .schedule-time {
+    display: block;
+    text-align: right;
+    margin-bottom: 0.35rem;
+  }
+}
+
+/* gate's FAQ set a 15rem question column against a 168px answer — 21 characters
+   a line, one answer 365px tall, and the section 45% of the whole document. The
+   question column is capped as a fraction of the measure rather than an absolute. */
+@media (min-width: 900px) {
+  html[data-template='gate'] .faq-ledger .faq-item {
+    grid-template-columns: minmax(0, 0.32fr) minmax(0, 0.68fr);
+  }
 }

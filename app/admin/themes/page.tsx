@@ -7,7 +7,8 @@ import { THEMES, isValidTheme } from '@/lib/themes';
 import { TEMPLATES, isValidTemplate } from '@/lib/templates';
 import { getSettings } from '@/lib/queries';
 import { query } from '@/lib/db';
-import { isAdmin } from '@/lib/auth';
+import { isAdmin, requireAdmin } from '@/lib/auth';
+import { AdminNav } from '../AdminNav';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Themes', robots: { index: false, follow: false } };
@@ -15,9 +16,9 @@ export const metadata: Metadata = { title: 'Themes', robots: { index: false, fol
 async function preview(formData: FormData) {
   'use server';
   const id = String(formData.get('theme') ?? '');
-  if (!isValidTheme(id)) redirect('/themes');
+  if (!isValidTheme(id)) redirect('/admin/themes');
   (await cookies()).set('preview_theme', id, { path: '/', maxAge: 60 * 60 * 24 * 7, sameSite: 'lax' });
-  redirect('/themes');
+  redirect('/admin/themes');
 }
 
 async function commit(formData: FormData) {
@@ -25,30 +26,30 @@ async function commit(formData: FormData) {
   // Re-verified inside the action: proxy coverage is an optimistic gate only.
   if (!(await isAdmin())) redirect('/admin/login');
   const id = String(formData.get('theme') ?? '');
-  if (!isValidTheme(id)) redirect('/themes');
+  if (!isValidTheme(id)) redirect('/admin/themes');
   await query(`UPDATE site_settings SET theme = $1, updated_at = now() WHERE id = 1`, [id]);
   (await cookies()).delete('preview_theme');
   revalidatePath('/', 'layout');
-  redirect('/themes?saved=1');
+  redirect('/admin/themes?saved=1');
 }
 
 async function previewTemplate(formData: FormData) {
   'use server';
   const id = String(formData.get('template') ?? '');
-  if (!isValidTemplate(id)) redirect('/themes');
+  if (!isValidTemplate(id)) redirect('/admin/themes');
   (await cookies()).set('preview_template', id, { path: '/', maxAge: 60 * 60 * 24 * 7, sameSite: 'lax' });
-  redirect('/themes');
+  redirect('/admin/themes');
 }
 
 async function commitTemplate(formData: FormData) {
   'use server';
   if (!(await isAdmin())) redirect('/admin/login');
   const id = String(formData.get('template') ?? '');
-  if (!isValidTemplate(id)) redirect('/themes');
+  if (!isValidTemplate(id)) redirect('/admin/themes');
   await query(`UPDATE site_settings SET template = $1, updated_at = now() WHERE id = 1`, [id]);
   (await cookies()).delete('preview_template');
   revalidatePath('/', 'layout');
-  redirect('/themes?saved=1');
+  redirect('/admin/themes?saved=1');
 }
 
 async function clearPreview() {
@@ -56,7 +57,7 @@ async function clearPreview() {
   const jar = await cookies();
   jar.delete('preview_theme');
   jar.delete('preview_template');
-  redirect('/themes');
+  redirect('/admin/themes');
 }
 
 export default async function ThemesPage({
@@ -64,17 +65,26 @@ export default async function ThemesPage({
 }: {
   searchParams: Promise<{ saved?: string }>;
 }) {
+  // The picker moved from a public `/themes` to `/admin/themes`. Choosing the look of the wedding
+  // is an owner's decision, and the page was previously reachable by anyone who guessed the URL —
+  // it only gated the "Use this" buttons, so a guest could still browse the whole catalogue and
+  // set a preview cookie on themselves.
+  //
+  // Re-checked here rather than trusted from a route prefix: there is no proxy or middleware in
+  // this app, and every admin page and Server Action verifies for itself.
+  await requireAdmin();
+
   const { saved } = await searchParams;
   const settings = await getSettings();
   const jar = await cookies();
   const previewing = jar.get('preview_theme')?.value;
   const previewingTemplate = jar.get('preview_template')?.value;
   const liveTemplate = settings.template || 'classic';
-  const admin = await isAdmin();
 
   return (
     <main id="main" className="section">
       <div className="wide">
+        <AdminNav active="themes" />
         <p className="label"><Link href="/">&larr; Back to the site</Link></p>
         <h1 className="display display-lg section-title">Choose a look</h1>
         <p className="prose muted">
@@ -138,16 +148,12 @@ export default async function ThemesPage({
                         {isPreview ? 'Previewing' : 'Preview'}
                       </button>
                     </form>
-                    {admin ? (
-                      <form action={commitTemplate}>
-                        <input type="hidden" name="template" value={t.id} />
-                        <button className="btn btn-sm" type="submit" disabled={isLive}>
-                          {isLive ? 'Live' : 'Use this'}
-                        </button>
-                      </form>
-                    ) : isLive ? (
-                      <span className="label">Currently live</span>
-                    ) : null}
+                    <form action={commitTemplate}>
+                      <input type="hidden" name="template" value={t.id} />
+                      <button className="btn btn-sm" type="submit" disabled={isLive}>
+                        {isLive ? 'Live' : 'Use this'}
+                      </button>
+                    </form>
                   </div>
                 </article>
               );
@@ -190,27 +196,18 @@ export default async function ThemesPage({
                     <input type="hidden" name="theme" value={t.id} />
                     <button className="btn btn-ghost btn-sm" type="submit">Preview</button>
                   </form>
-                  {admin ? (
-                    <form action={commit}>
-                      <input type="hidden" name="theme" value={t.id} />
-                      <button className="btn btn-sm" type="submit" disabled={isLive}>
-                        {isLive ? 'Live' : 'Use this'}
-                      </button>
-                    </form>
-                  ) : isLive ? (
-                    <span className="label">Currently live</span>
-                  ) : null}
+                  <form action={commit}>
+                    <input type="hidden" name="theme" value={t.id} />
+                    <button className="btn btn-sm" type="submit" disabled={isLive}>
+                      {isLive ? 'Live' : 'Use this'}
+                    </button>
+                  </form>
                 </div>
               </article>
             );
           })}
         </div>
 
-        {!admin ? (
-          <p className="prose muted theme-signin">
-            <a href="/admin/login">Sign in as an organiser</a> to make one of these permanent.
-          </p>
-        ) : null}
       </div>
     </main>
   );

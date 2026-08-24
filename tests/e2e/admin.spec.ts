@@ -230,7 +230,7 @@ test.describe('caterer export', () => {
 test.describe('theme switching', () => {
   test('an owner can preview a theme and see the source it was copied from', async ({ page }) => {
     await signIn(page);
-    await page.goto('/themes');
+    await page.goto('/admin/themes');
 
     // Every theme must credit a real, live template.
     const links = page.locator('.theme-ref a');
@@ -248,7 +248,7 @@ test.describe('theme switching', () => {
     const bg = await page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor);
     expect(bg).toBe('rgb(127, 73, 40)'); // #7f4928 — html{background} in Kelsey's own stylesheet
 
-    await page.goto('/themes');
+    await page.goto('/admin/themes');
     await page.getByRole('button', { name: /Stop previewing/i }).click();
     await expect(page.getByText(/You are previewing/)).toHaveCount(0);
   });

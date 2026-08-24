@@ -71,7 +71,7 @@ export interface Template {
    * default; `alternating` sets each beat against the one before it; `timeline` hangs them off a
    * centre rule. Only meaningful when `order` includes `story`.
    */
-  story?: 'stack' | 'alternating' | 'timeline';
+  story?: 'stack' | 'panels' | 'timeline';
   /** Section numbering (01, 02, 03) in the eyebrow. */
   numbered: boolean;
   /**
@@ -83,7 +83,73 @@ export interface Template {
    * section is configuration that cannot be observed, which is the pattern three audit rounds have
    * scored this project down for.
    */
-  party?: 'grid' | 'list' | 'bands';
+  party?: 'grid' | 'list' | 'rows' | 'bands';
+  /**
+   * How the prose sections — travel, things to do, gifts — are laid out.
+   *
+   * These four sections are between 30% and 57% of the scrolled length of every document here, and
+   * until now all seven templates rendered them as one identical single-track grid of centred
+   * blocks. A guest who scrolled past the schedule saw the same page whichever template they were
+   * looking at, which is most of the page.
+   */
+  blocks: 'stack' | 'twoUp' | 'tiles' | 'spine' | 'banded' | 'framed' | 'gutter';
+  /**
+   * How the FAQ is set. Same reasoning as `blocks`: it was one `display:block` list in all seven.
+   *   rows     question and answer stacked, a rule between
+   *   gutter   question in its own left column, answer beside it
+   *   twoUp    two columns of questions
+   *   inline   question and answer share a line
+   *   numbered a counter down the left, answers indented from it
+   *   panels   each question a bordered panel
+   *   ledger   uniform rows, question right-set against the answer
+   */
+  faq: 'rows' | 'gutter' | 'twoUp' | 'inline' | 'numbered' | 'panels' | 'ledger';
+  /**
+   * Which sections are painted on the theme's deep ground.
+   *
+   * This used to be `main > section.section:nth-of-type(even)` in the theme layer — a DOM index,
+   * counting the splash and the hero. So the single largest surface on the page was decided by how
+   * many sections a template happened to carry, not by any decision a template made: delete a
+   * welcome note and classic's schedule flipped from cream to maroon. Two templates with the same
+   * section count got the same banding for free, and that banding is the first thing anyone sees.
+   *
+   * Naming the sections instead makes the rhythm the template's own and makes it stable — removing
+   * a section above the schedule no longer repaints the schedule.
+   */
+  band: SectionId[];
+  /**
+   * Section headings, where this template names a section differently.
+   *
+   * Not decoration. Every one of the seven used to print the same eight headings in the same order,
+   * so the words on the page carried no information about which structure you were reading. The
+   * real builders do vary this — Zola's default is "Schedule", The Knot's is "Wedding Events", Joy
+   * ships "Itinerary" — and the heading is the one part of a section a guest actually reads.
+   */
+  copy?: Partial<Record<SectionId, string>>;
+  /** Nav labels, where this template shortens or renames them. */
+  navCopy?: Partial<Record<SectionId, string>>;
+  /**
+   * The label on the reply button.
+   *
+   * All seven said "Reply to your invitation" in the same words. A stationery card and a timeline
+   * do not ask the same way, and this is the single most-pressed control on the page.
+   */
+  cta?: { identified: string; anonymous: string };
+  /**
+   * How the closing footer is set.
+   *
+   * Round 6: "seven identical 283px footers under seven different documents is the single largest
+   * shared surface left". It was one `.site-footer` with one `display:block` and one `text-align`
+   * in all seven, sitting under structures that agree about nothing else.
+   *   centred   names over contact, centred — the plain one
+   *   split     names left, contact right, across a rule
+   *   rail      a left label column against the contact, matching the section rows
+   *   plate     boxed and ruled, the way the card sets everything
+   *   ledger    hairline rows, right-set label
+   *   spine     hung off the same rule the schedule runs down
+   *   panel     inset to the panel's own width rather than the window's
+   */
+  footer: 'centred' | 'split' | 'rail' | 'plate' | 'ledger' | 'spine' | 'panel';
 }
 
 export const TEMPLATES: Template[] = [
@@ -104,6 +170,23 @@ export const TEMPLATES: Template[] = [
     schedule: 'list',
     party: 'grid',
     numbered: true,
+    // The quietest rhythm in the set: two bands late in the document and nothing else, so classic
+    // reads as one long unbroken scroll the way Zola's default site does.
+    //
+    // Not zero bands, which was the first attempt. Several of the eighteen themes are identified BY
+    // their banding — kelsey is a rust page with light blocks set into it, and with no bands to set
+    // them into it stopped being kelsey — and classic is the default template, so a theme that
+    // cannot show itself on classic cannot show itself at all.
+    band: ['travel', 'things'],
+    blocks: 'stack',
+    faq: 'rows',
+    copy: {
+      welcome: 'A note from us',
+      schedule: 'The weekend, hour by hour',
+      gifts: 'On the subject of gifts',
+    },
+    cta: { identified: 'Reply to your invitation', anonymous: 'Open your invitation' },
+    footer: 'centred',
   },
   {
     id: 'rail',
@@ -119,8 +202,29 @@ export const TEMPLATES: Template[] = [
     cover: false,
     schedule: 'banded',
     story: 'stack',
-    party: 'grid',
+    // Full-width rows with the role held in the same left column the travel blocks use. `grid` was
+    // shared with classic — same registry value, same class, same CSS, and at 390px both resolved
+    // to a single track, which is not a grid at all.
+    party: 'rows',
     numbered: false,
+    // Eternity's whole idea: alternate sections tinted so the bands read as separate. Pinned to
+    // the sections themselves rather than to their position, so it is still a band rhythm when an
+    // owner has no story to tell.
+    band: ['story', 'party', 'faq'],
+    blocks: 'banded',
+    faq: 'gutter',
+    copy: {
+      welcome: 'Welcome',
+      story: 'Our story',
+      schedule: 'The celebration',
+      party: 'The wedding party',
+      travel: 'Travel and stay',
+      faq: 'Good to know',
+      gifts: 'The registry',
+    },
+    navCopy: { welcome: 'Home', faq: 'Good to know', gifts: 'Registry' },
+    cta: { identified: 'Send your reply', anonymous: 'Find your invitation' },
+    footer: 'rail',
   },
   {
     id: 'timeline',
@@ -138,6 +242,22 @@ export const TEMPLATES: Template[] = [
     schedule: 'timeline',
     story: 'timeline',
     numbered: false,
+    // One deep section only, and it is the schedule — the spine runs down a dark field and the
+    // rest of the document stays light, so the eye goes to the sequence.
+    band: ['schedule'],
+    blocks: 'spine',
+    faq: 'numbered',
+    copy: {
+      welcome: 'Before anything else',
+      schedule: 'The order of the days',
+      travel: 'Getting to us',
+      things: 'If you have an afternoon spare',
+      faq: 'Asked and answered',
+      gifts: 'Last of all, the registry',
+    },
+    navCopy: { schedule: 'The days', things: 'Spare time', faq: 'Answers' },
+    cta: { identified: 'Take me to my reply', anonymous: 'Find your invitation' },
+    footer: 'spine',
   },
   {
     id: 'split',
@@ -154,6 +274,20 @@ export const TEMPLATES: Template[] = [
     schedule: 'columns',
     party: 'list',
     numbered: true,
+    band: ['welcome', 'party', 'gifts'],
+    blocks: 'twoUp',
+    faq: 'twoUp',
+    copy: {
+      welcome: 'A note',
+      schedule: 'When and where',
+      party: 'Standing with us',
+      travel: 'Arriving, and staying',
+      faq: 'Questions',
+      gifts: 'A registry, if you would like one',
+    },
+    navCopy: { schedule: 'When', travel: 'Arriving' },
+    cta: { identified: 'Your reply', anonymous: 'Your invitation' },
+    footer: 'split',
   },
   {
     id: 'card',
@@ -169,6 +303,19 @@ export const TEMPLATES: Template[] = [
     cover: true,
     schedule: 'agenda',
     numbered: false,
+    band: ['welcome', 'faq'],
+    blocks: 'framed',
+    faq: 'inline',
+    // Stationery copy: short, formal, and set the way an invitation card sets it.
+    copy: {
+      welcome: 'With pleasure',
+      schedule: 'The order of the day',
+      travel: 'Travel',
+      faq: 'Particulars',
+      gifts: 'With regard to gifts',
+    },
+    cta: { identified: 'Kindly reply', anonymous: 'Kindly find your invitation' },
+    footer: 'plate',
   },
   {
     id: 'boxed',
@@ -177,15 +324,31 @@ export const TEMPLATES: Template[] = [
     source: 'https://dotrex.co/theme-preview/aimer-wedding/',
     provenance: 'ThemeForest 4.53 out of 5 from 17 reviews, 543 sales',
     blurb:
-      'A bordered panel that scrolls over a ground held still behind it, with each section given a screen of its own and a stacked numbered index down the inside of the panel, so the document reads as a set of pages rather than one run.',
-    mood: 'Layered, sectioned, page-like',
+      'A bordered panel that scrolls over a ground held still behind it, opening on a numbered contents page, with everything inside it set as bordered tiles — the story, the events, the travel notes and the questions — so the document reads as a set of pages rather than one run.',
+    mood: 'Layered, tiled, page-like',
     order: ['welcome', 'story', 'schedule', 'party', 'travel', 'things', 'faq', 'gifts'],
     nav: 'anchors',
     cover: true,
     schedule: 'cards',
-    story: 'alternating',
+    story: 'panels',
     party: 'bands',
     numbered: false,
+    band: ['story', 'travel', 'faq'],
+    blocks: 'tiles',
+    faq: 'panels',
+    copy: {
+      welcome: 'Read this first',
+      story: 'The long version',
+      schedule: 'Every event',
+      party: 'Who is standing where',
+      travel: 'Beds, roads and airports',
+      things: 'An afternoon to fill',
+      faq: 'Everything else',
+      gifts: 'If you were going to ask about gifts',
+    },
+    navCopy: { welcome: 'Start', story: 'Story', travel: 'Beds and roads', faq: 'Everything else' },
+    cta: { identified: 'Open your reply', anonymous: 'Open your invitation' },
+    footer: 'panel',
   },
   {
     id: 'gate',
@@ -202,6 +365,19 @@ export const TEMPLATES: Template[] = [
     cover: true,
     schedule: 'ledger',
     numbered: false,
+    // The whole document sits on the deep ground. Nothing is withheld once you are past the gate,
+    // but nothing is bright either — it reads as one continuous dark card.
+    band: ['schedule', 'travel', 'faq', 'gifts'],
+    blocks: 'gutter',
+    faq: 'ledger',
+    copy: {
+      schedule: 'The details',
+      travel: 'Getting there',
+      faq: 'If you are wondering',
+      gifts: 'No gifts, but if you insist',
+    },
+    cta: { identified: 'Reply', anonymous: 'Open' },
+    footer: 'ledger',
   },
 ];
 

@@ -2028,3 +2028,315 @@ select.field {
 .is-revoked { opacity: 0.55; }
 .rsvp-person { margin-top: clamp(2rem, 5vw, 3rem); }
 .rsvp-events { display: grid; gap: 0.25rem; margin-top: 0.5rem; }
+
+/* ===========================================================================
+   THE CONTENT ADMIN
+
+   Forms for the wedding itself — settings, events, and the prose sections.
+   Until these existed the only way to change a venue or a time was to edit the
+   seed script and reseed, which meant a code change and a deploy for a phone
+   call from a caterer.
+
+   Deliberately plain. This is the one part of the product a guest never sees;
+   it is used under time pressure, often on a phone, often by somebody who is
+   not the person who built it. Legibility and hit targets beat character here,
+   and it inherits the active theme's palette so an owner is never looking at
+   two unrelated designs in one session.
+   =========================================================================== */
+
+.admin-form {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.5rem, 4vw, 2.25rem);
+  max-width: 760px;
+}
+
+.admin-fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-fieldset + .admin-fieldset {
+  padding-top: clamp(1.5rem, 4vw, 2.25rem);
+  border-top: var(--rule) solid var(--border);
+}
+
+.admin-fieldset > legend {
+  padding: 0;
+  margin-bottom: 0.25rem;
+}
+
+.admin-grid {
+  display: grid;
+  gap: 0 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .admin-grid {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+
+  .admin-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* A hint belongs to the field above it, so it hangs off the same block rather
+   than floating as a sibling paragraph. */
+.field-hint {
+  display: block;
+  margin-top: 0.4rem;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--muted);
+  max-width: 62ch;
+}
+
+.field-hint code {
+  font-size: 0.95em;
+}
+
+/* Checkboxes get a real 44px row: this form is filled in on a phone, in a hurry,
+   and a 13px native box next to 15px text is not a target. */
+.admin-check {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin: 0.5rem 0 0;
+  min-height: 44px;
+}
+
+.admin-check input[type='checkbox'] {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  accent-color: var(--accent);
+}
+
+.admin-check label {
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.admin-check-inline {
+  margin-top: 1.4rem;
+}
+
+.admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 0.5rem 0 0;
+}
+
+/* The "add one" form at the top of a list — short, horizontal where there is room. */
+.admin-inline-form {
+  display: grid;
+  gap: 0 1rem;
+  align-items: end;
+  padding: 1.1rem 1.2rem;
+  border: var(--rule) solid var(--border);
+  background: color-mix(in srgb, var(--surface) 45%, var(--bg));
+}
+
+@media (min-width: 720px) {
+  .admin-inline-form {
+    grid-template-columns: minmax(0, 1fr) 12rem auto;
+  }
+
+  .admin-inline-form .admin-actions {
+    margin-bottom: 1rem;
+  }
+}
+
+/* --- Lists of things ------------------------------------------------------ */
+
+.admin-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.admin-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.5rem;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 1rem 1.2rem;
+  border: var(--rule) solid var(--border);
+  background: color-mix(in srgb, var(--surface) 45%, var(--bg));
+}
+
+.admin-row-main {
+  min-width: 0;
+}
+
+.admin-row-title {
+  font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-size: 1.25rem;
+  letter-spacing: 0;
+  /* The whole row is a link target in practice, so give it a real one. */
+  display: inline-block;
+  min-height: 32px;
+}
+
+.admin-row-meta {
+  margin: 0.15rem 0 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.admin-row-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+/* State as a shape, not only as words — an owner scanning eight events should
+   see which ones are public without reading every row. */
+.tag {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: var(--label-tracking);
+  padding: 0.3em 0.65em;
+  border: var(--rule) solid var(--border);
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.tag-on {
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+
+/* --- Section tabs --------------------------------------------------------- */
+
+.admin-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1.5rem;
+}
+
+.admin-tab {
+  font-family: var(--font-body);
+  font-size: 13px;
+  text-decoration: none;
+  padding: 0.6rem 0.9rem;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  border: var(--rule) solid var(--border);
+  color: var(--muted);
+}
+
+.admin-tab.is-active {
+  border-color: var(--accent);
+  color: var(--ink);
+  background: color-mix(in srgb, var(--accent-soft) 60%, transparent);
+}
+
+.admin-tab:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* --- One editable block --------------------------------------------------- */
+
+.admin-block {
+  padding: 1.2rem 1.3rem;
+  border: var(--rule) solid var(--border);
+  background: color-mix(in srgb, var(--surface) 45%, var(--bg));
+}
+
+.admin-block .admin-form {
+  gap: 0;
+  max-width: none;
+}
+
+/* Kept clear of Save so the two are never adjacent — one of these is reversible
+   and the other is not. */
+.admin-block-delete {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: var(--rule) solid var(--border);
+}
+
+.admin-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* --- Row actions and the delete guard ------------------------------------- */
+
+.admin-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+/* A native <details>, so the confirmation needs no JavaScript and survives the
+   in-app browsers this project is built for. `list-style: none` plus the WebKit
+   pseudo-element removes the disclosure triangle from what is styled as a
+   button; without both, Safari draws a marker inside it. */
+.admin-confirm > summary {
+  cursor: pointer;
+  list-style: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.admin-confirm > summary::-webkit-details-marker {
+  display: none;
+}
+
+.admin-confirm > summary::marker {
+  content: '';
+}
+
+.admin-confirm[open] > summary {
+  border-color: var(--accent);
+}
+
+.admin-confirm-body {
+  margin-top: 0.6rem;
+  padding: 0.9rem 1rem;
+  border: var(--rule) solid var(--border);
+  background: color-mix(in srgb, var(--surface) 60%, var(--bg));
+  max-width: 46ch;
+}
+
+.admin-confirm-text {
+  margin: 0 0 0.8rem;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+@media (min-width: 720px) {
+  /* The confirmation is wider than a list row, so let it out of the flex line
+     rather than squeezing it into a column. */
+  .admin-row-actions .admin-confirm[open] .admin-confirm-body {
+    position: absolute;
+    right: 0;
+    z-index: 2;
+    width: min(38ch, 80vw);
+  }
+
+  .admin-row-actions .admin-confirm {
+    position: relative;
+  }
+}

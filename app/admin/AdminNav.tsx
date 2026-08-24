@@ -9,8 +9,11 @@ async function signOut() {
 
 const LINKS = [
   { id: 'dashboard', href: '/admin', label: 'Dashboard' },
+  { id: 'content', href: '/admin/content', label: 'The wedding' },
+  { id: 'events', href: '/admin/events', label: 'Events' },
+  { id: 'pages', href: '/admin/pages', label: 'Sections' },
   { id: 'invites', href: '/admin/invites', label: 'Invite links' },
-  { id: 'themes', href: '/themes', label: 'Themes' },
+  { id: 'themes', href: '/admin/themes', label: 'Themes' },
 ];
 
 export function AdminNav({ active }: { active: string }) {

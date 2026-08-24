@@ -16,7 +16,25 @@ const TOKENS: { name: string; token: string }[] = JSON.parse(
   readFileSync(path.join(process.cwd(), '.data', 'tokens.json'), 'utf8'),
 );
 const INVITE = `/i/${TOKENS[0].token}`;
-const ROUTES = ['/', INVITE, `${INVITE}/rsvp`, '/find', '/themes'];
+// The guest-facing surface. The theme picker used to be in this list; it now lives at
+// `/admin/themes` behind a session, and is swept separately below so its accessibility is still
+// checked rather than quietly dropped along with its route.
+const ROUTES = ['/', INVITE, `${INVITE}/rsvp`, '/find'];
+
+/**
+ * The theme and template picker moved to `/admin/themes`, so reaching it needs a session.
+ * Choosing the look of the wedding is an owner's decision; the page used to be public and gated
+ * only its "Use this" buttons.
+ */
+const ADMIN_PASSWORD = 'demo-admin-password-please-change';
+
+async function signIn(page: Page) {
+  await page.goto('/admin/login');
+  await page.getByLabel('Password').fill(ADMIN_PASSWORD);
+  await page.getByRole('button', { name: /Sign in/i }).click();
+  await expect(page).toHaveURL(/\/admin$/);
+}
+
 
 /** Every distinct computed value of a property across the rendered page. */
 async function computedValues(page: Page, prop: string): Promise<string[]> {
@@ -158,7 +176,7 @@ test.describe('AI-slop tells are structurally impossible', () => {
   test('every theme keeps its palette and its own typeface', async ({ page }) => {
     const seenFonts = new Set<string>();
     for (const theme of THEMES) {
-      await page.goto('/themes');
+      await page.goto('/find');
       await page.evaluate((id) => {
         document.cookie = `preview_theme=${id}; path=/`;
       }, theme.id);
@@ -203,6 +221,22 @@ test.describe('accessibility', () => {
     });
   }
 
+  test('/admin/themes — no WCAG A/AA violations', async ({ page }) => {
+    // Swept on its own because it needs a session. It came off the public ROUTES list when the
+    // picker moved behind the admin gate, and a route that quietly loses its accessibility check
+    // by being moved is how these things rot.
+    await signIn(page);
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/admin/themes');
+    await page.waitForLoadState('networkidle');
+    const results = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+      .analyze();
+    const summary = results.violations.map((v) => `${v.id} (${v.nodes.length}): ${v.help}`);
+    expect(summary, summary.join('\n')).toEqual([]);
+  });
+
+
   test('interactive targets are at least 44px', async ({ page }) => {
     await page.goto(INVITE);
     const small = await page.evaluate(() => {
@@ -236,7 +270,14 @@ test.describe('accessibility', () => {
       // A header that has finished its day slides fully UNDER the bar on its way out — it is
       // completely hidden, which is correct. What must never happen is a header STRADDLING the
       // bar's lower edge, where the top of the text is clipped but the bottom is on screen.
+      // Only STICKY headers. A static one passing under the bar as the page scrolls is ordinary
+      // document behaviour — every other line of text does the same, and flagging it would mean
+      // asserting that nothing may ever scroll beneath a fixed bar. The defect this guards against
+      // is a header that PINS itself underneath the bar and stays there, which is why the test is
+      // named for a pinned header. Templates set this per layout: classic and rail pin theirs,
+      // card moves its day into the agenda's time gutter and leaves it static.
       const bad = [...document.querySelectorAll('.schedule-day-header')]
+        .filter((h) => getComputedStyle(h).position === 'sticky')
         .map((h) => ({ r: h.getBoundingClientRect(), txt: (h.textContent ?? '').trim() }))
         .filter(({ r }) => r.top < bar.bottom - 1 && r.bottom > bar.bottom + 1)
         .map(({ r, txt }) => `${txt} straddles the bar (top ${Math.round(r.top)}, bar bottom ${Math.round(bar.bottom)})`);
@@ -272,7 +313,9 @@ test.describe('mobile layout', () => {
   test('the RSVP call to action is above the fold', async ({ page }) => {
     // The RSVP is the most-used feature on a wedding site; it must not sit behind a hero-scroll.
     await page.goto(INVITE);
-    const cta = page.getByRole('link', { name: /Reply to your invitation/i });
+    // Located by role in the page, not by one template's wording — see the note in guest-flow.
+    // gate answers with its two doors on the cover; everyone else with the hero button.
+    const cta = page.locator('.hero-cta .btn, .gate-doors .btn').last();
     const box = await cta.boundingBox();
     const viewport = page.viewportSize();
     expect(box).not.toBeNull();

@@ -35,8 +35,15 @@ interface Props {
   calendarBase?: string;
 }
 
-/** Section titles. The copy differs by section, not by template — a structure changes where a
- *  section sits and how it looks, not what it is called. */
+/**
+ * The fallback headings.
+ *
+ * These used to be the ONLY headings: one map, seven templates, so every structure printed the
+ * same eight sentences in the same order and the words on the page said nothing about which
+ * document you were reading. A template may now override any of them (`Template.copy`), and most
+ * do — a stationery card says "The order of the day" where a timeline says "The order of the
+ * days" and a side rail says "The celebration".
+ */
 const TITLES: Record<SectionId, string> = {
   welcome: 'A note from us',
   story: 'How we got here',
@@ -48,6 +55,7 @@ const TITLES: Record<SectionId, string> = {
   gifts: 'On the subject of gifts',
 };
 
+/** Fallback nav labels, overridable per template via `Template.navCopy`. */
 const NAV_LABELS: Record<SectionId, string> = {
   welcome: 'Welcome',
   story: 'Our story',
@@ -92,6 +100,27 @@ export function WeddingPage({
   const present = tpl.order.filter((id) => has[id]);
   const numberOf = (id: SectionId) => String(present.indexOf(id) + 1).padStart(2, '0');
 
+  /** The template's own word for a section, falling back to the shared one. */
+  const titleOf = (id: SectionId) => tpl.copy?.[id] ?? TITLES[id];
+  const navLabelOf = (id: SectionId) => tpl.navCopy?.[id] ?? NAV_LABELS[id];
+
+  /**
+   * Which ground a section sits on.
+   *
+   * Named sections, not `:nth-of-type(even)`. The parity version counted the splash and the hero
+   * along with the sections, so the largest surface on the page was decided by how many sections
+   * an owner happened to have filled in — deleting a welcome note repainted the schedule — and any
+   * two templates carrying the same number of sections banded identically for free.
+   */
+  const bandOf = (id: SectionId) => {
+    const at = tpl.band.indexOf(id);
+    // Three tones, because three themes (kelsey, alessia, aspen) paint their bands in three block
+    // colours rather than one and that was audited into them deliberately. Keyed on the position
+    // in the template's DECLARED band list, not in the rendered page, so an owner who leaves a
+    // section empty never shifts the tone of the sections after it.
+    return at === -1 ? undefined : (['a', 'b', 'c'][at % 3] as string);
+  };
+
   return (
     <>
       {identified ? (
@@ -117,7 +146,7 @@ export function WeddingPage({
             .filter(Boolean)
             .map((n) => n.trim().charAt(0))
             .join(' + ')}
-          items={present.map((id) => ({ id, label: NAV_LABELS[id] }))}
+          items={present.map((id) => ({ id, label: navLabelOf(id) }))}
         />
       ) : null}
 
@@ -128,28 +157,67 @@ export function WeddingPage({
             hidden from assistive tech — the same names follow in the hero as a real heading.
             `gate` is the exception: its whole claim is that the first screen is the names, the
             date and two links, so there it carries all three and is NOT hidden. */}
-        <section className="splash" aria-hidden={tpl.id === 'gate' ? undefined : true}>
-          <p className="splash-names display">
-            {settings.partner_a || settings.couple_names}
-            {settings.partner_b ? (
-              <>
-                <span className="splash-amp">&amp;</span>
-                {settings.partner_b}
-              </>
-            ) : null}
-          </p>
+        {/* A cover template's cover carries the names and the date, and then the hero carried
+            them AGAIN one scroll below — split, card and boxed each printed the couple's names
+            twice and the date twice inside the first two screens. gate was the only one that
+            suppressed the repeat, and it did it in CSS by hiding the `h1`, which left the page
+            with no accessible heading at all.
+
+            So the cover becomes the real title when a template has one: it holds the `h1`, it is
+            no longer hidden from assistive tech, and the hero below drops its eyebrow and its
+            names and keeps only what the cover does not say. */}
+        <section className="splash" aria-hidden={tpl.cover ? undefined : true}>
+          {tpl.cover ? (
+            <h1 className="splash-names display">
+              {settings.partner_a || settings.couple_names}
+              {settings.partner_b ? (
+                <>
+                  <span className="splash-amp">&amp;</span>
+                  {settings.partner_b}
+                </>
+              ) : null}
+            </h1>
+          ) : (
+            <p className="splash-names display">
+              {settings.partner_a || settings.couple_names}
+              {settings.partner_b ? (
+                <>
+                  <span className="splash-amp">&amp;</span>
+                  {settings.partner_b}
+                </>
+              ) : null}
+            </p>
+          )}
+
+          {/* Every cover carries the date, not only gate's.
+              split, card and boxed each spent a full screen on the names alone and then repeated
+              them in the hero one scroll below, which is why all three had to be collapsed to a
+              thin band on a phone — a cover that says nothing cannot justify its height. With the
+              date on it the cover is worth having at any width, and the cover/hero distinction —
+              the main first-screen difference between these templates — survives onto the device
+              most guests use. */}
+          {tpl.cover && settings.script_line ? (
+            <span className="splash-indic" aria-hidden="true">
+              {settings.script_line}
+            </span>
+          ) : null}
+
+          {tpl.cover && settings.primary_date ? (
+            <p className={`label splash-date${tpl.id === 'gate' ? ' gate-date' : ''}`}>
+              {dateInWords(settings.primary_date)}
+            </p>
+          ) : null}
 
           {tpl.id === 'gate' ? (
             <>
-              {settings.primary_date ? (
-                <p className="label gate-date">{dateInWords(settings.primary_date)}</p>
-              ) : null}
               <p className="gate-doors">
                 <a className="btn btn-ghost" href="#schedule">
                   The details
                 </a>
                 <a className="btn" href={rsvpHref ?? '/find'}>
-                  {rsvpHref ? 'Reply to your invitation' : 'Open your invitation'}
+                  {rsvpHref
+                    ? (tpl.cta?.identified ?? 'Reply to your invitation')
+                    : (tpl.cta?.anonymous ?? 'Open your invitation')}
                 </a>
               </p>
             </>
@@ -159,29 +227,34 @@ export function WeddingPage({
         {/* ---------------------------------------------------------------- Hero */}
         <header className="hero section">
           <div className="shell hero-inner">
-            <p className="label rise hero-eyebrow">
-              {settings.primary_date ? dateInWords(settings.primary_date) : 'Save the date'}
-            </p>
+            {/* The date is on the cover already for a cover template. */}
+            {tpl.cover ? null : (
+              <p className="label rise hero-eyebrow">
+                {settings.primary_date ? dateInWords(settings.primary_date) : 'Save the date'}
+              </p>
+            )}
 
             {/* Anvaya's signature: the names set in a non-Latin script above the Latin ones. */}
-            {settings.script_line ? (
+            {settings.script_line && !tpl.cover ? (
               <span className="hero-indic rise" aria-hidden="true">
                 {settings.script_line}
               </span>
             ) : null}
 
-            <h1 className="display display-xl rise hero-names">
-              {settings.partner_a || settings.couple_names}
-              {settings.partner_b ? (
-                <>
-                  <span className="amp">&amp;</span>
-                  {settings.partner_b}
-                </>
-              ) : null}
-            </h1>
+            {tpl.cover ? null : (
+              <h1 className="display display-xl rise hero-names">
+                {settings.partner_a || settings.couple_names}
+                {settings.partner_b ? (
+                  <>
+                    <span className="amp">&amp;</span>
+                    {settings.partner_b}
+                  </>
+                ) : null}
+              </h1>
+            )}
 
             {/* Veley + Ross set the date twice — once in words, once as huge numerals. */}
-            {date ? (
+            {date && !tpl.cover ? (
               <span className="hero-numeric rise" aria-hidden="true">
                 {/* All numerals, as the source sets it (10 / 14 / 19). A three-letter month makes
                     the string too wide for 22.22vw and pushes the year off the screen. */}
@@ -197,13 +270,13 @@ export function WeddingPage({
             {rsvpHref ? (
               <p className="hero-cta rise">
                 <a className="btn" href={rsvpHref}>
-                  Reply to your invitation
+                  {tpl.cta?.identified ?? 'Reply to your invitation'}
                 </a>
               </p>
             ) : (
               <p className="hero-cta rise">
                 <a className="btn" href="/find">
-                  Open your invitation
+                  {tpl.cta?.anonymous ?? 'Open your invitation'}
                 </a>
               </p>
             )}
@@ -222,11 +295,28 @@ export function WeddingPage({
 
           if (id === 'welcome') {
             return (
-              <section className="section" key={id} aria-labelledby="welcome-h">
+              // `id` matters: rail, timeline and boxed all put "Welcome" in their nav, and without
+              // it every one of those links scrolled nowhere.
+              <section
+                className={`section section-welcome welcome-${tpl.blocks}`}
+                key={id}
+                id="welcome"
+                data-band={bandOf(id)}
+                aria-labelledby="welcome-h"
+              >
                 <div className="shell">
                   <hr className="rule" />
-                  <h2 id="welcome-h" className="visually-hidden">
-                    {TITLES.welcome}
+                  {/* The number was computed for this section and then thrown away, so every
+                      numbered template visibly began at 02. */}
+                  {tpl.numbered ? <p className="label section-num">{num}</p> : null}
+                  {/* Visible, not `visually-hidden`.
+                      Six templates carry their own word for this section — "A note", "With
+                      pleasure", "Read this first", "Before anything else" — and every one of them
+                      rendered zero pixels, because the heading was hidden from sight and left only
+                      for screen readers. Registry strings that reach nobody are the pattern this
+                      whole axis exists to catch. */}
+                  <h2 id="welcome-h" className="display display-lg section-title">
+                    {titleOf('welcome')}
                   </h2>
                   <p className="welcome-note prose">{settings.welcome_note}</p>
                 </div>
@@ -236,12 +326,18 @@ export function WeddingPage({
 
           if (id === 'schedule') {
             return (
-              <section className="section" key={id} aria-labelledby="schedule-h" id="schedule">
+              <section
+                className="section"
+                key={id}
+                id="schedule"
+                data-band={bandOf(id)}
+                aria-labelledby="schedule-h"
+              >
                 <div className="shell">
                   <hr className="rule" />
                   {tpl.numbered ? <p className="label section-num">{num}</p> : null}
                   <h2 id="schedule-h" className="display display-lg section-title">
-                    {identified ? TITLES.schedule : 'The weekend'}
+                    {identified ? titleOf('schedule') : 'The weekend'}
                   </h2>
 
                   {!identified ? (
@@ -273,45 +369,55 @@ export function WeddingPage({
           }
 
           if (id === 'story') {
-            return <StorySection key={id} blocks={story} template={tpl} num={num} title={TITLES.story} />;
+            return <StorySection key={id} blocks={story} template={tpl} num={num} title={titleOf('story')} band={bandOf('story')} />;
           }
           if (id === 'party') {
-            return <PartySection key={id} blocks={party} template={tpl} num={num} title={TITLES.party} />;
+            return <PartySection key={id} blocks={party} template={tpl} num={num} title={titleOf('party')} band={bandOf('party')} />;
           }
           if (id === 'travel') {
-            return <TravelSection key={id} blocks={travel} template={tpl} num={num} title={TITLES.travel} />;
+            return <TravelSection key={id} blocks={travel} template={tpl} num={num} title={titleOf('travel')} band={bandOf('travel')} />;
           }
           if (id === 'things') {
-            return <ThingsSection key={id} blocks={things} template={tpl} num={num} title={TITLES.things} />;
+            return <ThingsSection key={id} blocks={things} template={tpl} num={num} title={titleOf('things')} band={bandOf('things')} />;
           }
           if (id === 'faq') {
-            return <FaqSection key={id} blocks={faqs} template={tpl} num={num} title={TITLES.faq} />;
+            return <FaqSection key={id} blocks={faqs} template={tpl} num={num} title={titleOf('faq')} band={bandOf('faq')} />;
           }
 
           // gifts
           return (
-            <section className="section" key={id} aria-labelledby="gifts-h" id="gifts">
+            // Gifts was the one prose section never given a treatment: a heading and a
+            // paragraph, identical in all seven, and it is the last thing every guest reads.
+            <section
+              className={`section section-gifts gifts-${tpl.blocks}`}
+              key={id}
+              id="gifts"
+              data-band={bandOf(id)}
+              aria-labelledby="gifts-h"
+            >
               <div className="shell">
                 <hr className="rule" />
                 {tpl.numbered ? <p className="label section-num">{num}</p> : null}
                 <h2 id="gifts-h" className="display display-lg section-title">
-                  {TITLES.gifts}
+                  {titleOf('gifts')}
                 </h2>
                 {/* Registry is pull, not push: its own section, never the homepage hero, and never
                     appended to an RSVP confirmation. */}
-                <p className="prose">{settings.registry_note}</p>
-                {settings.registry_url ? (
-                  <p>
-                    <a
-                      className="btn btn-ghost"
-                      href={settings.registry_url}
-                      target="_blank"
-                      rel="noreferrer noopener"
-                    >
-                      The registry
-                    </a>
-                  </p>
-                ) : null}
+                <div className={`gifts-body${settings.registry_url ? ' gifts-paired' : ''}`}>
+                  <p className="prose gifts-note">{settings.registry_note}</p>
+                  {settings.registry_url ? (
+                    <p className="gifts-link">
+                      <a
+                        className="btn btn-ghost"
+                        href={settings.registry_url}
+                        target="_blank"
+                        rel="noreferrer noopener"
+                      >
+                        The registry
+                      </a>
+                    </p>
+                  ) : null}
+                </div>
               </div>
             </section>
           );
@@ -325,7 +431,7 @@ export function WeddingPage({
         <span className="label">{settings.tagline}</span>
       </div>
 
-      <footer className="site-footer">
+      <footer className={`site-footer footer-set-${tpl.footer}`}>
         <div className="shell">
           <hr className="rule" />
           <div className="footer-inner">

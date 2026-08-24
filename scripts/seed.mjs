@@ -280,7 +280,15 @@ async function main() {
        owner_email, contact_name, contact_phone, contact_email, site_is_public,
        show_our_story, registry_url, registry_note)
      VALUES (1, $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)
-     ON CONFLICT (id) DO UPDATE SET couple_names = EXCLUDED.couple_names`,
+     ON CONFLICT (id) DO UPDATE SET
+       couple_names = EXCLUDED.couple_names,
+       -- Also restore the LOOK on a reseed. Choosing a theme in the picker writes it here, so
+       -- without this a demo database keeps whatever was last clicked and every later run of the
+       -- test suite silently measures a different one of the 126 theme x template combinations
+       -- than the run before it. That is how a genuine WCAG failure on the goundry theme sat
+       -- unnoticed while the suite reported green on anvaya.
+       theme = EXCLUDED.theme,
+       template = 'classic'`,
     [
       'Ayesha & Imran', 'Ayesha', 'Imran',
       'Five days, one family, Karachi in February.',

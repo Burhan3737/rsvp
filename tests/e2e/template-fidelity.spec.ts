@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 
@@ -20,6 +20,21 @@ const TOKENS: { token: string }[] = JSON.parse(
   readFileSync(path.join(process.cwd(), '.data', 'tokens.json'), 'utf8'),
 );
 const INVITE = `/i/${TOKENS[0].token}`;
+
+/**
+ * The theme and template picker moved to `/admin/themes`, so reaching it needs a session.
+ * Choosing the look of the wedding is an owner's decision; the page used to be public and gated
+ * only its "Use this" buttons.
+ */
+const ADMIN_PASSWORD = 'demo-admin-password-please-change';
+
+async function signIn(page: Page) {
+  await page.goto('/admin/login');
+  await page.getByLabel('Password').fill(ADMIN_PASSWORD);
+  await page.getByRole('button', { name: /Sign in/i }).click();
+  await expect(page).toHaveURL(/\/admin$/);
+}
+
 
 const rgb = (hex: string) => {
   const h = hex.replace('#', '');
@@ -208,7 +223,7 @@ const EXPECTED: Fidelity[] = [
 test.describe('each theme renders its source template values', () => {
   for (const t of EXPECTED) {
     test(`${t.theme} matches ${t.source}`, async ({ page }) => {
-      await page.goto('/themes');
+      await page.goto('/find');
       await page.evaluate((id) => {
         document.cookie = `preview_theme=${id}; path=/`;
       }, t.theme);
@@ -237,7 +252,8 @@ test.describe('each theme renders its source template values', () => {
     // failure mode this file exists to prevent. Read from the picker rather than importing the
     // registry: the picker is what an owner can actually choose, and it is the surface that
     // matters if the two ever disagree.
-    await page.goto('/themes');
+    await signIn(page);
+    await page.goto('/admin/themes');
     // Scoped to THEME cards. The picker now offers two axes — structure and look — and both use
     // the same card, so an unscoped selector picks up the templates, which have no palette to
     // assert against.
@@ -252,7 +268,7 @@ test.describe('each theme renders its source template values', () => {
 
   test.afterAll(async ({ browser }) => {
     const page = await browser.newPage();
-    await page.goto('/themes');
+    await page.goto('/find');
     await page.evaluate(() => {
       document.cookie = 'preview_theme=; path=/; max-age=0';
     });
@@ -275,7 +291,7 @@ test.describe('signatures the sources are recognisable by', () => {
   test('Alessia keeps the marker face — as a CAPTION face, which is where its source uses it', async ({ page }) => {
     // The source sets headings in a heavy geometric caps sans and reserves the marker for small
     // labels ("Pool Chic"). An earlier round had these exactly inverted, so both halves are pinned.
-    await page.goto('/themes');
+    await page.goto('/find');
     await page.evaluate(() => {
       document.cookie = 'preview_theme=alessia; path=/';
     });
@@ -299,7 +315,7 @@ test.describe('signatures the sources are recognisable by', () => {
 
   test('Anvaya sets a non-Latin script beside the Latin names', async ({ page }) => {
     // anvaya.love loads Noto Serif in four Indic scripts precisely so it can do this.
-    await page.goto('/themes');
+    await page.goto('/find');
     await page.evaluate(() => {
       document.cookie = 'preview_theme=anvaya; path=/';
     });
@@ -318,7 +334,7 @@ test.describe('signatures the sources are recognisable by', () => {
 
   test('Marry Monday pins a second bar to the bottom of the window', async ({ page }) => {
     // veleyross.wedding carries a sticky bottom bar as well as a sticky top nav.
-    await page.goto('/themes');
+    await page.goto('/find');
     await page.evaluate(() => {
       document.cookie = 'preview_theme=marry-monday; path=/';
     });
@@ -340,7 +356,7 @@ test.describe('signatures the sources are recognisable by', () => {
   });
 
   test('Aspen uses no serif anywhere — its source loads Poppins and nothing else', async ({ page }) => {
-    await page.goto('/themes');
+    await page.goto('/find');
     await page.evaluate(() => {
       document.cookie = 'preview_theme=aspen; path=/';
     });
@@ -359,7 +375,7 @@ test.describe('signatures the sources are recognisable by', () => {
   });
 
   test('Kelsey is inverted — a RUST page, with light blocks set into it', async ({ page }) => {
-    await page.goto('/themes');
+    await page.goto('/find');
     await page.evaluate(() => {
       document.cookie = 'preview_theme=kelsey; path=/';
     });

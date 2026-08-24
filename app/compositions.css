@@ -346,7 +346,7 @@
    line. Fixing it by overshooting and clipping worked in Chromium and broke `position: sticky` in
    WebKit, where a clipped ancestor pulls the sticky day headers off the viewport. Blocking the
    section needs neither trick. */
-[data-theme='avril'] main > section.section:nth-of-type(even) {
+[data-theme='avril'] main > section.section[data-band] {
   --bg: #013ab2;
   --surface: #0a44bd;
   --ink: #fffaf1;
@@ -365,7 +365,7 @@
 }
 
 /* The section rule is a hairline ON the blue, not the divider between two cream bands. */
-[data-theme='avril'] main > section.section:nth-of-type(even) .rule {
+[data-theme='avril'] main > section.section[data-band] .rule {
   border-top-color: var(--border);
 }
 
@@ -688,10 +688,25 @@ html:not([data-theme='marry-monday']) .dresscode-head {
    and everything inside it follows.
    --------------------------------------------------------------------------- */
 
+/* ---------------------------------------------------------------------------
+   WHY [data-band] AND NOT :nth-of-type(even)
+
+   These bands are the largest painted surface on the page, and they used to be
+   chosen by a section's DOM index — which counts the splash and the hero, and
+   which therefore changed when an owner deleted a welcome note. Deleting one
+   flipped classic's schedule from cream to maroon. Worse for the template axis:
+   any two templates that happened to carry the same number of sections banded
+   identically, for free, and that banding is the first thing anyone sees.
+
+   The template now names which sections are painted (`Template.band`) and the
+   renderer emits `data-band="a" | "b" | "c"` from the position in that list. The
+   rhythm belongs to the structure, it is stable when a section is empty, and no
+   two templates here declare the same set.
+   --------------------------------------------------------------------------- */
+
 /* kelsey: a RUST page with LIGHT blocks set into it — the direction the source actually runs, and
    in its three block colours rather than one. Round 4 had this exactly inverted. */
-[data-theme='kelsey'] main > section.section:nth-of-type(2),
-[data-theme='kelsey'] main > section.section:nth-of-type(5) {
+[data-theme='kelsey'] main > section.section[data-band='a'] {
   --bg: #e0d8cb;
   --surface: #d7cec0;
   --ink: #7f4928;
@@ -708,7 +723,7 @@ html:not([data-theme='marry-monday']) .dresscode-head {
   color: var(--ink);
 }
 
-[data-theme='kelsey'] main > section.section:nth-of-type(6) {
+[data-theme='kelsey'] main > section.section[data-band='b'] {
   --bg: #a27a65;
   --surface: #96705c;
   --ink: #fdf6ee;
@@ -725,7 +740,7 @@ html:not([data-theme='marry-monday']) .dresscode-head {
   color: var(--ink);
 }
 
-[data-theme='kelsey'] main > section.section:nth-of-type(4) {
+[data-theme='kelsey'] main > section.section[data-band='c'] {
   --bg: #c5ad9f;
   --surface: #bba394;
   --ink: #5c3520;
@@ -747,8 +762,8 @@ html:not([data-theme='marry-monday']) .dresscode-head {
    band colours (#a20d13, #fbd8cb) were fabricated: neither appears anywhere in the source. What
    does appear is `#ffd8c7` x5 and `#9c0a0d` x7. Five peach blocks to one crimson, so the peach
    carries two bands and the crimson one. */
-[data-theme='alessia'] main > section.section:nth-of-type(2),
-[data-theme='alessia'] main > section.section:nth-of-type(4) {
+[data-theme='alessia'] main > section.section[data-band='a'],
+[data-theme='alessia'] main > section.section[data-band='c'] {
   --bg: #ffd8c7;
   --surface: #f7cdbe;
   --muted: #8a4a4c;
@@ -756,7 +771,7 @@ html:not([data-theme='marry-monday']) .dresscode-head {
   background: var(--bg);
 }
 
-[data-theme='alessia'] main > section.section:nth-of-type(6) {
+[data-theme='alessia'] main > section.section[data-band='b'] {
   --bg: #9c0a0d;
   --surface: #8e0b10;
   --ink: #fffaf1;
@@ -777,7 +792,7 @@ html:not([data-theme='marry-monday']) .dresscode-head {
 /* anvaya: the source blocks whole sections edge to edge in the deep maroon with cream Cormorant
    headings and a GOLD eyebrow reversed out. Gold finally gets to be gold here: #d4af37 measures
    7.06:1 on #570013, where on the cream page it was 2.00:1. */
-[data-theme='anvaya'] main > section.section:nth-of-type(even) {
+[data-theme='anvaya'] main > section.section[data-band] {
   --bg: #570013;
   --surface: #6b0a20;
   --ink: #fbf9f5;
@@ -798,7 +813,7 @@ html:not([data-theme='marry-monday']) .dresscode-head {
   color: var(--ink);
 }
 
-[data-theme='anvaya'] main > section.section:nth-of-type(even) .schedule-item {
+[data-theme='anvaya'] main > section.section[data-band] .schedule-item {
   background: var(--surface);
   border-color: color-mix(in srgb, var(--metal) 55%, transparent);
 }
@@ -914,12 +929,12 @@ html:not([data-theme='marry-monday']) .dresscode-head {
    about being a substitute. */
 
 @media (min-width: 720px) {
-  [data-theme='aspen'] main > section.section:nth-of-type(n + 4) {
+  [data-theme='aspen'] main > section.section[data-band] {
     position: relative;
     isolation: isolate;
   }
 
-  [data-theme='aspen'] main > section.section:nth-of-type(n + 4)::before {
+  [data-theme='aspen'] main > section.section[data-band]::before {
     content: '';
     position: absolute;
     top: 0;
@@ -954,10 +969,10 @@ html:not([data-theme='marry-monday']) .dresscode-head {
   }
 
   /* Left-set inside the column, as the source sets its stagger text. */
-  [data-theme='aspen'] main > section.section:nth-of-type(n + 4) .section-title,
-  [data-theme='aspen'] main > section.section:nth-of-type(n + 4) .section-num,
-  [data-theme='aspen'] main > section.section:nth-of-type(n + 4) .block,
-  [data-theme='aspen'] main > section.section:nth-of-type(n + 4) .faq-item {
+  [data-theme='aspen'] main > section.section[data-band] .section-title,
+  [data-theme='aspen'] main > section.section[data-band] .section-num,
+  [data-theme='aspen'] main > section.section[data-band] .block,
+  [data-theme='aspen'] main > section.section[data-band] .faq-item {
     text-align: left;
   }
 }

@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "db:migrate": "node scripts/migrate.mjs",
     "seed": "node scripts/seed.mjs",
     "seed:reset": "node scripts/seed.mjs --reset",
     "test": "vitest run",
@@ -14,6 +15,7 @@
     "test:e2e": "playwright test",
     "test:all": "vitest run && playwright test",
     "capture": "node scripts/capture.mjs",
+    "capture:templates": "node scripts/capture-templates.mjs",
     "db:reset": "node -e \"require('node:fs').rmSync('.data/pglite',{recursive:true,force:true})\" && node scripts/seed.mjs --reset"
   },
   "dependencies": {

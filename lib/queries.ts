@@ -285,11 +285,36 @@ export interface Settings {
   registry_note: string;
 }
 
+/**
+ * The two `date` columns are cast to text rather than coming back through `SELECT *`.
+ *
+ * Both drivers hand a Postgres `date` back as a JS Date object, so the declared
+ * `primary_date: string | null` above was simply untrue at runtime. Guest-facing code never
+ * noticed because it all routes through `toIsoDate()`, which was written to absorb exactly this —
+ * but anything reading the value directly gets a Date, and `String()` on a Date renders it in the
+ * RUNNER'S timezone. A wedding stored as 2027-02-27 stringifies to "Fri Feb 26 2027" anywhere west
+ * of UTC, one day early.
+ *
+ * That is what an `<input type="date">` in the admin was handed. It rejects anything that is not
+ * `YYYY-MM-DD`, rendered blank, and the next save wrote the blank back — silently clearing the
+ * wedding date and the reply deadline. Casting here makes the type honest at the boundary and
+ * leaves `toIsoDate()` as a harmless no-op for these two fields.
+ */
+const SETTINGS_COLUMNS = `
+  couple_names, partner_a, partner_b, tagline, script_line, welcome_note, theme, template,
+  primary_date::text AS primary_date, timezone, rsvp_deadline::text AS rsvp_deadline,
+  grace_hours, show_deadline, post_deadline_message, owner_email, contact_name, contact_phone,
+  contact_email, site_is_public, show_our_story, registry_url, registry_note`;
+
 export async function getSettings(): Promise<Settings> {
-  const row = await queryOne<Settings>(`SELECT * FROM site_settings WHERE id = 1`);
+  const row = await queryOne<Settings>(
+    `SELECT ${SETTINGS_COLUMNS} FROM site_settings WHERE id = 1`,
+  );
   if (row) return row;
   await query(`INSERT INTO site_settings (id) VALUES (1) ON CONFLICT (id) DO NOTHING`);
-  return (await queryOne<Settings>(`SELECT * FROM site_settings WHERE id = 1`))!;
+  return (await queryOne<Settings>(
+    `SELECT ${SETTINGS_COLUMNS} FROM site_settings WHERE id = 1`,
+  ))!;
 }
 
 export interface ContentBlock {

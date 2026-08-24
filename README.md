@@ -77,14 +77,43 @@ Make links in `/admin/invites`: give each a label only you see, set how many peo
 and tick its events. Events, page copy, travel blocks and FAQs live in the database and are edited
 through `/admin` — no redeploy needed to change a time or a venue.
 
+Everything a guest reads is editable there:
+
+| Page | What it changes |
+| --- | --- |
+| **The wedding** | Names, date, timezone, the welcome note, who to ask on the day, the reply deadline, gifts, whether search engines may index the front page |
+| **Events** | The whole schedule — times, venue, dress code and colour swatches, meal choices, which events are public, which collect replies |
+| **Sections** | Questions, travel and stay, things to do, your story, the wedding party |
+| **Invite links** | Households, how many seats each has, and which events each link shows |
+| **Themes** | The look (18) and the structure (7), independently |
+
 ## Deploying to Vercel (free)
 
 1. Push to a **personal** GitHub repo. (Hobby cannot connect to org-owned repos.)
 2. Import it in Vercel.
 3. In the project, **Storage → Neon → Install**. This injects `DATABASE_URL` for you.
-4. Set `ADMIN_SECRET`, `ADMIN_PASSWORD` and `IP_SALT` in Environment Variables.
-5. Deploy, then run the schema once (`/admin` creates it on first query, or run
-   `DATABASE_URL=... node scripts/seed.mjs`).
+4. Set `ADMIN_SECRET`, `ADMIN_PASSWORD`, `IP_SALT` and `SITE_URL` in Environment Variables.
+   Generate the two secrets with:
+   ```bash
+   node -e "console.log(require('node:crypto').randomBytes(32).toString('base64url'))"
+   ```
+5. **Create the schema once**, from your machine, against the production database:
+   ```bash
+   DATABASE_URL='postgres://...' npm run db:migrate
+   ```
+   This creates the tables and inserts nothing.
+6. Deploy, sign in at `/admin`, and fill the wedding in: **The wedding** for the names, the date and
+   the contact; **Events** for the schedule; **Sections** for travel, questions and the rest;
+   **Invite links** for the households.
+
+> **Do not run `npm run seed` against production.** It applies the schema *and* inserts the entire
+> demo wedding — a fictional couple, six invented events and five demo households with working
+> invite links. It is for local development. `db:migrate` is the production path.
+>
+> The schema is **not** created automatically on Neon. `lib/db/index.ts` applies `schema.sql` on the
+> PGlite path only; the Neon driver just wraps queries. An earlier version of this README claimed
+> `/admin` would create it on first query — it will not, and the first request against an empty
+> database fails on a missing relation.
 
 **Neon, specifically not Supabase.** Supabase's free tier pauses a project after a week of
 inactivity and needs a manual restore — which is exactly the wedding failure pattern: build in
