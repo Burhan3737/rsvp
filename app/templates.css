@@ -567,11 +567,35 @@ html[data-template='boxed'] .schedule-cards .schedule-item {
   /* A column is narrow, so the long-form detail is dropped rather than squeezed
      to three words a line — but the blurb and the attire line stay. See the note
      on compaction above the ledger rules. */
+  /* The swatches stay.
+     An earlier round stopped these templates deleting the whole attire block, and
+     kept the "Wear —" line. It still dropped the colours, and the colours ARE the
+     answer: `components/Schedule.tsx` shows them as actual dots rather than words
+     precisely because "yellow" covers a lot of ground, and its comment calls the
+     avoid list "as load-bearing as 'wear this'" — the seeded data includes "Not
+     red, the bride's colour", which is the single most useful sentence on the
+     page for a guest deciding what to put on. Compacted to inline dots here, not
+     removed. */
   html[data-template='split'] .schedule-columns .schedule-desc,
   html[data-template='split'] .schedule-columns .dresscode-note,
-  html[data-template='split'] .schedule-columns .swatches,
   html[data-template='split'] .schedule-columns .dresscode-modesty,
   html[data-template='split'] .schedule-columns .dresscode-permission {
+    display: none;
+  }
+
+  html[data-template='split'] .schedule-columns .swatches {
+    grid-template-columns: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem 0.7rem;
+    margin-top: 0.35rem;
+  }
+
+  html[data-template='split'] .schedule-columns .swatch-label {
+    font-size: 12px;
+  }
+
+  html[data-template='split'] .schedule-columns .swatch-why {
     display: none;
   }
 
@@ -885,6 +909,21 @@ html[data-template='boxed'] .splash-names {
     text-align: left;
   }
 
+  /* The script line goes IN the empty half — that was the point of moving it onto
+     the cover, and it did not land there. `.splash-indic` was never given a grid
+     position, so it auto-flowed into an implicit third row underneath the tinted
+     panel, flush against the window edge with no padding, leaving 720x553 of
+     nothing where the design says there is a divided cover. */
+  html[data-template='split'] .splash-indic {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-inline: clamp(2rem, 5vw, 4rem);
+    text-align: center;
+  }
+
   /* Two children in a two-track grid would otherwise put the date in the empty
      tinted half rather than under the names. */
   html[data-template='split'] .splash {
@@ -892,7 +931,7 @@ html[data-template='boxed'] .splash-names {
   }
 
   html[data-template='split'] .splash::before {
-    grid-row: 1 / -1;
+    grid-row: 1 / 3;
     grid-column: 1;
   }
 
@@ -1068,11 +1107,29 @@ html[data-template='gate'] .schedule-ledger .schedule-list::before {
 
 html[data-template='gate'] .schedule-ledger .schedule-desc,
 html[data-template='gate'] .schedule-ledger .dresscode-note,
-html[data-template='gate'] .schedule-ledger .swatches,
 html[data-template='gate'] .schedule-ledger .dresscode-modesty,
-html[data-template='gate'] .schedule-ledger .dresscode-permission,
-html[data-template='gate'] .schedule-ledger .schedule-unplugged {
+html[data-template='gate'] .schedule-ledger .dresscode-permission {
   display: none;
+}
+
+/* Kept: the swatches (see the note on split) and the unplugged notice, which is a
+   request the couple is making of the guest — a template cannot be the thing that
+   decides a guest never hears it. */
+html[data-template='gate'] .schedule-ledger .swatches {
+  grid-template-columns: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.7rem;
+  margin-top: 0.35rem;
+}
+
+html[data-template='gate'] .schedule-ledger .swatch-why {
+  display: none;
+}
+
+html[data-template='gate'] .schedule-ledger .schedule-unplugged {
+  margin-top: 0.4rem;
+  font-size: 0.94em;
 }
 
 /* The blurb, the attire line and the arrival time are what a ledger row is FOR;
@@ -1477,8 +1534,11 @@ html[data-template='gate'] .schedule-day-header .day-date {
     padding: 0.9rem 1rem;
   }
 
+  /* boxed used to drop every event description below 900px — six descriptions
+     present on a desktop and absent on a phone, which is where most guests read
+     it. A tile can be a tile with prose in it. */
   html[data-template='boxed'] .schedule-cards .schedule-desc {
-    display: none;
+    font-size: 0.94em;
   }
 }
 
@@ -1867,9 +1927,15 @@ html[data-template='card'] .schedule-day-header .day-date {
    cards keep "days side by side" alive at the width where it did not exist. */
 
 @media (max-width: 899px) {
+  /* ONE column on a phone, not two.
+     Two 169px tracks left the event body 143px wide — about seventeen characters
+     a line, which is a column of single words. The pairing is split's idea and it
+     survives at tablet width; below that the day card keeps its frame and its
+     left rule, which is what identifies the template, and the content gets a
+     readable measure. */
   html[data-template='split'] .schedule-columns {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
     gap: 0.75rem;
     align-items: start;
   }
@@ -1879,12 +1945,22 @@ html[data-template='card'] .schedule-day-header .day-date {
   }
 
   html[data-template='split'] .schedule-columns .schedule-item {
-    padding: 0.75rem;
+    padding: 0.85rem 0.9rem;
     border-radius: 0;
   }
 
+  /* These were `display: none`.
+     That is Directions, Add to calendar and REPLY — seventeen controls across the
+     schedule — switched off for every guest on a phone, on the one template where
+     they were the only way to answer from an event. `components/Schedule.tsx`
+     opens by stating the reply must never sit behind a tap; hiding it entirely is
+     the harder version of the same failure. A narrow column is a reason to wrap
+     buttons, never to remove them. */
   html[data-template='split'] .schedule-columns .schedule-actions {
-    display: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.6rem;
   }
 }
 
@@ -2507,24 +2583,31 @@ html[data-template='gate'] .faq-ledger .faq-item:last-child {
   border-bottom: var(--rule) solid var(--border);
 }
 
-html[data-template='gate'] main > section.section:nth-of-type(n) .faq-ledger .faq-a,
-html[data-template='gate'] main > section.section:nth-of-type(n) .faq-ledger .faq-q {
+html[data-template='gate'] main > section.section:nth-of-type(n) .faq-ledger .faq-a {
   max-width: none;
   text-align: left;
 }
 
-@media (min-width: 900px) {
-  html[data-template='gate'] .faq-ledger .faq-item {
-    grid-template-columns: minmax(0, 15rem) minmax(0, 1fr);
-    gap: 0 2rem;
-    align-items: baseline;
-  }
-
-  html[data-template='gate'] main > section.section:nth-of-type(n) .faq-ledger .faq-q {
-    margin: 0;
-    text-align: right;
-    font-size: clamp(1rem, 2vw, 1.15rem);
-  }
+/* The question sits RIGHT, above the answer, at every width.
+   Two things were wrong with the two-column version. Its question track was a
+   fraction of gate's own 440px measure and resolved to 131px — about fourteen
+   characters a line, narrower than the 168px column an earlier round was opened
+   to fix. And below 900px it collapsed to a left-set question over a left-set
+   answer, which is precisely rail's FAQ: the two measured byte-identical at 390
+   down to the computed font and colour, differing only in which edge carried the
+   hairline. A ledger's label belongs against the gutter, so keeping it there at
+   all widths gives the question a full measure AND keeps gate distinct from
+   rail. */
+html[data-template='gate'] main > section.section:nth-of-type(n) .faq-ledger .faq-q {
+  max-width: none;
+  margin: 0 0 0.3rem;
+  text-align: right;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: var(--label-tracking);
+  color: var(--accent-text);
 }
 
 /* ===========================================================================
@@ -2672,9 +2755,25 @@ html[data-template='boxed'] .footer-set-panel .footer-inner {
    grid track — three identical footers again, one breakpoint down. Each keeps
    the motif it uses everywhere else on its own page. */
 @media (max-width: 899px) {
+  /* Shapes, not hairlines.
+     A previous pass gave rail a top rule, split a left rule and gate a bottom
+     rule, and the audit reported all three still computing the same signature —
+     `20|350|grid|350px|start` — because a hairline is not a shape. rail keeps its
+     label column by giving the label a row of its own above a rule; gate
+     right-sets its label the way its ledger does everywhere else. */
   html[data-template='rail'] .footer-set-rail .footer-inner {
     padding-top: clamp(1rem, 3vw, 1.4rem);
     border-top: var(--rule) solid var(--border);
+  }
+
+  html[data-template='rail'] .footer-set-rail .footer-inner > .label {
+    padding-bottom: 0.6rem;
+    margin-bottom: 0.6rem;
+    border-bottom: var(--rule) solid var(--border);
+  }
+
+  html[data-template='gate'] .footer-set-ledger .footer-inner > .label {
+    text-align: right;
   }
 
   html[data-template='split'] .footer-set-split .footer-inner {
@@ -2971,7 +3070,12 @@ html[data-template='gate'] .welcome-gutter .welcome-note {
    --------------------------------------------------------------------------- */
 
 @media (max-width: 899px) {
-  /* classic: a real two-up, which is what a grid of people is. */
+  /* classic: two up while there is room for two — see the floor below 560px.
+     Forcing `repeat(2, …)` all the way down to 390 produced 167px tracks and a
+     member's bio at about twenty-two characters a line. That was kept on purpose
+     once, because a "grid" rendering one track did not look like a grid; but a
+     grid of single words is not a grid either, and this file applies a measure
+     floor everywhere else. */
   html[data-template='classic'] .party-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1.25rem 1rem;
@@ -3021,14 +3125,6 @@ html[data-template='gate'] .welcome-gutter .welcome-note {
   }
 }
 
-/* gate's FAQ set a 15rem question column against a 168px answer — 21 characters
-   a line, one answer 365px tall, and the section 45% of the whole document. The
-   question column is capped as a fraction of the measure rather than an absolute. */
-@media (min-width: 900px) {
-  html[data-template='gate'] .faq-ledger .faq-item {
-    grid-template-columns: minmax(0, 0.32fr) minmax(0, 0.68fr);
-  }
-}
 
 /* ===========================================================================
    FULL BLEED, WHEN THE CONTENT COLUMN IS NOT THE VIEWPORT
@@ -3086,5 +3182,22 @@ html[data-template='split'] .schedule-columns .day-weekday {
      the edge. */
   html[data-template='card'] .splash-names {
     padding-inline: clamp(0.75rem, 4vw, 2rem);
+  }
+}
+
+/* --- One column below 560px, and still classic's own treatment --------------
+   Ruled between members and centred, which is neither rail's role gutter, nor
+   split's ruled pair, nor boxed's banded chip. */
+
+@media (max-width: 559px) {
+  html[data-template='classic'] .party-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  html[data-template='classic'] .party-grid .party-member + .party-member {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: var(--rule) solid var(--border);
   }
 }

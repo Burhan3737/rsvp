@@ -1228,8 +1228,25 @@ textarea:focus-visible,
   width: 100%;
   min-height: 52px;
   padding: 0.75em 0.9em;
-  background: color-mix(in srgb, var(--bg) 60%, var(--surface));
-  border: var(--rule) solid var(--border);
+  /* The field's fill is a second ground, and --panel is the token that already
+     answers "can this theme carry one". For the four themes that cannot, it
+     resolves to --bg and the field sits flush on the page; everyone else keeps
+     the tint. Without this the fill failed on exactly those four themes and on
+     exactly the two routes where a guest types — 84 of the 1,008 page loads in
+     the sweep, all of them on the reply form and the code form. */
+  background: var(--panel, color-mix(in srgb, var(--bg) 60%, var(--surface)));
+  /* --muted, not --border.
+     `--border` is tuned as a HAIRLINE between blocks of content — a divider you
+     are meant to read past. On a form control the border is not decoration: it
+     is the whole affordance, the only thing that says "type here", and WCAG
+     1.4.11 asks for 3:1 on the visual boundary of a control. Drawn in --border
+     it measured 1.42:1 on the default theme and 1.34:1 on others — a rectangle
+     a guest has to guess at, on the two pages where a guest actually types.
+     Nothing caught it because a border is not text and no contrast rule looks
+     at one; the matrix sweep grew a check for it.
+     --muted is the right token: every theme already guarantees it clears 4.5:1
+     against the page ground, and a field sits on a near-identical ground. */
+  border: var(--rule) solid var(--muted);
   border-radius: var(--radius);
   color: var(--ink);
   font-family: var(--font-body);
@@ -1876,6 +1893,15 @@ main {
   margin-top: 0.85rem;
 }
 
+/* Second grounds all route through --panel.
+   A fill mixed from --bg and --surface is a second ground, and whether a theme
+   can carry one is exactly what --panel records. The reply form had three of
+   them — the field, the yes/no choice card, and the person block — and on the
+   four themes with no contrast headroom every one of them failed: 84 of the
+   1,008 page loads in the matrix sweep, all on the two routes where a guest
+   types. The admin surfaces below use the same mix and would have failed the
+   same way for the owner. */
+
 /* The whole label is the target, and it is at least 48px tall. Guest lists skew elderly, this is
    read on phones, and a 20px radio dot is not a usable target. */
 .choice {
@@ -1885,7 +1911,7 @@ main {
   min-height: 48px;
   padding: 0.5rem 1rem 0.5rem 0.85rem;
   border: var(--rule) solid var(--border);
-  background: color-mix(in srgb, var(--bg) 55%, var(--surface));
+  background: var(--panel, color-mix(in srgb, var(--bg) 55%, var(--surface)));
   font-size: 15px;
   cursor: pointer;
   transition: border-color 200ms var(--ease), background 200ms var(--ease);
@@ -1976,7 +2002,7 @@ select.field {
 .theme-card {
   padding: 1.5rem;
   border: var(--rule) solid var(--border);
-  background: color-mix(in srgb, var(--surface) 55%, var(--bg));
+  background: var(--panel, color-mix(in srgb, var(--surface) 55%, var(--bg)));
 }
 
 .theme-card.is-live { border-color: var(--accent); }
@@ -2020,7 +2046,7 @@ select.field {
 .tally-grid { display: grid; gap: 1rem; }
 @media (min-width: 720px) { .tally-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); } }
 
-.tally { border: var(--rule) solid var(--border); padding: 1.1rem 1.2rem; background: color-mix(in srgb, var(--surface) 45%, var(--bg)); }
+.tally { border: var(--rule) solid var(--border); padding: 1.1rem 1.2rem; background: var(--panel, color-mix(in srgb, var(--surface) 45%, var(--bg))); }
 .tally-name { margin: 0.3rem 0 0.7rem; font-family: var(--font-display); font-weight: var(--display-weight); font-size: 1.35rem; letter-spacing: 0; }
 .tally-audience { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0 0 1rem; }
 
@@ -2188,7 +2214,7 @@ select.field {
   align-items: end;
   padding: 1.1rem 1.2rem;
   border: var(--rule) solid var(--border);
-  background: color-mix(in srgb, var(--surface) 45%, var(--bg));
+  background: var(--panel, color-mix(in srgb, var(--surface) 45%, var(--bg)));
 }
 
 @media (min-width: 720px) {
@@ -2220,7 +2246,7 @@ select.field {
   justify-content: space-between;
   padding: 1rem 1.2rem;
   border: var(--rule) solid var(--border);
-  background: color-mix(in srgb, var(--surface) 45%, var(--bg));
+  background: var(--panel, color-mix(in srgb, var(--surface) 45%, var(--bg)));
 }
 
 .admin-row-main {
@@ -2305,7 +2331,7 @@ select.field {
 .admin-block {
   padding: 1.2rem 1.3rem;
   border: var(--rule) solid var(--border);
-  background: color-mix(in srgb, var(--surface) 45%, var(--bg));
+  background: var(--panel, color-mix(in srgb, var(--surface) 45%, var(--bg)));
 }
 
 .admin-block .admin-form {
@@ -2363,7 +2389,7 @@ select.field {
   margin-top: 0.6rem;
   padding: 0.9rem 1rem;
   border: var(--rule) solid var(--border);
-  background: color-mix(in srgb, var(--surface) 60%, var(--bg));
+  background: var(--panel, color-mix(in srgb, var(--surface) 60%, var(--bg)));
   max-width: 46ch;
 }
 

@@ -61,7 +61,25 @@ const viewports = arg('quick')
     ];
 
 const TOKEN = JSON.parse(readFileSync(path.join(process.cwd(), '.data', 'tokens.json'), 'utf8'))[0].token;
-const INVITE = `${BASE}/i/${TOKEN}`;
+
+/**
+ * The guest-facing routes, all of which inherit the theme and the template.
+ *
+ * The first version of this sweep checked the invitation page alone. That is the longest page and
+ * the one with the most paint on it, but it is not where a guest TYPES. The reply form carries every
+ * interactive control in the product — text inputs, radios, checkboxes, a select, the submit — and
+ * each of those has its own foreground, its own border and its own placeholder, none of which
+ * appear on the invitation page at all. It had been seen on one of the 126 combinations.
+ *
+ * `/find` matters for the same reason at a smaller scale: it is the way in for somebody holding a
+ * printed card, so it is the first thing they see, and it is one input and one button.
+ */
+const ROUTES = [
+  ['invite', `${BASE}/i/${TOKEN}`],
+  ['rsvp', `${BASE}/i/${TOKEN}/rsvp`],
+  ['find', `${BASE}/find`],
+  ['home', `${BASE}/`],
+];
 
 /**
  * Text painted in the colour of the thing behind it.
@@ -112,6 +130,59 @@ function clippedText() {
   return [...new Set(out)].slice(0, 6);
 }
 
+/**
+ * Form controls a guest cannot see the edge of, or type into legibly.
+ *
+ * A text input is the one element whose BORDER carries meaning — it is what says "type here" — and
+ * a border is not text, so no contrast rule looks at it. WCAG asks for 3:1 on the visual boundary
+ * of a control. An input whose border matches its own fill is a rectangle a guest has to guess at,
+ * and it passes every automated check in this project.
+ */
+function unreadableFields() {
+  const parse = (c) => {
+    const m = c.match(/rgba?\(([^)]+)\)/);
+    if (!m) return null;
+    const [r, g, b, a] = m[1].split(',').map((n) => parseFloat(n));
+    return a === 0 ? null : [r, g, b];
+  };
+  const lum = (rgb) => {
+    const s = rgb.map((v) => v / 255).map((u) => (u <= 0.03928 ? u / 12.92 : Math.pow((u + 0.055) / 1.055, 2.4)));
+    return 0.2126 * s[0] + 0.7152 * s[1] + 0.0722 * s[2];
+  };
+  const ratio = (a, b) => {
+    const x = lum(a);
+    const y = lum(b);
+    return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
+  };
+
+  const out = [];
+  for (const el of document.querySelectorAll('input, select, textarea')) {
+    const cs = getComputedStyle(el);
+    if (cs.display === 'none' || cs.visibility === 'hidden') continue;
+    if (el.type === 'hidden') continue;
+
+    const border = parse(cs.borderTopColor);
+    if (!border || parseFloat(cs.borderTopWidth) === 0) continue;
+
+    // The ground the border is drawn against: the field's own fill, else the first painted ancestor.
+    let ground = parse(cs.backgroundColor);
+    if (!ground) {
+      let node = el.parentElement;
+      while (node && !ground) {
+        ground = parse(getComputedStyle(node).backgroundColor);
+        node = node.parentElement;
+      }
+    }
+    if (!ground) continue;
+
+    const r = ratio(border, ground);
+    if (r < 3) {
+      out.push(`${el.tagName.toLowerCase()}[${el.type ?? ''}] border ${r.toFixed(2)}:1`);
+    }
+  }
+  return [...new Set(out)].slice(0, 6);
+}
+
 const browser = await chromium.launch();
 const findings = [];
 let checked = 0;
@@ -127,32 +198,40 @@ for (const [vpName, vpOpts] of viewports) {
         { name: 'preview_theme', value: theme, domain: '127.0.0.1', path: '/' },
         { name: 'preview_template', value: template, domain: '127.0.0.1', path: '/' },
       ]);
-      await page.goto(INVITE, { waitUntil: 'networkidle' });
-      checked++;
+      for (const [routeName, url] of ROUTES) {
+        await page.goto(url, { waitUntil: 'networkidle' });
+        checked++;
 
-      const results = await new AxeBuilder({ page }).withRules(['color-contrast']).analyze();
-      const contrast = results.violations.flatMap((v) =>
-        v.nodes.map((n) => ({
-          target: n.target.join(' ').slice(0, 90),
-          detail: (n.failureSummary || '').replace(/\s+/g, ' ').match(/contrast of ([\d.]+)/)?.[1] ?? '?',
-        })),
-      );
+        const results = await new AxeBuilder({ page }).withRules(['color-contrast']).analyze();
+        const contrast = results.violations.flatMap((v) =>
+          v.nodes.map((n) => ({
+            target: n.target.join(' ').slice(0, 90),
+            detail:
+              (n.failureSummary || '').replace(/\s+/g, ' ').match(/contrast of ([\d.]+)/)?.[1] ?? '?',
+          })),
+        );
 
-      const overflow = await page.evaluate(
-        () => Math.max(0, document.documentElement.scrollWidth - document.documentElement.clientWidth),
-      );
-      const invisible = await page.evaluate(invisibleText);
-      const clipped = await page.evaluate(clippedText);
+        const overflow = await page.evaluate(
+          () => Math.max(0, document.documentElement.scrollWidth - document.documentElement.clientWidth),
+        );
+        const invisible = await page.evaluate(invisibleText);
+        const clipped = await page.evaluate(clippedText);
+        const fields = await page.evaluate(unreadableFields);
 
-      if (contrast.length || overflow > 1 || invisible.length || clipped.length) {
-        findings.push({ theme, template, viewport: vpName, contrast, overflow, invisible, clipped });
-        const bits = [
-          contrast.length ? `${contrast.length} contrast` : '',
-          overflow > 1 ? `${overflow}px sideways` : '',
-          invisible.length ? `${invisible.length} invisible` : '',
-          clipped.length ? `${clipped.length} clipped` : '',
-        ].filter(Boolean);
-        console.log(`  ${theme}/${template} ${vpName}: ${bits.join(', ')}`);
+        if (contrast.length || overflow > 1 || invisible.length || clipped.length || fields.length) {
+          findings.push({
+            theme, template, viewport: vpName, route: routeName,
+            contrast, overflow, invisible, clipped, fields,
+          });
+          const bits = [
+            contrast.length ? `${contrast.length} contrast` : '',
+            overflow > 1 ? `${overflow}px sideways` : '',
+            invisible.length ? `${invisible.length} invisible` : '',
+            clipped.length ? `${clipped.length} clipped` : '',
+            fields.length ? `${fields.length} field` : '',
+          ].filter(Boolean);
+          console.log(`  ${theme}/${template} ${vpName} ${routeName}: ${bits.join(', ')}`);
+        }
       }
     }
     console.log(`${theme} ${vpName} done`);
@@ -171,12 +250,24 @@ writeFileSync('.data/sweep.json', JSON.stringify(findings, null, 1));
 const byTheme = new Map();
 const byTemplate = new Map();
 for (const f of findings) {
-  const weight = f.contrast.length + f.invisible.length * 3 + (f.overflow > 1 ? 2 : 0) + f.clipped.length;
+  const weight =
+    f.contrast.length +
+    f.invisible.length * 3 +
+    (f.overflow > 1 ? 2 : 0) +
+    f.clipped.length +
+    (f.fields?.length ?? 0) * 2;
   byTheme.set(f.theme, (byTheme.get(f.theme) ?? 0) + weight);
   byTemplate.set(f.template, (byTemplate.get(f.template) ?? 0) + weight);
 }
 
-console.log(`\n${checked} combinations checked, ${findings.length} with findings.`);
+console.log(`\n${checked} page loads checked across ${themes.length * TEMPLATES.length} combinations, ${findings.length} with findings.`);
+
+if (findings.length) {
+  const byRoute = new Map();
+  for (const f of findings) byRoute.set(f.route, (byRoute.get(f.route) ?? 0) + 1);
+  console.log('\nBy route:');
+  for (const [r, n] of [...byRoute].sort((a, b) => b[1] - a[1])) console.log(`  ${r.padEnd(10)} ${n}`);
+}
 
 if (findings.length) {
   console.log('\nWorst themes:');
