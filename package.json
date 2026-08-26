@@ -18,6 +18,7 @@
     "capture:templates": "node scripts/capture-templates.mjs",
     "sweep": "node scripts/sweep-matrix.mjs",
     "headroom": "node scripts/theme-headroom.mjs",
+    "spacing": "node scripts/spacing-audit.mjs",
     "db:reset": "node -e \"require('node:fs').rmSync('.data/pglite',{recursive:true,force:true})\" && node scripts/seed.mjs --reset"
   },
   "dependencies": {

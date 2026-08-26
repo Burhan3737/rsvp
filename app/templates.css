@@ -193,7 +193,10 @@ html[data-template='boxed'] .schedule-day-header {
 
   html[data-template='timeline'] .schedule-timeline .schedule-item {
     width: 46%;
-    padding-left: 0;
+    /* The token, not the padding — a theme that paints this item as a card keeps
+       its own left padding, and one that does not still resolves to 0. Writing
+       `padding-left: 0` here stripped anvaya's card to L0/R24. */
+    --rail-indent: 0px;
     text-align: right;
   }
 
@@ -556,7 +559,7 @@ html[data-template='boxed'] .schedule-cards .schedule-item {
   }
 
   html[data-template='split'] .schedule-columns .schedule-item {
-    padding-left: 0;
+    --rail-indent: 0px;
     padding-bottom: 0;
   }
 
@@ -1499,7 +1502,7 @@ html[data-template='gate'] .schedule-day-header .day-date {
   }
 
   html[data-template='timeline'] .schedule-timeline .schedule-item {
-    padding-left: 0;
+    --rail-indent: 0px;
   }
 }
 
