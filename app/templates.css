@@ -339,6 +339,24 @@ html[data-template='boxed'] .schedule-day-header {
   }
 }
 
+/* --- card's section break was no bigger than its day break ------------------
+   The card compresses its sections to 44px of padding a side, but the schedule kept the global
+   `.schedule-day + .schedule-day { margin-top: clamp(2.5rem, 6vw, 4rem) }` — 64px. So at 1440 a
+   section break measured 88px against a day break of 64px before the day header's own 28px top
+   margin is counted, a ratio of about 1:1 where every other template runs between 4.3:1 and 5.1:1.
+   At 390px it was inverted outright: a 40px section break against a 40px day break plus a 20px
+   header margin, so moving from the schedule to Travel was a SMALLER move than moving from Friday
+   to Saturday.
+
+   The card is stationery and is meant to be tighter than the others, so the answer is not the
+   global rhythm back. card already introduces each day with its own right-set ruled label in the
+   time gutter, which is the day break; the extra 64px stacked on top of it was doing the work
+   twice. Dropping it to zero leaves the header's own margin as the day break and puts the section
+   break comfortably clear of it at card's own scale. */
+html[data-template='card'] .schedule-day + .schedule-day {
+  margin-top: 0;
+}
+
 /* ===========================================================================
    6. BOXED PANEL  <-  Aimer (4.53 from 17 reviews, 543 sales)
 
@@ -445,7 +463,11 @@ html[data-template='card'] .schedule-agenda .schedule-item {
   margin-bottom: clamp(1rem, 2.5vw, 1.5rem);
 }
 
-html[data-template='card'] .schedule-agenda .schedule-item:last-child {
+/* Only the last event of the last day loses the rule. `.schedule-item:last-child` matched every
+   event — one `<ol>` per day, one event a day — so the ruled separator that IS the agenda never
+   rendered on any theme, and on a theme that fills the row it left a rounded card open along its
+   bottom edge. `.schedule-day` is the sibling axis. */
+html[data-template='card'] .schedule-agenda .schedule-day:last-of-type .schedule-item:last-child {
   border-bottom: 0;
 }
 
@@ -558,9 +580,25 @@ html[data-template='boxed'] .schedule-cards .schedule-item {
     display: none;
   }
 
+  /* The column card needs a real inset on all four sides. `boxed`, `card` and `split` all paint
+     `.schedule-item` with `background: var(--panel, var(--surface))` further down this file, and
+     this block used to declare nothing but `--rail-indent: 0px` and `padding-bottom: 0`, so the
+     computed padding at 1440 was 0px on every side for seventeen of the eighteen themes: time,
+     name, blurb and the Directions / Add to calendar / REPLY buttons all flush against the edges of
+     a painted block. The same element is correctly inset `0.85rem 0.9rem` at 390px further down,
+     which made the desktop rendering the worse of the two.
+
+     Written as a shorthand rather than as a `padding-bottom` alone because the old
+     `padding-bottom: 0` at (0,3,1) was also beating `[data-theme='anvaya'] .schedule-item` at
+     (0,2,0) and stripping that theme's 24px card bottom, which put the REPLY button on the card's
+     bottom border — the `--rail-indent` lesson from compositions.css:633-642 reappearing on the
+     bottom axis. A column is a fixed 257px track whatever the theme does with it, so the geometry
+     is the template's to state, and stating all four sides at once means no theme can be left with
+     three sides padded and one at zero. `--rail-indent` still goes to 0 so the base
+     `padding-left: var(--rail-indent)` cannot reintroduce the rail gutter for marry-monday. */
   html[data-template='split'] .schedule-columns .schedule-item {
     --rail-indent: 0px;
-    padding-bottom: 0;
+    padding: clamp(0.95rem, 1.4vw, 1.25rem);
   }
 
   html[data-template='split'] .schedule-columns .schedule-body {
@@ -685,8 +723,21 @@ html[data-template='boxed'] .schedule-cards .schedule-item {
     border-bottom: 1px solid var(--border);
   }
 
-  html[data-template='split'] main > section.section > .shell {
+  /* --- a theme's own reading column was defeating split's geometry ----------
+     `[data-theme='aspen'] main > section.section:nth-of-type(2n) .shell { max-width: min(520px, 44vw) }`
+     is (0,4,2); split's own `main > section.section > .shell` is only (0,3,3), which loses on the
+     class column before the type column is ever compared. At 1440 the shell measured 520px wide, a
+     304px content box, and the three tracks of `.schedule-columns` came out at 34.7px each: day
+     headers set one character to a line, the section title lying across the columns, and two thirds
+     of the page blank. `:nth-of-type(n)` matches every section and adds one to the class column,
+     making this (0,4,3).
+
+     The theme's `margin-left/right: auto` pair has to be cleared in the same rule. An auto margin
+     on a grid item suppresses `stretch`, so releasing the max-width alone would still have left the
+     shell shrink-wrapped to its content. */
+  html[data-template='split'] main > section.section:nth-of-type(n) > .shell {
     max-width: none;
+    margin-inline: 0;
     position: relative;
   }
 
@@ -719,8 +770,12 @@ html[data-template='boxed'] .schedule-cards .schedule-item {
     padding-block: 1.5rem;
   }
 
+  /* 1.25rem gave a 40px section break against a 40px day break — see the note under card's day
+     rhythm above. The day break is now the header's own 20px margin, and 1.5rem puts the section
+     break at 48px, comfortably the larger of the two while staying far inside the 144px the other
+     templates use at this width. */
   html[data-template='card'] main > section.section {
-    padding-block: 1.25rem;
+    padding-block: 1.5rem;
   }
 }
 
@@ -1454,11 +1509,20 @@ html[data-template='gate'] .schedule-day-header .day-date {
    315px tracks and six days wrap 2x3 — the same shape as boxed's tiles, which
    is exactly what this variant existed to avoid. */
 
-@media (min-width: 900px) {
+/* Three tracks are asked for against the width of `main`, not the width of the window. A theme is
+   free to narrow the reading column — `morrison` floats an 850px white card on the page, which is
+   its whole signature — and split was still forcing three tracks into whatever was left: 406px of
+   body column became three 114px tracks. Below that, the `repeat(auto-fit, minmax(230px, 1fr))`
+   declared at the top of this section takes over and gives one readable column, which is the same
+   answer split already reaches at 899px. `main` carries `container-type: inline-size` in
+   globals.css, so the query has a container to resolve against. */
+@container (min-width: 900px) {
   html[data-template='split'] .schedule-columns {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+}
 
+@media (min-width: 900px) {
   html[data-template='split'] .schedule-columns .schedule-actions {
     flex-direction: column;
     align-items: flex-start;

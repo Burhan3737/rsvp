@@ -1397,6 +1397,14 @@ textarea.field {
   padding-bottom: clamp(2.25rem, 5vw, 3.25rem);
 }
 
+/* The trailing padding of a LIST, not of the schedule. Unlike the `:nth-child` alternation and the
+   agenda's separator rule — both of which need a sequence that runs across the whole schedule and
+   were broken by the one-`<ol>`-per-day markup — this reset wants exactly the axis `:last-child`
+   gives it: `.schedule-item`'s `padding-bottom` is the gap BETWEEN two events inside one day, so
+   the last event of each day is precisely the one that should not carry it. The space between days
+   is `.schedule-day + .schedule-day`'s margin. Scoping this to the last day instead measured 52px
+   of dead space under the single event of each of the first five days on every theme that does not
+   pad the item itself. */
 .schedule-item:last-child {
   padding-bottom: 0;
 }
@@ -1739,6 +1747,38 @@ main {
   text-decoration-color: var(--accent);
   min-height: 44px;
   line-height: 44px;
+}
+
+/* --- Story ---------------------------------------------------------------- */
+
+/* The beat and its three parts carried no spacing of their own anywhere in the project:
+   `.story-beat` measured `padding: 0, margin: 0` and `.story-when`, `.story-title` and
+   `.story-body` all measured `margin: 0`. Every gap the story had came from a per-template rule —
+   rail's rule between beats and boxed's padded panels — so on `timeline` at 390px the gap between
+   consecutive beats measured 0px, label to title 0px and title to body 0px. A date label sat on the
+   last line of the previous beat's paragraph, and a heading was exactly as close to the beat above
+   it as to its own text. This is the floor, set once so every story variant inherits it.
+
+   The gap goes on the container rather than on `.story-beat + .story-beat`, because boxed's
+   `.story-panels` is the same element and already declares its own grid gap: a sibling margin would
+   have stacked on top of that gap and, in boxed's two-column arrangement above 860px, pushed the
+   second tile of the first row down out of line. Declaring `gap` here lets `.story-panels` simply
+   replace it. */
+.story {
+  display: grid;
+  gap: clamp(2rem, 4.5vw, 3rem);
+}
+
+.story-when {
+  margin: 0 0 0.55rem;
+}
+
+.story-title {
+  margin: 0 0 0.5rem;
+}
+
+.story-body {
+  margin: 0;
 }
 
 /* --- FAQ ------------------------------------------------------------------ */

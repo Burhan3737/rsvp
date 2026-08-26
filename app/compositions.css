@@ -544,12 +544,43 @@
   content: ' —';
 }
 
+/* The scatter alternates on whichever axis the layout actually gives it siblings on.
+   Keyed on `.schedule-item:nth-child()` alone it did not alternate at all in the day-grouped
+   layouts: the markup opens a fresh `<ol>` per day and the seed has one event on each, so every
+   item was its list's first child. `odd` matched 100% of them and `even` matched 0%, which meant
+   every card was pinned left with a uniform 56px void down the right-hand side — under a centred
+   day header and a centred section title whose own rules overhung the card by exactly that 56px.
+   Third appearance of this defect family; see the note at templates.css:1773-1779.
+
+   The effect is anvaya's signature and it stays, so both axes are named. `.schedule-day` is the
+   sibling axis wherever the schedule is grouped by day. `timeline` and `cards` flatten to a single
+   list — that is what `components/Schedule.tsx` does to escape this same defect — and there the
+   items really are each other's siblings, which is why the scatter already worked on those two and
+   has to keep working.
+
+   Both halves are held at (0,3,0) through `:where()`, which is exactly the weight the single
+   `.schedule-item:nth-child()` selector carried before, so nothing that used to override the
+   scatter stops overriding it. Written the obvious way the day half would be (0,4,0) and the
+   flattened half (0,5,0), and both start winning arguments they are supposed to lose:
+   `html[data-template='rail'] .schedule-banded .schedule-item { margin: 0 }` at (0,3,1), which keeps
+   the bands full-bleed, and `html[data-template='timeline'] .schedule-timeline
+   .schedule-item:nth-child(even)` at (0,4,1), the 54% stagger that puts every second event on the
+   far side of the spine — that one was measured collapsing from a 540px offset to 56px. */
 @media (min-width: 900px) {
-  [data-theme='anvaya'] .schedule-item:nth-child(even) {
+  [data-theme='anvaya'] .schedule-day:where(:nth-of-type(even)) .schedule-item,
+  [data-theme='anvaya'] :where(.schedule > .schedule-list) > .schedule-item:nth-child(even) {
     margin-left: 3.5rem;
   }
-  [data-theme='anvaya'] .schedule-item:nth-child(odd) {
+  [data-theme='anvaya'] .schedule-day:where(:nth-of-type(odd)) .schedule-item,
+  [data-theme='anvaya'] :where(.schedule > .schedule-list) > .schedule-item:nth-child(odd) {
     margin-right: 3.5rem;
+  }
+
+  /* split already lays the days out horizontally, so there is no vertical axis for a horizontal
+     scatter to work against — it only narrows the columns, and it was taking 56px out of a 257px
+     track, 22% of the reading width. (0,4,0), above the pair's (0,3,0). */
+  [data-theme='anvaya'] .schedule-columns .schedule-day .schedule-item {
+    margin-inline: 0;
   }
 }
 
