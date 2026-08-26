@@ -630,8 +630,18 @@ html:not([data-theme='marry-monday']) .schedule-node {
   display: none;
 }
 
+/* Zero the RAIL INDENT, not the padding.
+   The indent exists to clear the rail and its node, and only marry-monday draws
+   those — so every other theme needs it gone. Writing that as `padding-left: 0`
+   at (0,2,1) also overrode the left padding of any theme that turns the event
+   into a bordered card, because a theme's own `[data-theme='x'] .schedule-item`
+   is only (0,2,0). anvaya's card computed `22.4px 24px 24px 0px`: text flush
+   against the border on the left, a full 24px on the right, on the densest and
+   most-read block on the page. Setting the token instead leaves a theme's own
+   padding shorthand to win, and still resolves to 0 for the themes that set
+   none. */
 html:not([data-theme='marry-monday']) .schedule-item {
-  padding-left: 0;
+  --rail-indent: 0px;
 }
 
 html:not([data-theme='marry-monday']) .hero-inner,
