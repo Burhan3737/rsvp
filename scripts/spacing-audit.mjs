@@ -156,7 +156,10 @@ function measure() {
         px(cs(kids[i]).paddingTop) +
         px(cs(kids[i]).borderTopWidth);
       const gap = Math.round(b.top - a.bottom) + pad;
-      if (gap < 8 && gap > -40) {
+      // Actually touching, not merely close. A 6px gap between a 12px label and the heading it
+      // introduces is how a label is supposed to sit; an 8px floor reported 744 of those across
+      // the matrix and buried the handful of real collisions.
+      if (gap <= 1 && gap > -40) {
         out.crowding.push(
           `${kids[i - 1].tagName.toLowerCase()}.${kids[i - 1].className.toString().slice(0, 20)} → ${kids[i].tagName.toLowerCase()} ${gap}px`,
         );
@@ -208,8 +211,10 @@ for (const [vpName, vpOpts] of [
       await page.goto(INVITE, { waitUntil: 'networkidle' });
 
       const m = await page.evaluate(measure);
-      const score =
-        m.padSymmetry.length * 4 + m.tightText.length * 3 + m.crowding.length * 2 + m.runts.length;
+      // Runts are recorded but not scored. `text-wrap: pretty` is already applied to this text, so
+      // what remains is a function of the words and the measure rather than a defect anyone can
+      // fix in CSS — and 112 unfixable findings would drown the ones that matter.
+      const score = m.padSymmetry.length * 4 + m.tightText.length * 3 + m.crowding.length * 2;
       rows.push({ theme, template, viewport: vpName, score, ...m });
 
       if (wantShots && score > 0) {
